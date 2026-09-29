@@ -1,0 +1,33 @@
+# -----------------------------------------------------------------------------
+# TrainTrace — System Dependencies Specification
+# Senior Engineer Philosophy: Minimal, pinned dependencies to ensure system stability,
+# reproducibility, and fast debugging without bloated abstractions.
+# -----------------------------------------------------------------------------
+
+# Core Deep Learning Engine
+# torch: PyTorch core tensor computation, autograd graph, & neural network primitives
+torch>=2.0.0
+
+# torchvision: Standard vision dataset access (CIFAR-10) & image transformation pipelines
+torchvision>=0.15.0
+
+# Data Science & Numerical Computation
+# numpy: Fast array manipulations, matrix math, & statistical aggregation
+numpy>=1.24.0
+
+# pillow: Low-level image format conversion (PIL) for inference pipeline input preparation
+pillow>=9.5.0
+
+# Backend API & Asynchronous Web Server
+# fastapi: Modern, high-performance async REST framework with automatic OpenAPI docs
+fastapi>=0.95.0
+
+# uvicorn: Lightning-fast ASGI server implementation for hosting FastAPI applications
+uvicorn[standard]>=0.22.0
+
+# pydantic: Strict schema validation & type safety for REST payloads and runtime configs
+pydantic>=2.0.0
+
+# Testing & Verification Framework
+# pytest: Industry-standard test suite runner for empirical unit & integration testing
+pytest>=7.3.0
