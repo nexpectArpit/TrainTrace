@@ -81,10 +81,9 @@ This project is built following Senior Engineer standards:
 ## 🚀 Development Roadmap & Stages
 
 - [x] **Stage 1: Foundation & Blueprint Setup** (`requirements.txt`, `config.py`, `README.md`, PRD transfer)
-- [ ] **Stage 2: PyTorch Model Architectures & Data Ingestion Pipeline** (`core/models.py`, `core/dataset.py`)
-- [ ] **Stage 3: Autograd Training Loop Engine & Checkpointer** (`core/trainer.py`)
-- [ ] **Stage 4: Storage Infrastructure & Schema Persistence** (`db/database.py`, `db/repository.py`)
-- [ ] **Stage 5: Experiment Tracking & Dual Reproducibility Engine** (`tracking/tracker.py`, `tracking/evaluator.py`)
+- [x] **Stage 2: PyTorch Model Architectures & Data Ingestion Pipeline** (`core/models.py`, `core/dataset.py`, `core/trainer.py`)
+- [x] **Stage 3: Storage Infrastructure & Schema Persistence** (`db/database.py`, `db/repository.py`)
+- [ ] **Stage 4: Experiment Tracking & Dual Reproducibility Engine** (`tracking/tracker.py`, `tracking/evaluator.py`)
 - [ ] **Stage 6: Model Candidate Governance & Lineage Registry** (`registry/model_registry.py`)
 - [ ] **Stage 7: FastAPI REST Backend Engine** (`api/main.py`, `api/routers/`)
 - [ ] **Stage 8: Interactive React Frontend Interface**

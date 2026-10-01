@@ -1,0 +1,30 @@
+# Python Byte Code & Cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual Environments
+venv/
+.venv/
+
+# Generated Local Storage & Checkpoints
+backend/storage/
+storage/
+*.db
+*.sqlite
+*.pt
+*.pth
+
+# Dataset Caches
+cifar-10-batches-py/
+cifar-10-python.tar.gz
+
+# Frontend Build & Dependencies
+frontend/node_modules/
+frontend/dist/
+
+# System Files & Environment Secrets
+.env
+.DS_Store
+.vscode/
+.idea/

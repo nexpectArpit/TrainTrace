@@ -22,8 +22,8 @@ import torch
 # pathlib.Path(__file__).resolve().parent gives the absolute path to traintrace/
 BASE_DIR = Path(__file__).resolve().parent
 
-# Path to embedded documentation directory
-DOCS_DIR = BASE_DIR / "docs"
+# Path to embedded documentation directory at repository root
+DOCS_DIR = BASE_DIR.parent / "docs"
 
 # Artifacts & Storage Sinks Directory Structure
 STORAGE_DIR = BASE_DIR / "storage"
