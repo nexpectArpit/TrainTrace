@@ -1,20 +1,9 @@
-# -----------------------------------------------------------------------------
-# TrainTrace — System Dependencies Specification
-# -----------------------------------------------------------------------------
-
-# Core Deep Learning Engine
-torch>=2.0.0
-torchvision>=0.15.0
-
-# Data Science & Numerical Computation
-numpy>=1.24.0
-pillow>=9.5.0
-
-# Backend API & Asynchronous Web Server
-fastapi>=0.95.0
-uvicorn[standard]>=0.22.0
-pydantic>=2.0.0
-python-multipart>=0.0.6  # Required for multipart image upload endpoints in FastAPI
-
-# Testing & Verification Framework
-pytest>=7.3.0
+# Verified with Python 3.13 on macOS. CUDA requires a matching PyTorch installation.
+torch==2.14.1
+torchvision==0.29.1
+numpy==2.5.3
+pillow==12.3.0
+fastapi==0.142.2
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+python-multipart==0.0.32
