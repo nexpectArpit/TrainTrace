@@ -1,139 +1,157 @@
-"""
-traintrace/backend/registry/model_registry.py
-=============================================
-Model Governance Catalog & Provenance Lineage Graph Generator.
+"""Immutable registry versions with frozen scientific provenance."""
 
-Senior Engineering Rationale:
------------------------------
-1. Manages formal model promotion from evaluated Candidate state to Versioned Production release (v1.0, v2.0).
-2. Generates complete 11-step lineage provenance graphs tracing a model version back to:
-   - Originating Run ID & Hyperparameters
-   - PyTorch Compute Device & Hardware Context
-   - Dataset Version & Preprocessing Transforms
-   - Evaluated Holdout Metrics (Accuracy, Latency)
-   - Motivating Human Decision Rationale
-"""
-
+import json
+import os
 import shutil
-from typing import Dict, Any, List, Optional
-import torch
-from config import REGISTRY_DIR, ARTIFACTS_DIR
-from db.database import get_db_connection
-from db import repository
+from pathlib import Path
+from uuid import uuid4
+from config import ARTIFACTS_DIR, REGISTRY_DIR
+from db.database import database
+from storage import contained, sha256
 
 
 class ModelRegistry:
-    """
-    Model Governance Engine handling candidate promotion and lineage tracking.
-    """
-    def __init__(self):
-        REGISTRY_DIR.mkdir(parents=True, exist_ok=True)
+    def promote_candidate(self, name, run_id, version="v1.0.0"):
+        # Validate even when called outside HTTP.
+        from domain import RegisterModel
 
-    def promote_candidate(
-        self,
-        name: str,
-        run_id: str,
-        version: str = "v1.0",
-        test_accuracy: Optional[float] = None,
-        latency_ms: Optional[float] = None
-    ) -> Dict[str, Any]:
-        """
-        Promotes a qualified candidate run into a versioned model registry package.
-        Copies the best PyTorch checkpoint to the registry directory and registers SQLite metadata.
-        """
-        conn = get_db_connection()
-        run = repository.get_run(conn, run_id)
-        if not run:
-            conn.close()
-            raise ValueError(f"Run ID '{run_id}' not found in database.")
-
-        # Locate originating run checkpoint
-        source_checkpoint = ARTIFACTS_DIR / f"{run_id}_best_checkpoint.pt"
-        target_checkpoint = REGISTRY_DIR / f"{name}_{version}.pt"
-
-        if source_checkpoint.exists():
-            shutil.copy(source_checkpoint, target_checkpoint)
-            checkpoint_path_str = str(target_checkpoint)
-        else:
-            checkpoint_path_str = str(source_checkpoint)
-
-        model_id = f"model_{name}_{version}".replace(".", "_")
-
-        # Insert model entry into SQLite registry table
-        conn.execute(
-            """
-            INSERT INTO models (id, name, version, run_id, checkpoint_path, test_accuracy, latency_ms, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'PROMOTED')
-            ON CONFLICT(id) DO UPDATE SET
-                status = 'PROMOTED',
-                test_accuracy = excluded.test_accuracy,
-                latency_ms = excluded.latency_ms;
-            """,
-            (model_id, name, version, run_id, checkpoint_path_str, test_accuracy, latency_ms)
-        )
-        conn.commit()
-        conn.close()
-
-        return {
-            "model_id": model_id,
-            "name": name,
-            "version": version,
-            "run_id": run_id,
-            "checkpoint_path": checkpoint_path_str,
-            "status": "PROMOTED"
-        }
-
-    def get_lineage(self, model_id: str) -> Dict[str, Any]:
-        """
-        Generates complete 11-step Lineage & Provenance Graph tracing a model back to its source.
-        """
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM models WHERE id = ? OR name = ?;", (model_id, model_id))
-        model_row = cursor.fetchone()
-
-        if not model_row:
-            conn.close()
-            raise ValueError(f"Model '{model_id}' not found in registry.")
-
-        model = dict(model_row)
-        run = repository.get_run(conn, model["run_id"])
-        metrics = repository.get_run_metrics(conn, model["run_id"]) if run else []
-        decisions = repository.get_decisions(conn, model["run_id"]) if run else []
-        exp = repository.get_experiment(conn, run["experiment_id"]) if run else None
-        conn.close()
-
-        # Construct 11-Step Lineage Lineage Node Architecture
-        return {
-            "model_version_info": {
-                "model_id": model["id"],
-                "name": model["name"],
-                "version": model["version"],
-                "status": model["status"],
-                "registered_at": model["created_at"],
-                "checkpoint_path": model["checkpoint_path"]
-            },
-            "source_experiment": exp,
-            "originating_run": {
-                "run_id": run["id"] if run else None,
-                "approach_name": run["approach_name"] if run else None,
-                "model_architecture": run["model_architecture"] if run else None,
-                "hyperparameters": {
-                    "batch_size": run["batch_size"] if run else None,
-                    "epochs": run["epochs"] if run else None,
-                    "learning_rate": run["learning_rate"] if run else None,
-                    "seed": run["seed"] if run else None
+        request = RegisterModel(name=name, run_id=run_id, version=version)
+        version = "v" + request.version.lstrip("v")
+        target = None
+        try:
+            with database() as c:
+                c.execute("BEGIN IMMEDIATE")
+                if c.execute(
+                    "SELECT 1 FROM models WHERE name=? AND version IN (?,?)",
+                    (name, version, version[1:]),
+                ).fetchone():
+                    raise ValueError("Model name/version already exists; versions are immutable")
+                run = c.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
+                if not run or run["status"] != "COMPLETED" or not run["evaluation_json"]:
+                    raise ValueError("A completed, holdout-evaluated run is required")
+                decision = c.execute(
+                    "SELECT * FROM decisions WHERE run_id=? ORDER BY id DESC LIMIT 1", (run_id,)
+                ).fetchone()
+                if (
+                    not decision
+                    or decision["status"] != "SELECTED"
+                    or not decision["evidence_json"]
+                ):
+                    raise ValueError("Record an evidence-backed Selected decision first")
+                if not all(run[k] for k in ["config_json", "environment_json", "dataset_json"]):
+                    raise ValueError(
+                        "Historical provenance is unknown. Re-run this legacy candidate."
+                    )
+                source = contained(ARTIFACTS_DIR, f"{run_id}_best_checkpoint.pt")
+                evaluation = json.loads(run["evaluation_json"])
+                if not source.is_file() or sha256(source) != evaluation["checkpoint_sha256"]:
+                    raise ValueError("Evaluated checkpoint missing or modified")
+                exp = dict(
+                    c.execute(
+                        "SELECT * FROM experiments WHERE id=?", (run["experiment_id"],)
+                    ).fetchone()
+                )
+                investigation = []
+                for row in c.execute(
+                    "SELECT * FROM runs WHERE experiment_id=? AND audit_id IS NULL ORDER BY created_at,id",
+                    (run["experiment_id"],),
+                ).fetchall():
+                    r = dict(row)
+                    r["decisions"] = [
+                        dict(d)
+                        for d in c.execute(
+                            "SELECT * FROM decisions WHERE run_id=? ORDER BY id", (r["id"],)
+                        )
+                    ]
+                    investigation.append(r)
+                model_id = "model_" + uuid4().hex
+                target = contained(REGISTRY_DIR, model_id + ".pt")
+                temp = target.with_suffix(".tmp")
+                try:
+                    shutil.copyfile(source, temp)
+                    digest = sha256(temp)
+                    if digest != evaluation["checkpoint_sha256"]:
+                        raise ValueError("Checkpoint changed during registration")
+                    os.replace(temp, target)
+                finally:
+                    temp.unlink(missing_ok=True)
+                manifest = {
+                    "source_experiment": exp,
+                    "originating_run": dict(run),
+                    "decision": dict(decision),
+                    "investigation_history": investigation,
+                    "evaluation": evaluation,
+                    "checkpoint_sha256": digest,
+                    "environment": json.loads(run["environment_json"]),
+                    "dataset": json.loads(run["dataset_json"]),
+                    "configuration": json.loads(run["config_json"]),
                 }
-            },
-            "metric_history_summary": {
-                "total_epochs_completed": len(metrics),
-                "best_val_accuracy": max([m["val_acc"] for m in metrics]) if metrics else None,
-                "final_val_loss": metrics[-1]["val_loss"] if metrics else None
-            },
-            "decision_history": decisions,
-            "provenance_metadata": {
-                "pytorch_device": "Apple Silicon MPS / CUDA auto-detected",
-                "dataset": "CIFAR-10 (50k Train / 10k Test)",
-                "data_transforms": "RandomCrop(32, p=4) + RandomHorizontalFlip + Normalize(Mean/Std)"
+                c.execute(
+                    "INSERT INTO models(id,name,version,run_id,checkpoint_path,test_accuracy,latency_ms,status,manifest_json,sha256) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    (
+                        model_id,
+                        name,
+                        version,
+                        run_id,
+                        str(target),
+                        evaluation["test_accuracy"],
+                        evaluation["latency_ms_per_sample"],
+                        "REGISTERED",
+                        json.dumps(manifest),
+                        digest,
+                    ),
+                )
+            return self.get_model(model_id)
+        except BaseException:
+            if target:
+                target.unlink(missing_ok=True)
+            raise
+
+    def get_model(self, model_id):
+        with database() as c:
+            row = c.execute("SELECT * FROM models WHERE id=?", (model_id,)).fetchone()
+        if not row:
+            raise ValueError("Model version not found")
+        return dict(row)
+
+    def get_lineage(self, model_id):
+        model = self.get_model(model_id)
+        if not model["manifest_json"]:
+            return {
+                "model": model,
+                "verified": False,
+                "reason": "Legacy version has no frozen provenance snapshot.",
             }
+        return {
+            "model": {k: v for k, v in model.items() if k != "manifest_json"},
+            "verified": True,
+            **json.loads(model["manifest_json"]),
         }
+
+    def activate(self, model_id):
+        model = self.get_model(model_id)
+        path = Path(model["checkpoint_path"]).resolve()
+        if (
+            not model["manifest_json"]
+            or not model["sha256"]
+            or not path.is_relative_to(REGISTRY_DIR.resolve())
+            or not path.is_file()
+            or sha256(path) != model["sha256"]
+        ):
+            raise ValueError("Only an intact, verified registered version can serve predictions")
+        # Validate architecture and state before making it the active version.
+        import torch
+        from core.models import get_model_by_name
+
+        manifest = json.loads(model["manifest_json"])
+        net = get_model_by_name(manifest["configuration"]["model_name"])
+        checkpoint = torch.load(path, map_location="cpu", weights_only=True)
+        if checkpoint["run_id"] != model["run_id"]:
+            raise ValueError("Checkpoint run identity mismatch")
+        net.load_state_dict(checkpoint["model_state_dict"])
+        with database() as c:
+            c.execute(
+                "INSERT INTO serving(id,model_id) VALUES(1,?) ON CONFLICT(id) DO UPDATE SET model_id=excluded.model_id",
+                (model_id,),
+            )
+        return {"model_id": model_id, "status": "ACTIVE"}

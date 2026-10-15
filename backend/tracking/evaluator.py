@@ -1,120 +1,113 @@
-"""
-traintrace/backend/tracking/evaluator.py
-========================================
-Holdout Test Set Evaluator & Dual Reproducibility Protocol Engine (Protocol A & B).
-"""
+"""Audits replay immutable configurations and preserve every participating run."""
 
-import time
-from typing import Dict, Any, List
-import torch
-import numpy as np
-from core.models import get_model_by_name
-from core.dataset import get_cifar10_dataloaders
-from core.trainer import evaluate, Trainer
-from config import get_default_device
+import json
+import statistics
+from uuid import uuid4
+from db.database import database
+from jobs import insert_run
+from tracking.tracker import execute_run, cancelled
+from core.trainer import TrainingStopped
+from storage import write_json
 
 
-class Evaluator:
-    """
-    Evaluates trained model checkpoints and executes Reproducibility Audits.
-    """
-    def __init__(self, device: torch.device = None):
-        self.device = device if device is not None else get_default_device()
+METRICS = ("train_loss", "train_acc", "val_loss", "val_acc", "learning_rate")
 
-    def evaluate_holdout(
-        self,
-        checkpoint_path: str,
-        model_name: str,
-        batch_size: int = 128
-    ) -> Dict[str, Any]:
-        """
-        Executes evaluation on unseen holdout test dataset (10,000 samples).
-        """
-        _, _, test_loader = get_cifar10_dataloaders(batch_size=batch_size, num_workers=0)
-        
-        # Load model structure & weights from checkpoint
-        model = get_model_by_name(model_name, num_classes=10).to(self.device)
-        checkpoint = torch.load(checkpoint_path, map_location=self.device)
-        model.load_state_dict(checkpoint["model_state_dict"])
-        
-        criterion = torch.nn.CrossEntropyLoss()
-        
-        start_time = time.time()
-        test_loss, test_acc = evaluate(model, test_loader, criterion, self.device)
-        eval_time_sec = time.time() - start_time
-        
-        # Calculate average latency per sample in milliseconds
-        total_samples = len(test_loader.dataset)
-        avg_latency_ms = (eval_time_sec / total_samples) * 1000.0
-        
-        return {
-            "test_loss": test_loss,
-            "test_accuracy": test_acc,
-            "latency_ms_per_sample": avg_latency_ms,
-            "total_samples_evaluated": total_samples
+
+def execute_audit(payload, job_id):
+    with database() as c:
+        source = dict(c.execute("SELECT * FROM runs WHERE id=?", (payload["run_id"],)).fetchone())
+    config = json.loads(source["config_json"])
+    seeds = [config["seed"], config["seed"]] if payload["protocol"] == "A" else payload["seeds"]
+    members = []
+    for seed in seeds:
+        if cancelled(job_id):
+            raise TrainingStopped("Audit stopped")
+        child = {
+            **config,
+            "run_id": "replay_" + uuid4().hex,
+            "seed": seed,
+            "predecessor_run_id": None,
+            "motivating_reason": "Audit replay of " + source["id"],
         }
-
-    def audit_protocol_a(
-        self,
-        original_run_id: str,
-        model_name: str,
-        seed: int = 42,
-        epochs: int = 2
-    ) -> Dict[str, Any]:
-        """
-        PROTOCOL A: Same-Condition Repeatability Audit.
-        Re-executes run under identical seed/config to verify deterministic metric match.
-        """
-        torch.manual_seed(seed)
-        model1 = get_model_by_name(model_name)
-        train_loader1, val_loader1, _ = get_cifar10_dataloaders(batch_size=128, seed=seed, num_workers=0)
-        t1 = Trainer(model1, train_loader1, val_loader1, device=self.device)
-        h1 = t1.train(num_epochs=epochs, run_id=f"{original_run_id}_repro_a1")
-
-        torch.manual_seed(seed)
-        model2 = get_model_by_name(model_name)
-        train_loader2, val_loader2, _ = get_cifar10_dataloaders(batch_size=128, seed=seed, num_workers=0)
-        t2 = Trainer(model2, train_loader2, val_loader2, device=self.device)
-        h2 = t2.train(num_epochs=epochs, run_id=f"{original_run_id}_repro_a2")
-
-        acc_diff = abs(h1["best_val_acc"] - h2["best_val_acc"])
-        passed = acc_diff < 0.01  # Match within 0.01% tolerance
-
-        return {
-            "protocol": "Protocol A (Same-Condition Repeatability)",
-            "run_1_val_acc": h1["best_val_acc"],
-            "run_2_val_acc": h2["best_val_acc"],
-            "accuracy_delta": acc_diff,
-            "passed": passed
-        }
-
-    def audit_protocol_b(
-        self,
-        model_name: str,
-        seeds: List[int] = [42, 101, 2024],
-        epochs: int = 2
-    ) -> Dict[str, Any]:
-        """
-        PROTOCOL B: Multi-Seed Sensitivity Analysis.
-        Executes N runs across controlled random seeds to measure statistical variance.
-        """
-        val_accuracies = []
-        for s in seeds:
-            torch.manual_seed(s)
-            model = get_model_by_name(model_name)
-            t_loader, v_loader, _ = get_cifar10_dataloaders(batch_size=128, seed=s, num_workers=0)
-            trainer = Trainer(model, t_loader, v_loader, device=self.device)
-            res = trainer.train(num_epochs=epochs, run_id=f"prob_b_seed_{s}")
-            val_accuracies.append(res["best_val_acc"])
-
-        mean_acc = float(np.mean(val_accuracies))
-        std_acc = float(np.std(val_accuracies))
-
-        return {
-            "protocol": "Protocol B (Multi-Seed Sensitivity Analysis)",
-            "seeds_tested": seeds,
-            "val_accuracies": val_accuracies,
-            "mean_accuracy": mean_acc,
-            "std_deviation": std_acc,
-            "min_max_spread": float(max(val_accuracies) - min(val_accuracies))
-        }
+        with database() as c:
+            insert_run(c, child, job_id)
+        evaluation = execute_run(child, job_id)
+        with database() as c:
+            row = dict(c.execute("SELECT * FROM runs WHERE id=?", (child["run_id"],)).fetchone())
+            metrics = [
+                {k: r[k] for k in METRICS}
+                for r in c.execute(
+                    "SELECT * FROM epoch_metrics WHERE run_id=? ORDER BY epoch", (child["run_id"],)
+                )
+            ]
+        members.append(
+            {
+                "run_id": child["run_id"],
+                "seed": seed,
+                "test_accuracy": evaluation["test_accuracy"],
+                "test_loss": evaluation["test_loss"],
+                "trajectory": metrics,
+                "environment": json.loads(row["environment_json"]),
+                "dataset": json.loads(row["dataset_json"]),
+            }
+        )
+    report = {
+        "protocol": payload["protocol"],
+        "source_run_id": source["id"],
+        "members": members,
+        "configuration": config,
+        "accuracy_unit": "percent",
+    }
+    if payload["protocol"] == "A":
+        a, b = members
+        original_env = json.loads(source["environment_json"])
+        original_data = json.loads(source["dataset_json"])
+        with database() as c:
+            original_metrics = [
+                {k: r[k] for k in METRICS}
+                for r in c.execute(
+                    "SELECT * FROM epoch_metrics WHERE run_id=? ORDER BY epoch", (source["id"],)
+                )
+            ]
+        original_evaluation = json.loads(source["evaluation_json"])
+        parity = all(
+            m["environment"] == original_env and m["dataset"] == original_data for m in members
+        )
+        exact = all(
+            m["trajectory"] == original_metrics
+            and m["test_accuracy"] == original_evaluation["test_accuracy"]
+            and m["test_loss"] == original_evaluation["test_loss"]
+            for m in members
+        )
+        report.update(
+            passed=parity and exact,
+            environment_match=parity,
+            trajectory_match=exact,
+            accuracy_delta=abs(a["test_accuracy"] - b["test_accuracy"]),
+            comparison="Exact numeric trajectories and test loss/accuracy against original and both replays; timing excluded.",
+            reason="Matched original conditions and measurements."
+            if parity and exact
+            else "Configuration/environment or measured trajectory differs; inspect members.",
+        )
+    else:
+        values = [m["test_accuracy"] for m in members]
+        report.update(
+            mean_accuracy=statistics.mean(values),
+            std_deviation=statistics.pstdev(values),
+            min_accuracy=min(values),
+            max_accuracy=max(values),
+            spread=max(values) - min(values),
+            sample_count=len(values),
+            std_convention="Population standard deviation (ddof=0)",
+            environment_match=all(
+                m["environment"] == json.loads(source["environment_json"]) for m in members
+            ),
+            fixed_split=all(
+                m["dataset"]["split_sha256"] == members[0]["dataset"]["split_sha256"]
+                for m in members
+            ),
+        )
+    write_json(source["id"], job_id, report)
+    with database() as c:
+        c.execute("UPDATE audits SET report=? WHERE id=?", (json.dumps(report), job_id))
+    return report
