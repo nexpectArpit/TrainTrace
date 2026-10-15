@@ -1,70 +1,22 @@
-# TrainTrace — System Metrics, Dataset Specs & Runtime Numbers
+# TrainTrace dataset and model dimensions
 
-> **Reference Guide:** Technical dimensions, dataset partition numbers, batch math, and model parameter sizes powering the TrainTrace pipeline.
+CIFAR-10 contains 60,000 RGB images of 32×32 pixels in 10 classes. The application uses 45,000 training images, 5,000 validation images and 10,000 holdout test images. Split identity is controlled by a separate split seed and stored as an artifact/hash. Training augmentation is random cropping with 4-pixel padding and horizontal flipping; evaluation resizes to 32×32 and applies the recorded normalization.
 
----
+At batch size 64, these partitions require 704, 79 and 157 batches respectively. At 128 they require 352, 40 and 79; at 256 they require 176, 20 and 40. The final batch may be smaller. A full `[64,3,32,32]` FP32 input tensor contains 196,608 values, occupying 786,432 bytes before activation/gradient/optimizer memory.
 
-## 1. 📊 Dataset Specifications (CIFAR-10)
+## Actual parameter counts
 
-The core computer vision benchmark configured in `traintrace/backend/core/dataset.py`:
+Counts are computed with `sum(p.numel() for p in model.parameters())` for 10-class heads. FP32 parameter bytes alone do not include buffers, optimizer states, serialization overhead, or runtime activations. The dashboard reports the actual checkpoint file size separately.
 
-| Property | Value | Description |
-| :--- | :--- | :--- |
-| **Dataset Name** | CIFAR-10 | Canonical 10-class vision classification benchmark |
-| **Total Images** | **60,000 images** | 6,000 images per category (perfectly balanced) |
-| **Image Resolution** | **32 x 32 pixels** | Standardized input dimensions |
-| **Color Channels** | **3 (RGB)** | Red, Green, Blue channels |
-| **Numbers per Image** | **3,072 floats** | 3 channels * 32 height * 32 width |
-| **Storage Footprint** | **~163 MB – 180 MB** | Cached locally in `backend/storage/data/` |
-| **10 Target Classes** | `airplane`, `automobile`, `bird`, `cat`, `deer`, `dog`, `frog`, `horse`, `ship`, `truck` | Indexed with class IDs `0` through `9` |
+| Architecture | Parameters | FP32 parameter MB (decimal) |
+|---|---:|---:|
+| CustomCNN | 620,810 | 2.483 |
+| ResNet-18 (CIFAR stem) | 11,173,962 | 44.696 |
+| MobileNetV2 | 2,236,682 | 8.947 |
+| EfficientNet-B0 | 4,020,358 | 16.081 |
 
-### Partition Splits in Pipeline
+Accuracy is reported as **0–100 percent**. Precision, recall and F1 use **0–1**. Accuracy spread and overfitting gap use percentage points. The overfitting gap compares training and validation from the same final epoch; training augmentation/dropout can make this negative.
 
-* **🏋️ Training Set (`train_loader`)**: **45,000 images** (90% of training split)
-  * Data Augmentations: Random 4px padded cropping (`RandomCrop(32, padding=4)`) and random horizontal flipping (`RandomHorizontalFlip(p=0.5)`).
-* **🧪 Validation Set (`val_loader`)**: **5,000 images** (10% of training split)
-  * Deterministic normalization only. Evaluated after every training epoch for loss and accuracy curves.
-* **🎯 Test Set (`test_loader`)**: **10,000 images**
-  * Fully independent holdout dataset. Used for final candidate evaluation, Protocol A (deterministic bitwise check), and Protocol B (multi-seed sensitivity analysis).
+Holdout latency is the batched wall time including loading/transfers divided by sample count. It is not single-image serving latency. Prediction responses measure model forward execution plus probability transfer separately and identify the model version. Compare latency only under matching hardware, batch and evaluation conditions.
 
----
-
-## 2. 🔢 Runtime Execution Numbers & Batch Mathematics
-
-Calculations based on default batch size of **64**:
-
-| Runtime Dimension | Exact Number | Calculation / Explanation |
-| :--- | :--- | :--- |
-| **Mini-Batch Tensor Shape** | `[64, 3, 32, 32]` | 64 images grouped into a single multidimensional tensor |
-| **Values per Mini-Batch** | **196,608 floats** | 64 images * 3 channels * 32 height * 32 width |
-| **Batch Memory Size (FP32)** | **~786 KB** | 196,608 floats * 4 bytes per float |
-| **Training Steps per Epoch** | **704 batches** | 45,000 training images / 64 batch size = 704 iterations |
-| **Validation Steps per Epoch** | **79 batches** | 5,000 validation images / 64 batch size = 79 iterations |
-| **Holdout Test Steps** | **157 batches** | 10,000 test images / 64 batch size = 157 iterations |
-| **Output Logits Tensor** | `[64, 10]` | 10 unnormalized class confidence scores per image |
-
----
-
-## 3. 🧠 Model Architectures & Parameter Footprint
-
-The neural network backbones implemented in `traintrace/backend/core/models.py`:
-
-| Model Architecture | Parameter Count | File / Memory Size | Primary Characteristics |
-| :--- | :--- | :--- | :--- |
-| **`CustomCNN`** | **~1.2 Million** | **~4.8 MB** | 3 Conv-BatchNorm-ReLU blocks with max pooling; lightweight baseline |
-| **`MobileNetV2`** | **~2.2 Million** | **~8.8 MB** | Inverted residual bottlenecks & depthwise separable convolutions |
-| **`EfficientNet-B0`** | **~4.0 Million** | **~16.0 MB** | Compound coefficient scaling balancing depth, width, and resolution |
-| **`ResNet-18`** | **~11.2 Million** | **~44.8 MB** | 18-layer residual network with identity skip connections |
-
----
-
-## 4. ⚙️ Optimization & Hardware Acceleration
-
-* **Loss Function**: `nn.CrossEntropyLoss()` (combines `LogSoftmax` and Negative Log-Likelihood Loss over 10 classes).
-* **Default Learning Rate**: `0.001` (1e-3).
-* **Weight Decay ($L_2$ Regularization)**: `0.0001` (1e-4) to penalize large weights and prevent overfitting.
-* **Momentum**: `0.9` (when using SGD optimizer).
-* **Hardware Device**: Automatically selected via `backend/config.py`:
-  * **`mps`**: Apple Silicon Metal Performance Shaders GPU (Mac M1/M2/M3/M4)
-  * **`cuda`**: NVIDIA GPU
-  * **`cpu`**: Multi-threaded CPU fallback
+Worker device selection uses CUDA, then MPS, then CPU unless overridden. Actual dataset/configuration/environment/source hashes are captured per new run. Legacy observations without these snapshots remain unverified. Model quality depends on the training configuration; a one-epoch acceptance run is not an accuracy benchmark.
