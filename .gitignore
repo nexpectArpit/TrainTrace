@@ -28,3 +28,7 @@ frontend/dist/
 .DS_Store
 .vscode/
 .idea/
+
+backups/
+.coverage
+htmlcov/

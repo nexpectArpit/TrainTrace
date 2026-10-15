@@ -1,232 +1,119 @@
-# TrainTrace — Reproducible PyTorch Experiment Tracking Pipeline
+# TrainTrace — Tracked Training Pipeline
 
-> **Formal OJT Project:** Tracked Training Pipeline (TTP)  
-> **System Purpose:** An evidence-based PyTorch experiment tracking, hyperparameter evaluation, decision traceability, and model candidate lifecycle platform.
+TrainTrace is a local ML investigation workspace. It connects seeded PyTorch training, holdout evaluation, reproducibility studies, candidate comparisons, human decision history, immutable model versions, and version-bound inference.
 
----
+The supported core is **CIFAR-10 on a single-user macOS/Linux workstation**, with one compute job at a time. Additional datasets, W&B synchronization, multi-user authentication, and PDF/image report exports remain extensions. The original product specification is in [docs/PRD](docs/PRD/Tracked_Training_Pipeline_PRD.md); the implementation baseline and current limitations are documented below.
 
-## ⚡ Quick Start — How to Run the Project
+## Run locally
 
-TrainTrace consists of two decoupled services: the **FastAPI Backend & ML Engine** (Port 8000) and the **React Vite Frontend Dashboard** (Port 3000). They should be run concurrently in two separate terminal windows.
+Use Python **3.13** and Node **22.12+** (Node 22 recommended). From this repository root:
 
----
-
-### Prerequisites
-* **Python**: 3.10+ (macOS Homebrew Python `python3.13` or standard `python3`)
-* **Node.js**: v18+ and `npm`
-* **Hardware**: Automatically detects Apple Silicon GPU (`mps`), NVIDIA CUDA (`cuda`), or fallback (`cpu`).
-
----
-
-### Step 1: Start the Backend REST API Server (Terminal 1)
-
-Open a new terminal window and navigate to the backend directory:
-
-```bash
-cd traintrace/backend
+```sh
+python3.13 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements-dev.txt
+python -m uvicorn api.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
 
-#### Option A: Using Python Virtual Environment (Recommended)
-```bash
-# 1. Create a virtual environment
-python3 -m venv venv
+In a second terminal:
 
-# 2. Activate the virtual environment
-source venv/bin/activate       # On macOS/Linux
-# .\venv\Scripts\activate      # On Windows
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Launch FastAPI ASGI server with auto-reload
-uvicorn api.main:app --reload --port 8000
+```sh
+cd frontend
+npm ci
+npm run dev -- --host 127.0.0.1
 ```
 
-#### Option B: Direct Execution via Homebrew Python (macOS)
-If you are using Homebrew's Python environment without virtualenv:
-```bash
-/opt/homebrew/bin/pip3.13 install -r requirements.txt
-/opt/homebrew/bin/uvicorn api.main:app --reload --port 8000
+Open [the workspace](http://127.0.0.1:3000) and [API documentation](http://127.0.0.1:8000/docs). The API starts one worker subprocess automatically. Restart the API after backend source changes; worker code is not hot-reloaded. Keep a single API service for this local deployment. Bind to loopback: this application has no multi-user authentication and is not intended for public hosting.
+
+CIFAR-10 downloads on first use, then works from its cache. ImageNet initialization also requires a first-use download. Existing cached datasets can be reused with `TRAINTRACE_DATA_DIR`. No cloud account is required.
+
+## Workflow
+
+1. **Investigations:** define an objective, hypothesis, and optional accuracy/latency targets. Targets and all accuracy measurements use **0–100 percent**. Edit conclusions and archive investigations here.
+2. **Training:** configure an architecture, optimizer, schedule, initialization seed, and independent split seed. Queue a unique run ID. Completed epoch metrics persist immediately, and best/last/periodic checkpoints are catalogued with SHA256 checksums. A stopped or failed run retains completed evidence.
+3. **Compare:** select up to four candidate runs and inspect validation trajectories, hyperparameters, measured parameter counts, holdout accuracy, checkpoint size, duration, and latency. The overfitting gap uses training and validation accuracy from the same final epoch.
+4. **Audits:** Protocol A replays the original full configuration twice and compares exact numerical trajectories plus test loss/accuracy against the original. Timing is excluded. Conditions must match. Protocol B defaults to five distinct initialization seeds, holds the data split fixed, and persists per-seed test accuracies, mean, population standard deviation, minimum, maximum, and spread. Both use the same sequential queue as ordinary training.
+5. **Decisions and History:** record rationale, limitations/strengths, alternatives, why alternatives were rejected, and acknowledged trade-offs. Evidence is snapshotted when the decision is saved. Link successor approaches to the run and limitation that motivated them. A single current Selected candidate is allowed per investigation; supersede the previous selection explicitly.
+6. **Registry:** register a Selected, completed, evaluated candidate using a new semantic version such as `v1.0.0`. Versions cannot be overwritten. Registration freezes the checkpoint hash, source configuration, environment/source hashes, split metadata, decision, and investigation history.
+7. **Inference:** activate a registered version, then upload PNG/JPEG images (up to 5 MB and 16 megapixels). Preprocessing comes from the frozen manifest. Predictions identify the model version, run, checkpoint checksum, top classes, and confidence. Missing or changed checkpoints produce errors; there is no random-weight fallback.
+
+Decision reports download as Markdown. Epoch logs download as CSV; evaluation, split and audit evidence download as JSON; checkpoints download as `.pt`. Load checkpoint files only from trusted origins.
+
+## Configuration
+
+| Variable | Purpose |
+|---|---|
+| `TRAINTRACE_STORAGE_DIR` | Managed storage root; default `backend/storage` |
+| `TRAINTRACE_DATA_DIR` | Dataset cache; default `<storage>/data` |
+| `TRAINTRACE_DEVICE` | `cpu`, `cuda`, or `mps`; automatic hardware selection when unset |
+| `TRAINTRACE_CPU_THREADS` | Worker PyTorch thread count; default `4` |
+| `TRAINTRACE_WORKER=0` | Disable automatic worker startup for isolated API testing |
+
+Use separate storage for validation, for example:
+
+```sh
+TRAINTRACE_STORAGE_DIR=/tmp/traintrace-validation \
+TRAINTRACE_DATA_DIR="$PWD/backend/storage/data" \
+TRAINTRACE_DEVICE=cpu \
+.venv/bin/python -m uvicorn api.main:app --app-dir backend --host 127.0.0.1 --port 8000
 ```
 
-#### 🔍 Backend Verification URLs
-* 🌐 **Interactive Swagger API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
-* 📖 **ReDoc Documentation:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
-* 🩺 **Backend Health Check:** [http://localhost:8000/](http://localhost:8000/)
+The split seed identifies the 45k/5k partition. Initialization seeds control model initialization and training randomness; they do not silently alter the evaluation partition. Exact repeatability is asserted only when captured code, device, environment, data and measurements match. GPU determinism is not established by the CPU acceptance study; unsupported deterministic operations fail visibly.
 
----
+## Storage, migrations and recovery
 
-### Step 2: Start the Frontend React Web Dashboard (Terminal 2)
+SQLite schema changes are additive. A pre-migration database copy is created for legacy schema version zero. The exact clean-install macOS/Python 3.13 dependency snapshot is in `backend/requirements-lock-macos-py313.txt`; use the portable requirements files for other supported environments.
 
-Open a second terminal window and navigate to the frontend directory:
+A full source/checkpoint backup from before the repair is retained locally under `backups/` (ignored by Git).
 
-```bash
-cd traintrace/frontend
+Existing experiments, decisions, and checkpoint files are preserved. Unknown legacy provenance remains unknown; new evidence must be established by new runs. Legacy registry entries without frozen manifests cannot be activated as verified models.
 
-# 1. Install frontend dependencies (First time only)
-npm install
+Jobs are queued durably in SQLite. One worker holds an OS file lock and atomically claims one job. Cancellation is checked at batch/evaluation boundaries. On worker restart, interrupted executions become FAILED with retained metrics/artifacts; pending durable jobs remain queued. Automatic checkpoint resume is not implemented. If a worker exits unexpectedly, restart the API to recreate it and reconcile state. The UI reports worker availability.
 
-# 2. Launch Vite development server
-npm run dev
+Checkpoints are written atomically. Registry versions are stored under generated internal IDs, with name/version collision checks and transactional metadata publication. Do not manually edit or move managed artifacts.
+
+## Verify changes
+
+```sh
+.venv/bin/ruff check backend
+.venv/bin/ruff format --check backend
+.venv/bin/python -m pytest --cov --cov-report=term-missing
 ```
 
-#### 🖥️ Interactive Web Dashboard
-* Open your browser and navigate to: **[http://localhost:3000](http://localhost:3000)**
-
----
-
-## 🧪 Quick Smoke Test & CLI Verification
-
-You can verify the backend is running and execute a quick test run directly from your terminal:
-
-### 1. Health Check
-```bash
-curl -X GET http://localhost:8000/
-# Expected response: {"status":"healthy","system":"TrainTrace Engine v1.0",...}
+```sh
+cd frontend
+npm test
+npm run format:check
+npm run build
 ```
 
-### 2. Create an Experiment via CLI
-```bash
-curl -X POST http://localhost:8000/api/v1/experiments/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "CIFAR-10 Baseline Exploration",
-    "description": "Evaluating initial CNN architectures under standard SGD and AdamW",
-    "target_metric": "val_accuracy",
-    "target_threshold": 0.70
-  }'
+CI runs these checks on pushes and pull requests. Fast tests use a small deterministic synthetic fixture, including complete training → decision → registration → activation → prediction flows. Coverage excludes the tests themselves and fails below 80%.
+
+For an explicit real-data acceptance study, start a temporary-storage API, complete a one-epoch CIFAR-10 run in the UI, then run:
+
+```sh
+.venv/bin/python scripts/verify_real_audits.py \
+  --run-id YOUR_ACCEPTANCE_RUN_ID \
+  --output /tmp/traintrace-real-acceptance.json
 ```
 
-### 3. Launch a Training Run via CLI (Async Background Execution)
-```bash
-curl -X POST http://localhost:8000/api/v1/runs/launch \
-  -H "Content-Type: application/json" \
-  -d '{
-    "experiment_id": "EXP-001",
-    "model_architecture": "custom_cnn",
-    "hyperparameters": {
-      "lr": 0.001,
-      "batch_size": 64,
-      "optimizer": "adamw",
-      "weight_decay": 0.0001
-    },
-    "epochs": 3,
-    "seed": 42
-  }'
-```
+This starts two replay runs and a five-seed study using the source run's complete configuration. It consumes real compute and may take several minutes.
 
-### 4. Fetch Comparative Matrix
-```bash
-curl -X GET http://localhost:8000/api/v1/runs/compare/EXP-001
-```
+## Architecture
 
----
+- `backend/domain.py`: validated request contracts and safe identifiers.
+- `backend/api/`: HTTP boundary, investigation/reporting, run monitoring, registry and serving.
+- `backend/jobs.py`, `backend/worker.py`: durable admission, single-process scheduling, stop and restart handling.
+- `backend/core/`: CIFAR-10 preprocessing, four model factories, explicit autograd training and checkpoint lifecycle.
+- `backend/tracking/`: per-epoch persistence, measured holdout evaluation, full-config audits, environment/source capture.
+- `backend/db/database.py`: SQLite connections, schema migration and integrity constraints.
+- `backend/storage.py`, `backend/registry/`: managed artifacts, checksums and frozen model manifests.
+- `frontend/src/screens/`: investigation, training, comparison, audits, decisions, history, registry and inference screens.
+- `frontend/src/components/`: shared accessible inputs/panels and metric charts.
+- `frontend/src/App.jsx`: selection, refresh coordination and workspace navigation.
 
-## 📑 Core Documentation Links
+## Status and remaining scope
 
-* 📊 **[System Metrics, Dataset Specs & Runtime Numbers](SYSTEM_METRICS.md)** — Complete breakdown of CIFAR-10 data sizes, batch mathematics, model parameter counts, and VRAM memory footprints.
-* 📄 **[Product Requirements Document (PRD)](docs/PRD/Tracked_Training_Pipeline_PRD.md)** — Defines business goals, product behavior, 11-step decision reasoning chain, functional requirements (`FR-DEC-01` to `FR-DEC-06`), and user stories.
-* 📄 **[Product Requirements Document (Word Version)](docs/PRD/Tracked_Training_Pipeline_PRD.docx)**
-* 📄 **[Product Requirements Document (PDF Version)](docs/PRD/Tracked_Training_Pipeline_PRD.pdf)**
+See [the repair status and evidence](docs/audits/2026-10-15/REPAIR_STATUS.md) and [the original audit](docs/audits/2026-10-15/PROJECT_AUDIT_AND_REPAIR_PLAN.md). The audit is a historical record of the pre-repair code; its probe script intentionally describes that old implementation.
 
----
-
-## 🏛️ System Architecture & Directory Layout
-
-TrainTrace follows strict **Separation of Concerns** across a modular architecture:
-
-```
-traintrace/                           # REPOSITORY ROOT
-│
-├── .gitignore                        # Standard git ignore file
-├── .env.example                      # Environment variables template
-├── README.md                         # Master repository README & roadmap
-│
-├── docs/                             # Project documentation
-│   └── PRD/                          # Product Requirements Documents
-│
-├── backend/                          # PYTHON BACKEND & ML ENGINE
-│   ├── config.py                     # Path configuration & hardware GPU auto-detection
-│   ├── requirements.txt              # System dependencies
-│   │
-│   ├── core/                         # PyTorch ML Engine
-│   │   ├── models.py                 # CustomCNN, ResNet-18, MobileNetV2, EfficientNet-B0
-│   │   ├── dataset.py                # CIFAR-10 transforms & DataLoader factories
-│   │   └── trainer.py                # Autograd batch training loop & checkpointer (.pt)
-│   │
-│   ├── tracking/                     # Experiment Tracking & Reproducibility
-│   │   ├── tracker.py                # Metric logger & experiment orchestrator
-│   │   └── evaluator.py              # Holdout evaluator & Protocol A/B auditor
-│   │
-│   ├── db/                           # Relational Storage Layer
-│   │   ├── database.py               # SQLite WAL connection manager & 5 schema tables
-│   │   └── repository.py             # CRUD helper functions
-│   │
-│   ├── registry/                     # Model Governance Layer
-│   │   └── model_registry.py         # Version catalog & lineage graph generator
-│   │
-│   ├── api/                          # FastAPI Web Application Server
-│   │   ├── main.py                   # FastAPI entrypoint & CORS middleware
-│   │   └── routers/                  # REST API endpoints
-│   │       ├── experiments.py        # Experiment workspace & decision logging
-│   │       ├── runs.py               # Hyperparameter run launch & comparison matrix
-│   │       ├── registry.py           # Model promotion & lineage provenance queries
-│   │       └── inference.py          # Real-time PyTorch model prediction serving
-│   │
-│   └── storage/                      # Local Storage Sinks (Git-ignored)
-│       ├── data/                     # Raw CIFAR-10 dataset downloads
-│       ├── db/                       # Embedded SQLite database (traintrace.db)
-│       ├── artifacts/                # PyTorch checkpoints (.pt) & JSON reports
-│       └── registry/                 # Promoted production model packages
-│
-└── frontend/                         # FRONTEND SERVICE (React Single Page App)
-    ├── package.json                  # Node dependencies & Vite build scripts
-    ├── vite.config.js                # Port 3000 server & API proxy config
-    └── src/
-        ├── App.jsx                   # Master dashboard, workstation & matrix components
-        ├── App.css                   # Glassmorphic dark-mode design system
-        └── main.jsx                  # React DOM entrypoint
-```
-
----
-
-## 🌐 FastAPI REST API Endpoints
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/` | System health check and Swagger docs link |
-| `POST` | `/api/v1/experiments/` | Create a new experiment parent workspace |
-| `GET` | `/api/v1/experiments/{exp_id}` | Fetch experiment details and objective target |
-| `POST` | `/api/v1/runs/launch` | Launch a customized training run (Hyperparameters, Seed, Arch) |
-| `GET` | `/api/v1/runs/compare/{exp_id}` | Side-by-side run comparison matrix & metric curves |
-| `GET` | `/api/v1/experiments/{exp_id}/runs/{run_id}/metrics` | Fetch per-epoch loss and accuracy progression |
-| `POST` | `/api/v1/experiments/decisions` | Record 11-step decision rationale & candidate status |
-| `POST` | `/api/v1/registry/promote` | Promote a model candidate to versioned release (v1.0) |
-| `GET` | `/api/v1/registry/{model_id}/lineage` | Fetch complete 11-step lineage & provenance graph |
-| `POST` | `/api/v1/inference/predict` | Real-time PyTorch forward-pass prediction (Sanity check) |
-
----
-
-## 🎯 End-to-End User Workflow Guide
-
-1. **Create Experiment Workspace**: In the UI, navigate to **Experiment Workstation**, enter a title (e.g. `CIFAR-10 Optimizer Benchmark`), target metric (`val_accuracy`), and target threshold (`0.75`).
-2. **Launch Comparative Runs**: Configure run variations across model architectures (`CustomCNN`, `ResNet-18`, `MobileNetV2`), learning rates, batch sizes, optimizers (`SGD`, `AdamW`), and seeds. Runs execute asynchronously on the hardware accelerator.
-3. **Analyze Pareto Trade-Offs**: Open the **Comparative Matrix** to inspect accuracy vs training duration, test loss, and per-epoch convergence curves.
-4. **Audit Reproducibility**:
-   * **Protocol A**: Click Deterministic Audit to verify exact bitwise repeatability under identical seeds.
-   * **Protocol B**: Execute Sensitivity Analysis to quantify standard deviation across varying random seeds.
-5. **Log Engineering Decisions**: Document the justification for selecting the candidate model (e.g. why ResNet-18 was preferred over CustomCNN despite higher training time).
-6. **Promote to Registry**: Promote the winning candidate with semantic versioning (`v1.0.0`) and explore the complete interactive **Lineage Provenance Graph**.
-7. **Sanity Check Inference**: Upload any sample image to test the forward-pass output probabilities against the CIFAR-10 classes.
-
----
-
-## 🚀 Development Roadmap & Stage Status
-
-- [x] **Stage 1: Foundation & Blueprint Setup** (`requirements.txt`, `config.py`, `README.md`, PRD transfer)
-- [x] **Stage 2: PyTorch Model Architectures & Data Ingestion Pipeline** (`core/models.py`, `core/dataset.py`, `core/trainer.py`)
-- [x] **Stage 3: Storage Infrastructure & Schema Persistence** (`db/database.py`, `db/repository.py`)
-- [x] **Stage 4: Experiment Tracking & Dual Reproducibility Engine** (`tracking/tracker.py`, `tracking/evaluator.py`)
-- [x] **Stage 5: FastAPI REST Backend Engine** (`api/main.py`, `api/routers/`)
-- [x] **Stage 6: Model Candidate Governance & Lineage Registry** (`registry/model_registry.py`, `api/routers/registry.py`)
-- [x] **Stage 7: Interactive React Frontend Interface** (`frontend/`)
+The core pipeline is implemented and tested. Expanded dataset support, W&B, multi-user sessions, tags/global cross-entity filtering, PDF reports, confusion-matrix image exports, and a fully interactive graph remain extensions. The current history view exposes predecessor relationships and decision evidence as cards. Performance, accessibility and GPU claims must be read alongside the recorded verification limits; passing tests is not proof of every PRD requirement.

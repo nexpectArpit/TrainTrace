@@ -1,0 +1,49 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.13, pytest-9.1.1, pluggy-1.7.0
+rootdir: /Users/arpittripathi/Desktop/TTP/traintrace
+configfile: pyproject.toml
+testpaths: backend/tests
+plugins: cov-7.1.0, anyio-4.15.1
+collected 34 items
+
+backend/tests/test_engine.py ...........                                 [ 32%]
+backend/tests/test_lifecycle.py .......................                  [100%]
+
+=============================== warnings summary ===============================
+backups/validation-env/lib/python3.13/site-packages/fastapi/testclient.py:1
+  /Users/arpittripathi/Desktop/TTP/traintrace/backups/validation-env/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.13.13-final-0 _______________
+
+Name                                 Stmts   Miss  Cover   Missing
+------------------------------------------------------------------
+backend/api/__init__.py                  0      0   100%
+backend/api/main.py                     46      9    80%   20, 23-28, 58-59
+backend/api/routers/__init__.py          0      0   100%
+backend/api/routers/experiments.py      75      2    97%   33, 77
+backend/api/routers/inference.py        74      5    93%   45, 62, 76, 92, 94
+backend/api/routers/registry.py         32      0   100%
+backend/api/routers/runs.py             90      2    98%   121, 199
+backend/config.py                       47     12    74%   80, 86, 90-95, 106-108, 110-111
+backend/core/__init__.py                 0      0   100%
+backend/core/dataset.py                 38      0   100%
+backend/core/models.py                  56      0   100%
+backend/core/trainer.py                112      2    98%   68, 128
+backend/db/__init__.py                   0      0   100%
+backend/db/database.py                  37      0   100%
+backend/domain.py                       67      0   100%
+backend/jobs.py                         47      1    98%   21
+backend/registry/__init__.py             0      0   100%
+backend/registry/model_registry.py      81      4    95%   42, 74, 107, 150
+backend/storage.py                      34      1    97%   31
+backend/tracking/__init__.py             0      0   100%
+backend/tracking/evaluator.py           43      1    98%   24
+backend/tracking/tracker.py            136     12    91%   30, 42-43, 93, 147, 223, 225, 230, 235, 241, 243, 245
+backend/worker.py                       65     25    62%   34, 72-99, 103
+------------------------------------------------------------------
+TOTAL                                 1080     76    93%
+Required test coverage of 80.0% reached. Total coverage: 92.96%
+======================== 34 passed, 1 warning in 5.03s =========================

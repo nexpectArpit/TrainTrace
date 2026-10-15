@@ -1,0 +1,14 @@
+UI decision payload rejected: [(('rationale',), 'missing')]
+Blank/invalid decision accepted: {'run_id': 'r1', 'status': 'INVALID', 'rationale': '', 'limitations': None, 'alternatives_considered': None, 'why_not_alternative': None, 'next_investigation': None}
+Invalid launch accepted; motivation dropped: {'run_id': '../outside', 'experiment_id': 'e1', 'experiment_name': 'CIFAR-10 Optimization', 'objective': 'Identify optimal architecture and hyperparameters', 'approach_name': 'x', 'model_name': 'custom_cnn', 'epochs': 0, 'batch_size': -1, 'learning_rate': -1.0, 'seed': 42, 'pretrained': False, 'scheduler_type': 'constant'}
+Missing checkpoint, FAILED, no decision promotion: {'model_id': 'model_audit_v1_0', 'name': 'audit', 'version': 'v1.0', 'run_id': 'r1', 'checkpoint_path': '/var/folders/r0/ydylqxg56tx6220vy_t_bsrh0000gn/T/ttp-audit-btj27iix/artifacts/r1_best_checkpoint.pt', 'status': 'PROMOTED'}
+Version collision recorded run: r1 artifact bytes: b'run-two'
+CustomCNN parameters: 620810
+64x64 transform output: (3, 64, 64)
+Missing checkpoint inference returned: cat 0.1087
+All probe writes isolated in: /var/folders/r0/ydylqxg56tx6220vy_t_bsrh0000gn/T/ttp-audit-btj27iix
+[INIT] Starting Training Run [synthetic_smoke] for 1 Epochs on Device: cpu
+  [EPOCH 01/01] Completed in 0.1s | Train Loss: 2.8618, Train Acc: 0.00% | Val Loss: 2.1792, Val Acc: 25.00%
+  [CHECKPOINT] ✓ New best validation accuracy: 25.00%. Saved to synthetic_smoke_best_checkpoint.pt
+Run [synthetic_smoke] Complete! Best Validation Accuracy: 25.00%
+Synthetic trainer smoke: 1 epoch; checkpoint exists: True

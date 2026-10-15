@@ -1,420 +1,464 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { request } from "./services/api";
+import {
+  freshRun,
+  emptyExperiment,
+  emptyDecision,
+  fmt,
+  Badge,
+  Field,
+  Select,
+} from "./components/Common";
+import Investigations from "./screens/Investigations";
+import Training from "./screens/Training";
+import Compare from "./screens/Compare";
+import Audits from "./screens/Audits";
+import Decisions from "./screens/Decisions";
+import History from "./screens/History";
+import Registry from "./screens/Registry";
+import Inference from "./screens/Inference";
+import "./App.css";
+const tabs = [
+  "Investigations",
+  "Training",
+  "Compare",
+  "Audits",
+  "Decisions",
+  "History",
+  "Registry",
+  "Inference",
+];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [expId, setExpId] = useState('exp_cifar10');
-  const [runs, setRuns] = useState([]);
-  const [comparison, setComparison] = useState(null);
-  const [lineage, setLineage] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // Run Launch Form State
-  const [launchForm, setLaunchForm] = useState({
-    run_id: 'run_resnet_02',
-    approach_name: 'ResNet-18 Refined LR',
-    model_name: 'resnet18',
-    epochs: 2,
-    batch_size: 128,
-    learning_rate: 0.0001,
-    seed: 42
-  });
-
-  // Decision Form State
-  const [decisionForm, setDecisionForm] = useState({
-    run_id: 'run_resnet_01',
-    status: 'ACCEPTED',
-    rationale: 'ResNet-18 residual architecture achieved 66.14% validation accuracy, outperforming Custom CNN.'
-  });
-
-  const fetchComparison = async () => {
+  const [tab, setTab] = useState(() =>
+    tabs.includes(localStorage.getItem("traintrace-tab"))
+      ? localStorage.getItem("traintrace-tab")
+      : "Investigations",
+  );
+  const [expId, setExpId] = useState(
+    () => localStorage.getItem("traintrace-investigation") || "",
+  );
+  const [runId, setRunId] = useState(
+    () => localStorage.getItem("traintrace-run") || "",
+  );
+  const [experiments, setExperiments] = useState([]),
+    [runs, setRuns] = useState([]),
+    [models, setModels] = useState([]),
+    [jobs, setJobs] = useState([]);
+  const [activeModel, setActiveModel] = useState(null),
+    [info, setInfo] = useState(null),
+    [online, setOnline] = useState(false);
+  const [connectionError, setConnectionError] = useState("");
+  const [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
+    [busy, setBusy] = useState(false),
+    [query, setQuery] = useState("");
+  const [setup, setSetup] = useState(freshRun),
+    [newExp, setNewExp] = useState(emptyExperiment),
+    [editExp, setEditExp] = useState(null);
+  const [decision, setDecision] = useState(emptyDecision),
+    [seeds, setSeeds] = useState("42, 101, 2024, 7, 99");
+  const [release, setRelease] = useState({ name: "", version: "v1.0.0" }),
+    [lineage, setLineage] = useState(null),
+    [lineageId, setLineageId] = useState("");
+  const [file, setFile] = useState(null),
+    [prediction, setPrediction] = useState(null),
+    [compare, setCompare] = useState([]);
+  const [archFilter, setArchFilter] = useState(""),
+    [statusFilter, setStatusFilter] = useState(""),
+    [seedFilter, setSeedFilter] = useState(""),
+    [accuracyMin, setAccuracyMin] = useState("");
+  const [live, setLive] = useState(null),
+    [events, setEvents] = useState([]);
+  const requestSeq = useRef(0),
+    eventCursor = useRef(0);
+  const experiment = experiments.find((e) => e.id === expId),
+    run = runs.find((r) => r.id === runId);
+  const refresh = useCallback(async () => {
+    const seq = ++requestSeq.current;
     try {
-      const res = await fetch(`/api/v1/runs/compare/${expId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setComparison(data);
-        setRuns(data.comparison_matrix || []);
+      const [e, s, m, j] = await Promise.all([
+        request("/experiments/"),
+        request("/system/info"),
+        request("/registry/models"),
+        request("/runs/jobs"),
+      ]);
+      const validInvestigation = e.experiments.some((row) => row.id === expId);
+      const c = validInvestigation
+        ? await request(`/runs/compare/${encodeURIComponent(expId)}`)
+        : { comparison_matrix: [] };
+      if (seq !== requestSeq.current) return;
+      if (expId && !validInvestigation) {
+        setExpId("");
+        setRunId("");
       }
+      setConnectionError("");
+      setExperiments(e.experiments);
+      setInfo(s);
+      setModels(m.models);
+      setActiveModel(m.active_model_id);
+      setJobs(j.jobs);
+      setRuns(c.comparison_matrix);
+      setOnline(true);
+      if (!expId && e.experiments.length)
+        setExpId(
+          e.experiments.find((e) => !e.archived)?.id || e.experiments[0].id,
+        );
     } catch (e) {
-      console.error('Failed to fetch comparison matrix:', e);
-    }
-  };
-
-  const fetchLineage = async () => {
-    try {
-      const res = await fetch('/api/v1/registry/model_CIFAR10_Classifier_v1_0/lineage');
-      if (res.ok) {
-        const data = await res.json();
-        setLineage(data);
+      if (seq === requestSeq.current) {
+        setOnline(false);
+        setConnectionError(e.message);
       }
-    } catch (e) {
-      console.error('Failed to fetch lineage:', e);
     }
-  };
-
-  // Initial load
-  useEffect(() => {
-    fetchComparison();
-    fetchLineage();
   }, [expId]);
-
-  // Re-fetch on tab change
   useEffect(() => {
-    fetchComparison();
-  }, [activeTab]);
-
-  // Auto-poll every 3 seconds if any run is currently running
+    refresh();
+    return () => {
+      requestSeq.current++;
+    };
+  }, [refresh]);
   useEffect(() => {
-    const hasRunning = runs.some(r => r.status === 'RUNNING');
-    if (!hasRunning) return;
+    localStorage.setItem("traintrace-tab", tab);
+    localStorage.setItem("traintrace-investigation", expId);
+    localStorage.setItem("traintrace-run", runId);
+  }, [tab, expId, runId]);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(""), 8000);
+    return () => clearTimeout(timer);
+  }, [notice]);
+  useEffect(() => {
+    setDecision(emptyDecision);
+    setLive(null);
+    setEvents([]);
+    eventCursor.current = 0;
+    setPrediction(null);
+  }, [runId]);
+  useEffect(() => {
+    setPrediction(null);
+  }, [activeModel]);
+  useEffect(() => {
+    if (!runId || tab !== "Training") return;
+    let disposed = false,
+      pending = false,
+      timer = null;
+    const poll = async () => {
+      if (pending || disposed) return;
+      pending = true;
+      try {
+        const data = await request(
+          `/runs/${encodeURIComponent(runId)}/live-status?after=${eventCursor.current}`,
+        );
+        if (!disposed) {
+          setLive(data);
+          eventCursor.current = data.next_cursor;
+          setEvents((prev) => [...prev, ...data.events].slice(-300));
 
-    const interval = setInterval(() => {
-      fetchComparison();
-    }, 3000);
+          const isActive =
+            data.status === "RUNNING" ||
+            data.status === "PENDING" ||
+            data.status === "QUEUED";
 
-    return () => clearInterval(interval);
-  }, [runs]);
-
-  const handleLaunchRun = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const res = await fetch('/api/v1/runs/launch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...launchForm,
-          experiment_id: expId
-        })
-      });
-      if (res.ok) {
-        alert(`Run '${launchForm.run_id}' launched successfully in background!`);
-        fetchComparison();
+          if (isActive) {
+            if (!timer) {
+              timer = setInterval(poll, 1000);
+            }
+          } else {
+            if (timer) {
+              clearInterval(timer);
+              timer = null;
+            }
+            refresh();
+          }
+        }
+      } catch (e) {
+        if (!disposed) {
+          setError(e.message);
+          if (timer) {
+            clearInterval(timer);
+            timer = null;
+          }
+        }
+      } finally {
+        pending = false;
       }
-    } catch (e) {
-      alert('Failed to launch run');
-    }
-    setLoading(false);
-  };
-
-  const handleRecordDecision = async (e) => {
-    e.preventDefault();
+    };
+    poll();
+    return () => {
+      disposed = true;
+      if (timer) clearInterval(timer);
+    };
+  }, [runId, tab, refresh]);
+  const act = async (fn) => {
+    setBusy(true);
+    setError("");
+    setNotice("");
     try {
-      const res = await fetch('/api/v1/experiments/decisions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(decisionForm)
-      });
-      if (res.ok) {
-        alert(`Decision status '${decisionForm.status}' recorded successfully!`);
-        fetchComparison();
-      }
+      await fn();
+      await refresh();
     } catch (e) {
-      alert('Failed to record decision');
+      setError(e.message);
+    } finally {
+      setBusy(false);
     }
   };
-
+  const switchExperiment = (id) => {
+    setExpId(id);
+    setRunId("");
+    setRuns([]);
+    setCompare([]);
+    setEditExp(null);
+    setLineage(null);
+    setSetup(freshRun());
+    setPrediction(null);
+  };
+  const visibleRuns = runs.filter(
+    (r) =>
+      (!query ||
+        (r.id + " " + r.approach_name)
+          .toLowerCase()
+          .includes(query.toLowerCase())) &&
+      (!archFilter || r.model_architecture === archFilter) &&
+      (!statusFilter ||
+        r.status === statusFilter ||
+        r.latest_decision?.status === statusFilter) &&
+      (!seedFilter || String(r.seed) === seedFilter) &&
+      (accuracyMin === "" ||
+        r.evaluation?.test_accuracy >= Number(accuracyMin)),
+  );
+  const chosen = runs.filter((r) => compare.includes(r.id)).slice(0, 4);
+  const metrics =
+    live?.run_id === runId ? live.all_metrics : run?.metrics || [];
+  const executionStatus = live?.run_id === runId ? live.status : run?.status;
+  const branch = (r) => {
+    setSetup({
+      ...freshRun(),
+      predecessor_run_id: r.id,
+      motivating_reason: r.latest_decision?.details?.limitations || "",
+    });
+    setTab("Training");
+    setNotice(
+      "Successor is linked to " +
+        r.id +
+        ". Describe the new approach and launch it.",
+    );
+  };
+  const stop = (id) =>
+    act(async () => {
+      const result = await request(`/runs/jobs/${id}/stop`, "POST");
+      setNotice(result.message);
+    });
+  const loadLineage = (id) =>
+    act(async () => {
+      setLineage(null);
+      setLineageId(id);
+      setLineage(await request(`/registry/${id}/lineage`));
+    });
+  const workspace = {
+    tab,
+    setTab,
+    expId,
+    setExpId,
+    runId,
+    setRunId,
+    experiments,
+    setExperiments,
+    runs,
+    setRuns,
+    models,
+    setModels,
+    jobs,
+    setJobs,
+    activeModel,
+    setActiveModel,
+    info,
+    setInfo,
+    online,
+    setOnline,
+    error,
+    setError,
+    notice,
+    setNotice,
+    busy,
+    setBusy,
+    query,
+    setQuery,
+    setup,
+    setSetup,
+    newExp,
+    setNewExp,
+    editExp,
+    setEditExp,
+    decision,
+    setDecision,
+    seeds,
+    setSeeds,
+    release,
+    setRelease,
+    lineage,
+    setLineage,
+    lineageId,
+    setLineageId,
+    file,
+    setFile,
+    prediction,
+    setPrediction,
+    compare,
+    setCompare,
+    archFilter,
+    setArchFilter,
+    statusFilter,
+    setStatusFilter,
+    seedFilter,
+    setSeedFilter,
+    accuracyMin,
+    setAccuracyMin,
+    live,
+    setLive,
+    events,
+    setEvents,
+    requestSeq,
+    eventCursor,
+    experiment,
+    run,
+    refresh,
+    act,
+    switchExperiment,
+    visibleRuns,
+    chosen,
+    metrics,
+    executionStatus,
+    branch,
+    stop,
+    loadLineage,
+  };
   return (
-    <div className="app-container">
-      <header>
-        <div>
-          <div className="brand-title">TrainTrace Platform</div>
-          <div className="subtitle">Reproducible PyTorch Experiment Tracking & Decision Traceability Workstation</div>
+    <div className="app-shell">
+      <aside>
+        <a href="#main" className="skip">
+          Skip to content
+        </a>
+        <div className="brand">
+          <span className="brand-mark">T</span>
+          <div>
+            TrainTrace<small>Evidence-led ML investigations</small>
+          </div>
         </div>
-        <div style={{ textAlign: 'right', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button className="tab-btn" onClick={fetchComparison} style={{ background: 'rgba(255,255,255,0.06)' }}>
-            ↻ Refresh Data
+        <nav aria-label="Workspace">
+          {tabs.map((t) => (
+            <button
+              key={t}
+              aria-current={tab === t ? "page" : undefined}
+              onClick={() => setTab(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-status">
+          <Badge value={online ? "API ONLINE" : "API OFFLINE"} />
+          <p>
+            {online
+              ? info?.hardware?.name
+              : "Connect the backend to load verified state."}
+          </p>
+          <small>
+            Worker:{" "}
+            {online ? (info?.worker_online ? "online" : "offline") : "unknown"}{" "}
+            · {online ? (info?.queued_jobs ?? "—") : "—"} queued
+          </small>
+        </div>
+      </aside>
+      <main id="main">
+        <header>
+          <div>
+            <div className="eyebrow">TRACKED TRAINING PIPELINE</div>
+            <h1>{tab}</h1>
+          </div>
+          <button onClick={refresh} disabled={busy}>
+            Refresh
           </button>
-          <span className="badge badge-accepted">Backend Online (MPS GPU)</span>
+        </header>
+        <div aria-live="polite">
+          {notice && <div className="notice">{notice}</div>}
         </div>
-      </header>
-
-      <nav className="nav-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
-        >
-          Overview Dashboard
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'workstation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('workstation')}
-        >
-          Experiment Workstation
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'comparison' ? 'active' : ''}`}
-          onClick={() => setActiveTab('comparison')}
-        >
-          Run Trade-Off Matrix
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'registry' ? 'active' : ''}`}
-          onClick={() => setActiveTab('registry')}
-        >
-          Model Lineage Registry
-        </button>
-      </nav>
-
-      {/* DASHBOARD OVERVIEW */}
-      {activeTab === 'dashboard' && (
-        <div>
-          <div className="grid-3 mb-4">
-            <div className="stat-box">
-              <div className="stat-label">Active Experiment</div>
-              <div className="stat-val" style={{ fontSize: '1.2rem', color: '#60a5fa' }}>
-                {comparison?.experiment_name || 'CIFAR-10 Optimization'}
-              </div>
-              <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.3rem' }}>
-                Objective: {comparison?.objective || 'Find optimal architecture'}
-              </div>
-            </div>
-            <div className="stat-box">
-              <div className="stat-label">Total Executed Runs</div>
-              <div className="stat-val">{comparison?.total_runs || 0}</div>
-              <div style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '0.3rem' }}>
-                Logged to SQLite Database
-              </div>
-            </div>
-            <div className="stat-box">
-              <div className="stat-label">Compute Accelerator</div>
-              <div className="stat-val" style={{ color: '#a78bfa' }}>Apple MPS</div>
-              <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.3rem' }}>
-                Metal Performance Shaders Active
-              </div>
-            </div>
+        {connectionError && (
+          <div className="error" role="alert">
+            {connectionError}
           </div>
-
-          <div className="card">
-            <div className="card-header">11-Step ML Experimentation Reasoning Chain</div>
-            <div className="code-block" style={{ color: '#60a5fa' }}>
-              Objective / Problem → Approach → Run(s) → Evidence / Results → Limitations → Decision → Decision Reason → Alternative Considered → Why Not Alternative → Next Investigation → Final Selected Approach
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* EXPERIMENT WORKSTATION */}
-      {activeTab === 'workstation' && (
-        <div className="grid-2">
-          <div className="card">
-            <div className="card-header">Launch Customized Training Run</div>
-            <form onSubmit={handleLaunchRun}>
-              <div className="form-group">
-                <label>Run Identifier</label>
-                <input
-                  className="form-input"
-                  value={launchForm.run_id}
-                  onChange={(e) => setLaunchForm({ ...launchForm, run_id: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Approach Design Name</label>
-                <input
-                  className="form-input"
-                  value={launchForm.approach_name}
-                  onChange={(e) => setLaunchForm({ ...launchForm, approach_name: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Model Architecture</label>
-                <select
-                  className="form-input"
-                  value={launchForm.model_name}
-                  onChange={(e) => setLaunchForm({ ...launchForm, model_name: e.target.value })}
-                >
-                  <option value="custom_cnn">Custom 3-Layer CNN (Baseline)</option>
-                  <option value="resnet18">ResNet-18 (Residual Skip Connections)</option>
-                  <option value="mobilenet_v2">MobileNetV2 (Depthwise Separable)</option>
-                  <option value="efficientnet_b0">EfficientNet-B0 (Compound Scaling)</option>
-                </select>
-              </div>
-              <div className="grid-2">
-                <div className="form-group">
-                  <label>Learning Rate</label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    className="form-input"
-                    value={launchForm.learning_rate}
-                    onChange={(e) => setLaunchForm({ ...launchForm, learning_rate: parseFloat(e.target.value) })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Batch Size</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={launchForm.batch_size}
-                    onChange={(e) => setLaunchForm({ ...launchForm, batch_size: parseInt(e.target.value) })}
-                  />
-                </div>
-              </div>
-              <div className="grid-2">
-                <div className="form-group">
-                  <label>Epoch Count</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={launchForm.epochs}
-                    onChange={(e) => setLaunchForm({ ...launchForm, epochs: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Random Seed</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={launchForm.seed}
-                    onChange={(e) => setLaunchForm({ ...launchForm, seed: parseInt(e.target.value) })}
-                  />
-                </div>
-              </div>
-              <button type="submit" className="btn-primary" disabled={loading}>
-                {loading ? 'Launching Run...' : 'Launch Training Run'}
-              </button>
-            </form>
-          </div>
-
-          <div className="card">
-            <div className="card-header">Record Decision Rationale & Candidate Status</div>
-            <form onSubmit={handleRecordDecision}>
-              <div className="form-group">
-                <label>Select Target Run</label>
-                <select
-                  className="form-input"
-                  value={decisionForm.run_id}
-                  onChange={(e) => setDecisionForm({ ...decisionForm, run_id: e.target.value })}
-                >
-                  {runs.map((r) => (
-                    <option key={r.run_id} value={r.run_id}>
-                      {r.run_id} ({r.model_architecture})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Decision Status</label>
-                <select
-                  className="form-input"
-                  value={decisionForm.status}
-                  onChange={(e) => setDecisionForm({ ...decisionForm, status: e.target.value })}
-                >
-                  <option value="ACCEPTED">ACCEPTED (Candidate qualified)</option>
-                  <option value="SELECTED">SELECTED (Chosen for Production)</option>
-                  <option value="REJECTED">REJECTED (Failed target metrics)</option>
-                  <option value="SUPERSEDED">SUPERSEDED (Replaced by superior model)</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Documented Rationale & Evidence Reason</label>
-                <textarea
-                  className="form-input"
-                  rows={4}
-                  value={decisionForm.rationale}
-                  onChange={(e) => setDecisionForm({ ...decisionForm, rationale: e.target.value })}
-                />
-              </div>
-              <button type="submit" className="btn-primary">
-                Record Decision Rationale
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* RUN COMPARISON */}
-      {activeTab === 'comparison' && (
-        <div className="card">
-          <div className="card-header">
-            <span>Pareto Run Trade-Off Matrix</span>
-            <button className="tab-btn" onClick={fetchComparison} style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.06)' }}>
-              ↻ Refresh
+        )}
+        {error && (
+          <div className="error" role="alert">
+            {error}
+            <button aria-label="Dismiss error" onClick={() => setError("")}>
+              ×
             </button>
           </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Run ID</th>
-                <th>Approach Name</th>
-                <th>Architecture</th>
-                <th>Hyperparameters</th>
-                <th>Status</th>
-                <th>Best Val Acc</th>
-                <th>Final Loss</th>
-                <th>Latest Decision</th>
-              </tr>
-            </thead>
-            <tbody>
-              {runs.map((r) => (
-                <tr key={r.run_id}>
-                  <td style={{ fontFamily: 'var(--font-mono)' }}>{r.run_id}</td>
-                  <td>{r.approach_name}</td>
-                  <td style={{ color: '#60a5fa' }}>{r.model_architecture}</td>
-                  <td style={{ fontSize: '0.8rem', color: '#9ca3af' }}>
-                    LR={r.hyperparameters.learning_rate}, Batch={r.hyperparameters.batch_size}, Seed={r.hyperparameters.seed}
-                  </td>
-                  <td>
-                    <span className={`badge ${r.status === 'COMPLETED' ? 'badge-accepted' : 'badge-superseded'}`}>
-                      {r.status}
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: '600', color: '#10b981' }}>
-                    {r.best_val_accuracy ? `${r.best_val_accuracy.toFixed(2)}%` : 'N/A'}
-                  </td>
-                  <td style={{ color: '#9ca3af' }}>
-                    {r.final_val_loss ? r.final_val_loss.toFixed(4) : 'N/A'}
-                  </td>
-                  <td>
-                    {r.latest_decision ? (
-                      <span className={`badge badge-${r.latest_decision.status.toLowerCase()}`}>
-                        {r.latest_decision.status}
-                      </span>
-                    ) : (
-                      <span style={{ color: '#6b7280' }}>Pending</span>
-                    )}
-                  </td>
-                </tr>
+        )}
+        <div className="context-bar">
+          <Select
+            label="Investigation"
+            value={expId}
+            onChange={switchExperiment}
+          >
+            <option value="">Choose investigation</option>
+            {experiments
+              .filter(
+                (e) =>
+                  !query ||
+                  e.name.toLowerCase().includes(query.toLowerCase()) ||
+                  e.id === expId,
+              )
+              .map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                  {e.archived ? " (archived)" : ""}
+                </option>
               ))}
-            </tbody>
-          </table>
+          </Select>
+          <Select label="Candidate run" value={runId} onChange={setRunId}>
+            <option value="">Choose a run</option>
+            {runs.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.approach_name} · {r.status}
+              </option>
+            ))}
+          </Select>
+          <Field
+            label="Search investigations / runs / models"
+            value={query}
+            onChange={setQuery}
+            placeholder="Name or run ID"
+          />
         </div>
-      )}
-
-      {/* MODEL REGISTRY */}
-      {activeTab === 'registry' && (
-        <div className="card">
-          <div className="card-header">Model Registry Catalog & 11-Step Lineage Graph</div>
-          {lineage ? (
-            <div>
-              <div className="grid-2 mb-4">
-                <div className="stat-box">
-                  <div className="stat-label">Registered Model Version</div>
-                  <div className="stat-val" style={{ fontSize: '1.2rem', color: '#10b981' }}>
-                    {lineage.model_version_info?.name} ({lineage.model_version_info?.version})
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.3rem' }}>
-                    Status: {lineage.model_version_info?.status}
-                  </div>
-                </div>
-                <div className="stat-box">
-                  <div className="stat-label">Originating Run ID</div>
-                  <div className="stat-val" style={{ fontSize: '1.2rem', color: '#60a5fa' }}>
-                    {lineage.originating_run?.run_id}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.3rem' }}>
-                    Architecture: {lineage.originating_run?.model_architecture}
-                  </div>
-                </div>
-              </div>
-              <div className="card-header" style={{ fontSize: '1rem' }}>Complete Lineage JSON Payload</div>
-              <pre className="code-block">{JSON.stringify(lineage, null, 2)}</pre>
-            </div>
-          ) : (
-            <div style={{ color: '#9ca3af' }}>Loading registry lineage provenance data...</div>
-          )}
-        </div>
-      )}
+        {experiment && (
+          <div className="investigation-summary">
+            <strong>{experiment.name}</strong>
+            <p>{experiment.objective}</p>
+            <small>
+              Hypothesis: {experiment.hypothesis || "Unknown (legacy record)"} ·
+              Targets: {fmt(experiment.target_accuracy)}% accuracy /{" "}
+              {fmt(experiment.target_latency_ms)} ms
+            </small>
+            {!!experiment.archived && <Badge value="ARCHIVED" />}
+          </div>
+        )}
+        {tab === "Investigations" && <Investigations workspace={workspace} />}
+        {tab === "Training" && <Training workspace={workspace} />}
+        {tab === "Compare" && <Compare workspace={workspace} />}
+        {tab === "Audits" && <Audits workspace={workspace} />}
+        {tab === "Decisions" && <Decisions workspace={workspace} />}
+        {tab === "History" && <History workspace={workspace} />}
+        {tab === "Registry" && <Registry workspace={workspace} />}
+        {tab === "Inference" && <Inference workspace={workspace} />}
+        <footer>
+          TrainTrace · Local single-user workspace ·{" "}
+          {online
+            ? `${jobs.filter((j) => j.status === "RUNNING").length} active job, ${jobs.filter((j) => j.status === "QUEUED").length} queued`
+            : "Backend unavailable"}{" "}
+          · Missing evidence is shown as unknown.
+        </footer>
+      </main>
     </div>
   );
 }

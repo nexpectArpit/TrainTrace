@@ -1,0 +1,27 @@
+{
+  "legacy_counts_before": {
+    "experiments": 6,
+    "runs": 8,
+    "epoch_metrics": 32,
+    "decisions": 5,
+    "models": 1
+  },
+  "legacy_counts_after_migration": {
+    "experiments": 6,
+    "runs": 8,
+    "epoch_metrics": 32,
+    "decisions": 5,
+    "models": 1
+  },
+  "migration_preserved_all_rows": true,
+  "original_checkpoint_count": 13,
+  "original_checkpoint_hashes_unchanged": true,
+  "original_database_counts": {
+    "experiments": 6,
+    "runs": 8,
+    "epoch_metrics": 32,
+    "decisions": 5,
+    "models": 1
+  },
+  "backup": "/Users/arpittripathi/Desktop/TTP/traintrace/backups/20261015-233220"
+}

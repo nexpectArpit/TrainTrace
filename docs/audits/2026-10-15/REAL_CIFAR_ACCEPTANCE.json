@@ -1,0 +1,1121 @@
+{
+  "id": "cifar_acceptance_02",
+  "experiment_id": "exp_8265d877f00541c5bb0e1a0ef2b35342",
+  "approach_name": "Final-source seeded CNN",
+  "model_architecture": "custom_cnn",
+  "batch_size": 256,
+  "epochs": 1,
+  "learning_rate": 0.001,
+  "seed": 42,
+  "status": "COMPLETED",
+  "created_at": "2026-10-15 18:20:49",
+  "predecessor_run_id": null,
+  "motivating_reason": "Validate the finalized worker and immutable serving contracts on CIFAR-10.",
+  "error": null,
+  "audit_id": null,
+  "metrics": [
+    {
+      "id": 4,
+      "run_id": "cifar_acceptance_02",
+      "epoch": 1,
+      "train_loss": 1.553804984580146,
+      "train_acc": 42.913333333333334,
+      "val_loss": 1.1827656455993651,
+      "val_acc": 57.88,
+      "epoch_time_sec": 36.383989667003334,
+      "learning_rate": 0.001
+    }
+  ],
+  "decisions": [],
+  "artifacts": [
+    {
+      "id": "439088d5e75a4b89942a60d36e73a6f5",
+      "kind": "split",
+      "sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+      "size_bytes": 538931,
+      "created_at": "2026-10-15 18:20:52"
+    },
+    {
+      "id": "6ea378f0452a4597ae3a5e8dd9bb9c85",
+      "kind": "last",
+      "sha256": "092f07ccf9125b8c71b89f64f1681d95566f2bb41c38948e891bd057b1c05b49",
+      "size_bytes": 7482117,
+      "created_at": "2026-10-15 18:21:28"
+    },
+    {
+      "id": "944e2a94452c45aa85abd55eaf23f584",
+      "kind": "best",
+      "sha256": "97cf4361d6e258c7e10cd07813289cd4f0e717c7040e98a86253445da5258e34",
+      "size_bytes": 7482117,
+      "created_at": "2026-10-15 18:21:28"
+    },
+    {
+      "id": "45d93d71551c4ab7b366b352cc4bc23d",
+      "kind": "evaluation",
+      "sha256": "89b2036b8a8b00ad041e4ed09b62e124b8b9c302afa4339bc0e5369338891f69",
+      "size_bytes": 1712,
+      "created_at": "2026-10-15 18:21:31"
+    },
+    {
+      "id": "99ef3d53c8f04bde8a7c9e202781b0b3",
+      "kind": "metrics_csv",
+      "sha256": "72a3676e163617d11ed288afffdad4e91372d5467df9ce445b71d87014cedde3",
+      "size_bytes": 196,
+      "created_at": "2026-10-15 18:21:31"
+    },
+    {
+      "id": "67f341a4ca764cfab3acddcd1a975750",
+      "kind": "audit_a6b8ef3135dc4b09b8ea5d55aa012364",
+      "sha256": "49c91a811b237fa6e5027f3ff232aaf5abf7877e175b10709f54a78f7f32126e",
+      "size_bytes": 10125,
+      "created_at": "2026-10-15 18:23:26"
+    },
+    {
+      "id": "f0637dcd555a43bb83629e9256531123",
+      "kind": "audit_14721911997844af9466f663ce61432c",
+      "sha256": "7c60695eb7f1f193d0344f3d573f20f1ee6f281caff8a8e66d6633217dd609cb",
+      "size_bytes": 23874,
+      "created_at": "2026-10-15 18:26:59"
+    }
+  ],
+  "audits": [
+    {
+      "id": "audit_14721911997844af9466f663ce61432c",
+      "run_id": "cifar_acceptance_02",
+      "protocol": "B",
+      "report": {
+        "protocol": "B",
+        "source_run_id": "cifar_acceptance_02",
+        "members": [
+          {
+            "run_id": "replay_6426182c164945cfb012d766b5763b3f",
+            "seed": 42,
+            "test_accuracy": 57.4,
+            "test_loss": 1.1817948907852174,
+            "trajectory": [
+              {
+                "train_loss": 1.553804984580146,
+                "train_acc": 42.913333333333334,
+                "val_loss": 1.1827656455993651,
+                "val_acc": 57.88,
+                "learning_rate": 0.001
+              }
+            ],
+            "environment": {
+              "python": "3.13.13",
+              "torch": "2.14.1",
+              "torchvision": "0.29.1",
+              "numpy": "2.5.3",
+              "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+              "device": {
+                "type": "cpu",
+                "name": "Host CPU (Universal Execution)",
+                "badge": "CPU Compute Online",
+                "is_accelerated": false
+              },
+              "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+              "git_dirty": true,
+              "source_hashes": {
+                "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+                "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+                "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+                "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+                "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+                "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+                "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+                "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+                "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+                "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+                "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+                "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+                "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+                "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+                "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+                "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+                "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+              },
+              "deterministic_algorithms": true,
+              "torch_threads": 4
+            },
+            "dataset": {
+              "name": "CIFAR-10",
+              "version": "torchvision-cifar10-python",
+              "split_seed": 42,
+              "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+              "counts": {
+                "train": 45000,
+                "validation": 5000,
+                "test": 10000
+              },
+              "preprocessing": {
+                "size": [
+                  32,
+                  32
+                ],
+                "mean": [
+                  0.4914,
+                  0.4822,
+                  0.4465
+                ],
+                "std": [
+                  0.2023,
+                  0.1994,
+                  0.201
+                ],
+                "augmentation": [
+                  "RandomCrop(32,padding=4)",
+                  "RandomHorizontalFlip"
+                ]
+              },
+              "file_hashes": {
+                "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+                "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+                "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+                "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+                "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+              }
+            }
+          },
+          {
+            "run_id": "replay_aeebfce7e1ab4bc88651c051b5889d8b",
+            "seed": 101,
+            "test_accuracy": 56.2,
+            "test_loss": 1.2073095153808593,
+            "trajectory": [
+              {
+                "train_loss": 1.5829963624318442,
+                "train_acc": 41.77333333333333,
+                "val_loss": 1.2200018789291383,
+                "val_acc": 55.58,
+                "learning_rate": 0.001
+              }
+            ],
+            "environment": {
+              "python": "3.13.13",
+              "torch": "2.14.1",
+              "torchvision": "0.29.1",
+              "numpy": "2.5.3",
+              "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+              "device": {
+                "type": "cpu",
+                "name": "Host CPU (Universal Execution)",
+                "badge": "CPU Compute Online",
+                "is_accelerated": false
+              },
+              "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+              "git_dirty": true,
+              "source_hashes": {
+                "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+                "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+                "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+                "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+                "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+                "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+                "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+                "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+                "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+                "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+                "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+                "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+                "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+                "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+                "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+                "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+                "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+              },
+              "deterministic_algorithms": true,
+              "torch_threads": 4
+            },
+            "dataset": {
+              "name": "CIFAR-10",
+              "version": "torchvision-cifar10-python",
+              "split_seed": 42,
+              "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+              "counts": {
+                "train": 45000,
+                "validation": 5000,
+                "test": 10000
+              },
+              "preprocessing": {
+                "size": [
+                  32,
+                  32
+                ],
+                "mean": [
+                  0.4914,
+                  0.4822,
+                  0.4465
+                ],
+                "std": [
+                  0.2023,
+                  0.1994,
+                  0.201
+                ],
+                "augmentation": [
+                  "RandomCrop(32,padding=4)",
+                  "RandomHorizontalFlip"
+                ]
+              },
+              "file_hashes": {
+                "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+                "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+                "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+                "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+                "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+              }
+            }
+          },
+          {
+            "run_id": "replay_40240cead9924c6e89c2712dfedc8ca1",
+            "seed": 2024,
+            "test_accuracy": 55.11,
+            "test_loss": 1.255814733695984,
+            "trajectory": [
+              {
+                "train_loss": 1.5311167756822375,
+                "train_acc": 43.50222222222222,
+                "val_loss": 1.2730544382095337,
+                "val_acc": 54.58,
+                "learning_rate": 0.001
+              }
+            ],
+            "environment": {
+              "python": "3.13.13",
+              "torch": "2.14.1",
+              "torchvision": "0.29.1",
+              "numpy": "2.5.3",
+              "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+              "device": {
+                "type": "cpu",
+                "name": "Host CPU (Universal Execution)",
+                "badge": "CPU Compute Online",
+                "is_accelerated": false
+              },
+              "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+              "git_dirty": true,
+              "source_hashes": {
+                "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+                "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+                "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+                "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+                "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+                "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+                "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+                "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+                "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+                "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+                "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+                "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+                "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+                "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+                "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+                "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+                "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+              },
+              "deterministic_algorithms": true,
+              "torch_threads": 4
+            },
+            "dataset": {
+              "name": "CIFAR-10",
+              "version": "torchvision-cifar10-python",
+              "split_seed": 42,
+              "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+              "counts": {
+                "train": 45000,
+                "validation": 5000,
+                "test": 10000
+              },
+              "preprocessing": {
+                "size": [
+                  32,
+                  32
+                ],
+                "mean": [
+                  0.4914,
+                  0.4822,
+                  0.4465
+                ],
+                "std": [
+                  0.2023,
+                  0.1994,
+                  0.201
+                ],
+                "augmentation": [
+                  "RandomCrop(32,padding=4)",
+                  "RandomHorizontalFlip"
+                ]
+              },
+              "file_hashes": {
+                "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+                "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+                "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+                "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+                "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+              }
+            }
+          },
+          {
+            "run_id": "replay_2f62f2e751e84155b7530d8059b2c562",
+            "seed": 7,
+            "test_accuracy": 54.75,
+            "test_loss": 1.231451194381714,
+            "trajectory": [
+              {
+                "train_loss": 1.582068392393324,
+                "train_acc": 41.473333333333336,
+                "val_loss": 1.2409663206100463,
+                "val_acc": 54.18,
+                "learning_rate": 0.001
+              }
+            ],
+            "environment": {
+              "python": "3.13.13",
+              "torch": "2.14.1",
+              "torchvision": "0.29.1",
+              "numpy": "2.5.3",
+              "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+              "device": {
+                "type": "cpu",
+                "name": "Host CPU (Universal Execution)",
+                "badge": "CPU Compute Online",
+                "is_accelerated": false
+              },
+              "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+              "git_dirty": true,
+              "source_hashes": {
+                "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+                "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+                "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+                "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+                "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+                "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+                "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+                "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+                "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+                "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+                "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+                "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+                "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+                "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+                "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+                "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+                "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+              },
+              "deterministic_algorithms": true,
+              "torch_threads": 4
+            },
+            "dataset": {
+              "name": "CIFAR-10",
+              "version": "torchvision-cifar10-python",
+              "split_seed": 42,
+              "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+              "counts": {
+                "train": 45000,
+                "validation": 5000,
+                "test": 10000
+              },
+              "preprocessing": {
+                "size": [
+                  32,
+                  32
+                ],
+                "mean": [
+                  0.4914,
+                  0.4822,
+                  0.4465
+                ],
+                "std": [
+                  0.2023,
+                  0.1994,
+                  0.201
+                ],
+                "augmentation": [
+                  "RandomCrop(32,padding=4)",
+                  "RandomHorizontalFlip"
+                ]
+              },
+              "file_hashes": {
+                "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+                "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+                "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+                "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+                "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+              }
+            }
+          },
+          {
+            "run_id": "replay_e095b0222eb144eea869568f0521fdd9",
+            "seed": 99,
+            "test_accuracy": 58.0,
+            "test_loss": 1.1606312297821044,
+            "trajectory": [
+              {
+                "train_loss": 1.565272165913052,
+                "train_acc": 42.144444444444446,
+                "val_loss": 1.1735191305160522,
+                "val_acc": 57.26,
+                "learning_rate": 0.001
+              }
+            ],
+            "environment": {
+              "python": "3.13.13",
+              "torch": "2.14.1",
+              "torchvision": "0.29.1",
+              "numpy": "2.5.3",
+              "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+              "device": {
+                "type": "cpu",
+                "name": "Host CPU (Universal Execution)",
+                "badge": "CPU Compute Online",
+                "is_accelerated": false
+              },
+              "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+              "git_dirty": true,
+              "source_hashes": {
+                "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+                "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+                "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+                "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+                "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+                "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+                "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+                "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+                "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+                "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+                "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+                "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+                "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+                "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+                "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+                "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+                "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+              },
+              "deterministic_algorithms": true,
+              "torch_threads": 4
+            },
+            "dataset": {
+              "name": "CIFAR-10",
+              "version": "torchvision-cifar10-python",
+              "split_seed": 42,
+              "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+              "counts": {
+                "train": 45000,
+                "validation": 5000,
+                "test": 10000
+              },
+              "preprocessing": {
+                "size": [
+                  32,
+                  32
+                ],
+                "mean": [
+                  0.4914,
+                  0.4822,
+                  0.4465
+                ],
+                "std": [
+                  0.2023,
+                  0.1994,
+                  0.201
+                ],
+                "augmentation": [
+                  "RandomCrop(32,padding=4)",
+                  "RandomHorizontalFlip"
+                ]
+              },
+              "file_hashes": {
+                "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+                "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+                "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+                "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+                "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+              }
+            }
+          }
+        ],
+        "configuration": {
+          "run_id": "cifar_acceptance_02",
+          "experiment_id": "exp_8265d877f00541c5bb0e1a0ef2b35342",
+          "approach_name": "Final-source seeded CNN",
+          "model_name": "custom_cnn",
+          "epochs": 1,
+          "batch_size": 256,
+          "learning_rate": 0.001,
+          "seed": 42,
+          "split_seed": 42,
+          "pretrained": false,
+          "scheduler_type": "constant",
+          "optimizer": "adamw",
+          "weight_decay": 0.0001,
+          "predecessor_run_id": null,
+          "motivating_reason": "Validate the finalized worker and immutable serving contracts on CIFAR-10."
+        },
+        "accuracy_unit": "percent",
+        "mean_accuracy": 56.292,
+        "std_deviation": 1.2592283351322744,
+        "min_accuracy": 54.75,
+        "max_accuracy": 58.0,
+        "spread": 3.25,
+        "sample_count": 5,
+        "std_convention": "Population standard deviation (ddof=0)",
+        "environment_match": true,
+        "fixed_split": true
+      },
+      "created_at": "2026-10-15 18:22:05",
+      "status": "COMPLETED",
+      "error": null,
+      "members": [
+        {
+          "id": "replay_6426182c164945cfb012d766b5763b3f",
+          "seed": 42,
+          "status": "COMPLETED",
+          "error": null
+        },
+        {
+          "id": "replay_aeebfce7e1ab4bc88651c051b5889d8b",
+          "seed": 101,
+          "status": "COMPLETED",
+          "error": null
+        },
+        {
+          "id": "replay_40240cead9924c6e89c2712dfedc8ca1",
+          "seed": 2024,
+          "status": "COMPLETED",
+          "error": null
+        },
+        {
+          "id": "replay_2f62f2e751e84155b7530d8059b2c562",
+          "seed": 7,
+          "status": "COMPLETED",
+          "error": null
+        },
+        {
+          "id": "replay_e095b0222eb144eea869568f0521fdd9",
+          "seed": 99,
+          "status": "COMPLETED",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "audit_a6b8ef3135dc4b09b8ea5d55aa012364",
+      "run_id": "cifar_acceptance_02",
+      "protocol": "A",
+      "report": {
+        "protocol": "A",
+        "source_run_id": "cifar_acceptance_02",
+        "members": [
+          {
+            "run_id": "replay_93dc1f05adbc4cab89123503d0790113",
+            "seed": 42,
+            "test_accuracy": 57.4,
+            "test_loss": 1.1817948907852174,
+            "trajectory": [
+              {
+                "train_loss": 1.553804984580146,
+                "train_acc": 42.913333333333334,
+                "val_loss": 1.1827656455993651,
+                "val_acc": 57.88,
+                "learning_rate": 0.001
+              }
+            ],
+            "environment": {
+              "python": "3.13.13",
+              "torch": "2.14.1",
+              "torchvision": "0.29.1",
+              "numpy": "2.5.3",
+              "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+              "device": {
+                "type": "cpu",
+                "name": "Host CPU (Universal Execution)",
+                "badge": "CPU Compute Online",
+                "is_accelerated": false
+              },
+              "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+              "git_dirty": true,
+              "source_hashes": {
+                "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+                "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+                "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+                "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+                "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+                "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+                "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+                "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+                "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+                "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+                "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+                "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+                "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+                "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+                "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+                "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+                "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+              },
+              "deterministic_algorithms": true,
+              "torch_threads": 4
+            },
+            "dataset": {
+              "name": "CIFAR-10",
+              "version": "torchvision-cifar10-python",
+              "split_seed": 42,
+              "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+              "counts": {
+                "train": 45000,
+                "validation": 5000,
+                "test": 10000
+              },
+              "preprocessing": {
+                "size": [
+                  32,
+                  32
+                ],
+                "mean": [
+                  0.4914,
+                  0.4822,
+                  0.4465
+                ],
+                "std": [
+                  0.2023,
+                  0.1994,
+                  0.201
+                ],
+                "augmentation": [
+                  "RandomCrop(32,padding=4)",
+                  "RandomHorizontalFlip"
+                ]
+              },
+              "file_hashes": {
+                "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+                "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+                "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+                "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+                "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+              }
+            }
+          },
+          {
+            "run_id": "replay_7278fcc2aef54a0fa15d976faad0ba67",
+            "seed": 42,
+            "test_accuracy": 57.4,
+            "test_loss": 1.1817948907852174,
+            "trajectory": [
+              {
+                "train_loss": 1.553804984580146,
+                "train_acc": 42.913333333333334,
+                "val_loss": 1.1827656455993651,
+                "val_acc": 57.88,
+                "learning_rate": 0.001
+              }
+            ],
+            "environment": {
+              "python": "3.13.13",
+              "torch": "2.14.1",
+              "torchvision": "0.29.1",
+              "numpy": "2.5.3",
+              "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+              "device": {
+                "type": "cpu",
+                "name": "Host CPU (Universal Execution)",
+                "badge": "CPU Compute Online",
+                "is_accelerated": false
+              },
+              "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+              "git_dirty": true,
+              "source_hashes": {
+                "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+                "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+                "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+                "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+                "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+                "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+                "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+                "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+                "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+                "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+                "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+                "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+                "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+                "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+                "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+                "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+                "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+              },
+              "deterministic_algorithms": true,
+              "torch_threads": 4
+            },
+            "dataset": {
+              "name": "CIFAR-10",
+              "version": "torchvision-cifar10-python",
+              "split_seed": 42,
+              "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+              "counts": {
+                "train": 45000,
+                "validation": 5000,
+                "test": 10000
+              },
+              "preprocessing": {
+                "size": [
+                  32,
+                  32
+                ],
+                "mean": [
+                  0.4914,
+                  0.4822,
+                  0.4465
+                ],
+                "std": [
+                  0.2023,
+                  0.1994,
+                  0.201
+                ],
+                "augmentation": [
+                  "RandomCrop(32,padding=4)",
+                  "RandomHorizontalFlip"
+                ]
+              },
+              "file_hashes": {
+                "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+                "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+                "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+                "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+                "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+              }
+            }
+          }
+        ],
+        "configuration": {
+          "run_id": "cifar_acceptance_02",
+          "experiment_id": "exp_8265d877f00541c5bb0e1a0ef2b35342",
+          "approach_name": "Final-source seeded CNN",
+          "model_name": "custom_cnn",
+          "epochs": 1,
+          "batch_size": 256,
+          "learning_rate": 0.001,
+          "seed": 42,
+          "split_seed": 42,
+          "pretrained": false,
+          "scheduler_type": "constant",
+          "optimizer": "adamw",
+          "weight_decay": 0.0001,
+          "predecessor_run_id": null,
+          "motivating_reason": "Validate the finalized worker and immutable serving contracts on CIFAR-10."
+        },
+        "accuracy_unit": "percent",
+        "passed": true,
+        "environment_match": true,
+        "trajectory_match": true,
+        "accuracy_delta": 0.0,
+        "comparison": "Exact numeric trajectories and test loss/accuracy against original and both replays; timing excluded.",
+        "reason": "Matched original conditions and measurements."
+      },
+      "created_at": "2026-10-15 18:22:05",
+      "status": "COMPLETED",
+      "error": null,
+      "members": [
+        {
+          "id": "replay_93dc1f05adbc4cab89123503d0790113",
+          "seed": 42,
+          "status": "COMPLETED",
+          "error": null
+        },
+        {
+          "id": "replay_7278fcc2aef54a0fa15d976faad0ba67",
+          "seed": 42,
+          "status": "COMPLETED",
+          "error": null
+        }
+      ]
+    }
+  ],
+  "config": {
+    "run_id": "cifar_acceptance_02",
+    "experiment_id": "exp_8265d877f00541c5bb0e1a0ef2b35342",
+    "approach_name": "Final-source seeded CNN",
+    "model_name": "custom_cnn",
+    "epochs": 1,
+    "batch_size": 256,
+    "learning_rate": 0.001,
+    "seed": 42,
+    "split_seed": 42,
+    "pretrained": false,
+    "scheduler_type": "constant",
+    "optimizer": "adamw",
+    "weight_decay": 0.0001,
+    "predecessor_run_id": null,
+    "motivating_reason": "Validate the finalized worker and immutable serving contracts on CIFAR-10."
+  },
+  "environment": {
+    "python": "3.13.13",
+    "torch": "2.14.1",
+    "torchvision": "0.29.1",
+    "numpy": "2.5.3",
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "device": {
+      "type": "cpu",
+      "name": "Host CPU (Universal Execution)",
+      "badge": "CPU Compute Online",
+      "is_accelerated": false
+    },
+    "git_commit": "7a53b4d161f22b711292cbf6f720e3425e5021e0",
+    "git_dirty": true,
+    "source_hashes": {
+      "api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "api/main.py": "b64d0fbab764bffe27e5ac3a58b62b8ca31a8a4f236adc0181962d0199dbf3e1",
+      "api/routers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "api/routers/experiments.py": "3a5a26ad78b9f4dd0089cf5968a2360f77e620bb2ae6abf7971acbd78d864d10",
+      "api/routers/inference.py": "5a6594c45023317130c696a7079057cf962499ecbb63efaa76fcb216e2bddf4f",
+      "api/routers/registry.py": "74e0f103e3ebbbe96a03a18ae663054110a296c442fa700333d056a3f230be87",
+      "api/routers/runs.py": "076fe1ba03878a211592d633c65a0d7a5b65554908c0dd1edcad6e072b38b2d9",
+      "config.py": "eb41607085a005f8a193702462c9b110a3b07400ad295d21121cbe1fd478f652",
+      "core/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "core/dataset.py": "6eafe34f947f64922b0727e71286267c7b9b8ac2e8866954e302eee1845d0395",
+      "core/models.py": "9c839bd2491be6e685ebb6d1151fde6faf70b720d68ba0ebbf49e1dbc890d661",
+      "core/trainer.py": "6968382c5a8acc32cb834c93c0aefb798a187ce01698f157c073048172f03647",
+      "db/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "db/database.py": "282837fc9ac43570cf06f058afc9dbf8ec1bbb75b3d72752d894e006fb8b3018",
+      "domain.py": "6a6cc2a9fde50024c345c5b2abc8f4535ebe234948ee60550724ef18ae11af73",
+      "jobs.py": "4150906d85127e2a8a2c3a5622cb416baaecd314cf441118e6f883bc14128d81",
+      "registry/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "registry/model_registry.py": "4d1964215391a82404944afd47911766598b704d86e866f83abfcfc5b38e7fa2",
+      "storage.py": "ddaa4343c62fef5e233dcf07e6930cc6243b9de57aa0324c996f302e1a5e4acf",
+      "tracking/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tracking/evaluator.py": "79e964de537ee2a4ca854356e502ba778fb14fa4c8798f4674c73ffc177ce746",
+      "tracking/tracker.py": "a5e539f6aec1f9018dbc7e2e3a872632617388b7cafe441022935cbd1100a43a",
+      "worker.py": "f1b7dba2fa62da15cfd9d987192e4f64336a9d4d741ce38672e98db7afb3acc1"
+    },
+    "deterministic_algorithms": true,
+    "torch_threads": 4
+  },
+  "dataset": {
+    "name": "CIFAR-10",
+    "version": "torchvision-cifar10-python",
+    "split_seed": 42,
+    "split_sha256": "e2ea5176163a6e15bfc2e26b8e8e95dbc2be93240f8caf23ebaf892730abfc7a",
+    "counts": {
+      "train": 45000,
+      "validation": 5000,
+      "test": 10000
+    },
+    "preprocessing": {
+      "size": [
+        32,
+        32
+      ],
+      "mean": [
+        0.4914,
+        0.4822,
+        0.4465
+      ],
+      "std": [
+        0.2023,
+        0.1994,
+        0.201
+      ],
+      "augmentation": [
+        "RandomCrop(32,padding=4)",
+        "RandomHorizontalFlip"
+      ]
+    },
+    "file_hashes": {
+      "cifar-10-batches-py/data_batch_1": "54636561a3ce25bd3e19253c6b0d8538147b0ae398331ac4a2d86c6d987368cd",
+      "cifar-10-batches-py/data_batch_2": "766b2cef9fbc745cf056b3152224f7cf77163b330ea9a15f9392beb8b89bc5a8",
+      "cifar-10-batches-py/data_batch_3": "0f00d98ebfb30b3ec0ad19f9756dc2630b89003e10525f5e148445e82aa6a1f9",
+      "cifar-10-batches-py/data_batch_4": "3f7bb240661948b8f4d53e36ec720d8306f5668bd0071dcb4e6c947f78e9682b",
+      "cifar-10-batches-py/data_batch_5": "d91802434d8376bbaeeadf58a737e3a1b12ac839077e931237e0dcd43adcb154"
+    }
+  },
+  "evaluation": {
+    "test_loss": 1.1817948907852174,
+    "test_accuracy": 57.4,
+    "precision_macro": 0.5962971270107278,
+    "recall_macro": 0.5740000000000001,
+    "f1_macro": 0.5768102383960931,
+    "confusion_matrix": [
+      [
+        625,
+        22,
+        92,
+        25,
+        12,
+        11,
+        6,
+        4,
+        175,
+        28
+      ],
+      [
+        35,
+        730,
+        19,
+        14,
+        6,
+        4,
+        19,
+        5,
+        74,
+        94
+      ],
+      [
+        97,
+        16,
+        530,
+        74,
+        62,
+        123,
+        55,
+        15,
+        22,
+        6
+      ],
+      [
+        17,
+        11,
+        130,
+        392,
+        46,
+        270,
+        95,
+        12,
+        23,
+        4
+      ],
+      [
+        38,
+        8,
+        269,
+        66,
+        393,
+        72,
+        80,
+        51,
+        21,
+        2
+      ],
+      [
+        7,
+        5,
+        126,
+        188,
+        34,
+        589,
+        18,
+        20,
+        11,
+        2
+      ],
+      [
+        11,
+        1,
+        159,
+        111,
+        60,
+        28,
+        618,
+        3,
+        8,
+        1
+      ],
+      [
+        34,
+        8,
+        81,
+        49,
+        113,
+        170,
+        13,
+        512,
+        5,
+        15
+      ],
+      [
+        99,
+        55,
+        17,
+        25,
+        7,
+        6,
+        9,
+        1,
+        764,
+        17
+      ],
+      [
+        50,
+        198,
+        12,
+        34,
+        10,
+        4,
+        22,
+        14,
+        69,
+        587
+      ]
+    ],
+    "latency_ms_per_sample": 0.26805063339998014,
+    "latency_method": "Batched holdout wall time including loading/transfers, divided by sample count",
+    "samples": 10000,
+    "evaluation_seconds": 2.6805063339998014,
+    "checkpoint_sha256": "97cf4361d6e258c7e10cd07813289cd4f0e717c7040e98a86253445da5258e34",
+    "checkpoint_epoch": 1,
+    "parameter_count": 620810,
+    "model_size_bytes": 7482117
+  },
+  "progress": {
+    "epoch": 1,
+    "total_epochs": 1,
+    "batch_idx": 176,
+    "total_batches": 176,
+    "batch_loss": 1.3024885654449463,
+    "running_acc": 42.913333333333334,
+    "lr": 0.001
+  },
+  "run_id": "cifar_acceptance_02",
+  "latest_decision": null,
+  "best_val_accuracy": 57.88,
+  "total_duration_sec": 36.383989667003334,
+  "overfitting_gap": -14.966666666666669
+}
