@@ -20,9 +20,17 @@ export default function Decisions({ workspace }) {
     run,
     act,
     branch,
+    expId,
   } = workspace;
   return (
-    <Panel title="Record a human decision">
+    <Panel
+      title="Record a human decision"
+      action={
+        run?.decisions?.length > 0 && expId ? (
+          <a href={`/api/v1/experiments/${expId}/report`}>Download report</a>
+        ) : null
+      }
+    >
       <p>
         Choose a completed, evaluated candidate. Every decision preserves its
         evidence snapshot and reasoning. Record “none” explicitly where no

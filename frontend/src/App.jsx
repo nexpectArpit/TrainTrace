@@ -395,53 +395,61 @@ export default function App() {
             </button>
           </div>
         )}
-        <div className="context-bar">
-          <Select
-            label="Investigation"
-            value={expId}
-            onChange={switchExperiment}
-          >
-            <option value="">Choose investigation</option>
-            {experiments
-              .filter(
-                (e) =>
-                  !query ||
-                  e.name.toLowerCase().includes(query.toLowerCase()) ||
-                  e.id === expId,
-              )
-              .map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.name}
-                  {e.archived ? " (archived)" : ""}
-                </option>
-              ))}
-          </Select>
-          <Select label="Candidate run" value={runId} onChange={setRunId}>
-            <option value="">Choose a run</option>
-            {runs.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.approach_name} · {r.status}
-              </option>
-            ))}
-          </Select>
-          <Field
-            label="Search investigations / runs / models"
-            value={query}
-            onChange={setQuery}
-            placeholder="Name or run ID"
-          />
-        </div>
-        {experiment && (
-          <div className="investigation-summary">
-            <strong>{experiment.name}</strong>
-            <p>{experiment.objective}</p>
-            <small>
-              Hypothesis: {experiment.hypothesis || "Unknown (legacy record)"} ·
-              Targets: {fmt(experiment.target_accuracy)}% accuracy /{" "}
-              {fmt(experiment.target_latency_ms)} ms
-            </small>
-            {!!experiment.archived && <Badge value="ARCHIVED" />}
-          </div>
+        {tab !== "Investigations" && (
+          <>
+            <div className="context-bar">
+              {tab !== "Registry" && tab !== "Inference" && (
+                <Select
+                  label="Investigation"
+                  value={expId}
+                  onChange={switchExperiment}
+                >
+                  <option value="">Choose investigation</option>
+                  {experiments
+                    .filter(
+                      (e) =>
+                        !query ||
+                        e.name.toLowerCase().includes(query.toLowerCase()) ||
+                        e.id === expId,
+                    )
+                    .map((e) => (
+                      <option key={e.id} value={e.id}>
+                        {e.name}
+                        {e.archived ? " (archived)" : ""}
+                      </option>
+                    ))}
+                </Select>
+              )}
+              {(tab === "Audits" || tab === "Decisions" || tab === "Training") && (
+                <Select label="Candidate run" value={runId} onChange={setRunId}>
+                  <option value="">Choose a run</option>
+                  {runs.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.approach_name} · {r.status}
+                    </option>
+                  ))}
+                </Select>
+              )}
+              <Field
+                label="Search investigations / runs / models"
+                value={query}
+                onChange={setQuery}
+                placeholder="Name or run ID"
+              />
+            </div>
+            {experiment && tab !== "Registry" && tab !== "Inference" && (
+              <div className="investigation-summary">
+                <strong>{experiment.name}</strong>
+                <p>{experiment.objective}</p>
+                <small>
+                  Hypothesis: {experiment.hypothesis || "Unknown (legacy record)"} ·
+                  Targets: {fmt(experiment.target_accuracy)}% accuracy /{" "}
+                  {fmt(experiment.target_latency_ms)} ms
+                </small>
+                {!!experiment.archived && <Badge value="ARCHIVED" />}
+              </div>
+            )}
+          </>
         )}
         {tab === "Investigations" && <Investigations workspace={workspace} />}
         {tab === "Training" && <Training workspace={workspace} />}
