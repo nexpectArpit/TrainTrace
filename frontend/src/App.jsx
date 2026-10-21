@@ -420,7 +420,9 @@ export default function App() {
                     ))}
                 </Select>
               )}
-              {(tab === "Audits" || tab === "Decisions" || tab === "Training") && (
+              {(tab === "Audits" ||
+                tab === "Decisions" ||
+                tab === "Training") && (
                 <Select label="Candidate run" value={runId} onChange={setRunId}>
                   <option value="">Choose a run</option>
                   {runs.map((r) => (
@@ -442,7 +444,8 @@ export default function App() {
                 <strong>{experiment.name}</strong>
                 <p>{experiment.objective}</p>
                 <small>
-                  Hypothesis: {experiment.hypothesis || "Unknown (legacy record)"} ·
+                  Hypothesis:{" "}
+                  {experiment.hypothesis || "Unknown (legacy record)"} ·
                   Targets: {fmt(experiment.target_accuracy)}% accuracy /{" "}
                   {fmt(experiment.target_latency_ms)} ms
                 </small>
