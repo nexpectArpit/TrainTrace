@@ -155,13 +155,17 @@ export default function Investigations({ workspace }) {
           ) : (
             <>
               <p>Conclusion: {experiment.conclusion || "Not recorded"}</p>
-              <a href={`/api/v1/experiments/${expId}/report`}>
-                Download decision report
-              </a>
               <p>
                 {runs.length} candidate runs ·{" "}
                 {runs.filter((r) => r.status === "COMPLETED").length} completed
               </p>
+              {runs.some((r) => (r.decisions || []).length > 0) ? (
+                <p>
+                  <a href={`/api/v1/experiments/${expId}/report`}>
+                    Download decision report
+                  </a>
+                </p>
+              ) : null}
               <button onClick={() => setTab("Training")}>
                 Configure an approach →
               </button>
