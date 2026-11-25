@@ -1,0 +1,288 @@
+.tt-lab-section {
+  padding: 58px 10%;
+  background: var(--paper);
+}
+.tt-section-heading {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  align-items: center;
+  gap: 40px;
+}
+.tt-section-heading h2 {
+  font-size: clamp(30px, 3.5vw, 50px);
+  font-weight: 550;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin: 20px 0 30px;
+}
+.tt-section-heading p {
+  color: var(--landing-muted);
+  line-height: 1.8;
+  font-size: 14px;
+  max-width: 420px;
+}
+.tt-lab {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  border: 1px solid var(--landing-line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--landing-card);
+  box-shadow: 0 24px 70px #1683c912;
+}
+.tt-lab aside {
+  background: var(--paper);
+  padding: 22px 15px;
+  border-right: 1px solid var(--landing-line);
+  position: static;
+  height: auto;
+  min-height: 0;
+}
+.tt-lab-brand {
+  font-size: 23px;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 26px;
+  color: var(--accent);
+}
+.tt-lab-brand span {
+  font-size: 13px;
+  color: var(--ink);
+}
+.tt-lab aside > small {
+  font-size: 9px;
+  color: var(--landing-muted);
+  letter-spacing: 1.5px;
+}
+.tt-lab aside > strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 10px 0 20px;
+}
+.tt-lab aside > div {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  padding: 11px 10px;
+  border-radius: 6px;
+  color: var(--landing-muted);
+}
+.tt-lab aside .is-current {
+  background: #1683c91a;
+  color: var(--accent);
+}
+.tt-lab aside > p {
+  font-size: 10px;
+  color: var(--landing-muted);
+  line-height: 1.6;
+  margin-top: 35px;
+}
+.tt-lab-main {
+  padding: 24px;
+  min-width: 0;
+}
+.tt-lab-main header {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: center;
+}
+.tt-lab-main header small {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--landing-muted);
+}
+.tt-lab-main h3 {
+  font-size: 20px;
+  letter-spacing: -0.6px;
+  margin: 9px 0 20px;
+  font-weight: 600;
+}
+.tt-example-tag {
+  font-size: 10px;
+  white-space: nowrap;
+  border: 1px solid var(--landing-line);
+  border-radius: 20px;
+  padding: 6px 10px;
+  color: var(--landing-muted);
+}
+.tt-lab-controls {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tt-lab-controls > div {
+  display: flex;
+  border: 1px solid var(--landing-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.tt-landing .tt-lab-controls button {
+  padding: 9px;
+  font-size: 10px;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--landing-muted);
+  cursor: pointer;
+}
+.tt-landing .tt-lab-controls button[aria-pressed="true"] {
+  background: #1683c91a;
+  color: var(--accent);
+}
+.tt-lab-controls label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+  color: var(--landing-muted);
+}
+.tt-lab input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--accent);
+}
+.tt-lab-chart svg {
+  width: 100%;
+  display: block;
+  margin-top: 20px;
+}
+.tt-lab-line {
+  stroke-dasharray: 900;
+  stroke-dashoffset: 900;
+  animation: tt-draw 1.8s ease forwards;
+}
+.tt-lab-line[stroke-dasharray] {
+  stroke-dasharray: 7 5;
+  stroke-dashoffset: 0;
+  animation: tt-enter 0.6s;
+}
+.tt-epoch-slider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--landing-muted);
+  font-size: 11px;
+  margin: 14px 0 22px;
+}
+.tt-landing .tt-epoch-slider input[type="range"],
+.tt-epoch-slider input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+  transition: background 180ms ease;
+  box-shadow: none;
+}
+.tt-landing .tt-epoch-slider input[type="range"]:hover,
+.tt-epoch-slider input[type="range"]:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+.tt-landing .tt-epoch-slider input[type="range"]::-webkit-slider-thumb,
+.tt-epoch-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #45adf0;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(69, 173, 240, 0.85);
+  border: 2px solid #ffffff;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+.tt-landing .tt-epoch-slider input[type="range"]::-webkit-slider-thumb:hover,
+.tt-epoch-slider input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 18px rgba(69, 173, 240, 1);
+}
+.tt-landing .tt-epoch-slider input[type="range"]::-moz-range-thumb,
+.tt-epoch-slider input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #45adf0;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(69, 173, 240, 0.85);
+  border: 2px solid #ffffff;
+}
+.tt-lab-results {
+  border-top: 1px solid var(--landing-line);
+  padding-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px 25px;
+}
+.tt-lab-results > div {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tt-lab-results i {
+  width: 8px;
+  height: 8px;
+  background: #1683c9;
+  border-radius: 50%;
+}
+.tt-lab-results > div:nth-child(2) i {
+  background: #a36edf;
+}
+.tt-lab-results strong {
+  font-size: 16px;
+}
+.tt-lab-results p {
+  font-size: 10px;
+  color: var(--landing-muted);
+  margin: 0;
+  width: 100%;
+}
+@media (max-width: 750px) {
+  .tt-lab-section {
+    padding: 38px 6%;
+  }
+  .tt-section-heading {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .tt-lab {
+    grid-template-columns: 1fr;
+  }
+  .tt-lab aside {
+    display: none;
+  }
+  .tt-lab-main {
+    padding: 16px;
+  }
+  .tt-lab-main header {
+    align-items: start;
+  }
+  .tt-lab-main h3 {
+    font-size: 17px;
+  }
+  .tt-example-tag {
+    font-size: 9px;
+    padding: 5px;
+  }
+  .tt-epoch-slider {
+    gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tt-lab-line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

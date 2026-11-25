@@ -1,70 +1,29 @@
 import React from "react";
-import { fmt, Badge, Panel, Json } from "../components/Common";
+import { Panel } from "../components/Common";
+import InvestigationTimeline from "../components/InvestigationTimeline";
+
 export default function History({ workspace }) {
-  const { setTab, expId, setRunId, experiments, runs, decision, run, branch } =
-    workspace;
+  const { expId, runs, setRunId, setTab, branch } = workspace;
   return (
     <Panel
-      title="Investigation reasoning chain"
+      title="Investigation timeline"
       action={
         expId && (
-          <a href={`/api/v1/experiments/${expId}/report`}>Download report</a>
+          <div className="actions">
+            <a href={`/api/v1/experiments/${expId}/report`}>Decision report</a>
+            <a href={`/api/v1/experiments/${expId}/report.csv`}>Metrics CSV</a>
+          </div>
         )
       }
     >
-      <p>
-        Follow explicit predecessor links and inspect the reasoning behind each
-        approach. Missing historical fields remain unknown.
-      </p>
-      {[...runs].reverse().map((r) => (
-        <article className="record history" key={r.id}>
-          <div className="eyebrow">
-            {r.predecessor_run_id
-              ? `SUCCESSOR OF ${r.predecessor_run_id}`
-              : "INITIAL APPROACH / NO PREDECESSOR RECORDED"}
-          </div>
-          <h3>
-            {r.approach_name}{" "}
-            <Badge value={r.latest_decision?.status || "CANDIDATE"} />
-          </h3>
-          <p>
-            {r.motivating_reason ||
-              "Motivation not recorded (legacy or initial run)."}
-          </p>
-          <p>
-            Run {r.id} · holdout {fmt(r.evaluation?.test_accuracy)}% ·{" "}
-            {r.decisions.length} decisions
-          </p>
-          {r.latest_decision && (
-            <>
-              <p>{r.latest_decision.rationale}</p>
-              <Json
-                data={{
-                  decisions: r.decisions,
-                  evaluation: r.evaluation,
-                }}
-                label="Evidence, limitations, alternatives and complete decision history"
-              />
-            </>
-          )}
-          <button
-            onClick={() => {
-              setRunId(r.id);
-              setTab("Decisions");
-            }}
-          >
-            Review candidate
-          </button>
-          {r.latest_decision && (
-            <button onClick={() => branch(r)}>Branch from this approach</button>
-          )}
-        </article>
-      ))}
-      {!runs.length && (
-        <div className="empty">
-          No approaches recorded in this investigation.
-        </div>
-      )}
+      <InvestigationTimeline
+        runs={runs}
+        onOpenRun={(run) => {
+          setRunId(run.id);
+          setTab("Training");
+        }}
+        onBranch={branch}
+      />
     </Panel>
   );
 }

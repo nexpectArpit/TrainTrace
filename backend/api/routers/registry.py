@@ -14,7 +14,11 @@ def list_models_endpoint():
         rows = [
             dict(r)
             for r in c.execute(
-                "SELECT id,name,version,run_id,test_accuracy,latency_ms,status,sha256,created_at FROM models ORDER BY created_at DESC,id"
+                "SELECT m.id,m.name,m.version,m.run_id,m.test_accuracy,m.latency_ms,m.status,m.sha256,m.created_at, "
+                "COALESCE(json_extract(m.manifest_json,'$.originating_run.approach_name'),r.approach_name) AS source_approach, "
+                "COALESCE(json_extract(m.manifest_json,'$.configuration.dataset_name'),json_extract(r.config_json,'$.dataset_name')) AS dataset_name, "
+                "json_extract(m.manifest_json,'$.decision.status') AS decision_status "
+                "FROM models m LEFT JOIN runs r ON r.id=m.run_id ORDER BY m.created_at DESC,m.id"
             )
         ]
         active = c.execute("SELECT model_id FROM serving WHERE id=1").fetchone()

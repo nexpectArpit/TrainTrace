@@ -1,0 +1,76 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 0.35rem;
+  line-height: 1;
+}
+
+:global(.app-shell) button.trigger:not(.link) {
+  display: inline-grid;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--tt-border, #8c9bad);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--tt-muted, #63748a);
+  font:
+    600 11px/1 system-ui,
+    sans-serif;
+  cursor: help;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+:global(.app-shell) button.trigger:not(.link):hover,
+:global(.app-shell) button.trigger:not(.link):focus-visible {
+  border-color: var(--tt-blue, #2f6feb);
+  color: var(--tt-blue, #2f6feb);
+  outline: none;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 100;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  width: min(280px, calc(100vw - 40px));
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--tt-border, #8c9bad);
+  border-radius: 6px;
+  background: var(--tt-surface, #fff);
+  color: var(--tt-text, #243247);
+  box-shadow: 0 8px 24px rgb(10 20 35 / 18%);
+  font:
+    400 12px/1.5 system-ui,
+    sans-serif;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 120ms;
+  pointer-events: none;
+}
+
+.root:hover .tooltip,
+.root:has(.trigger:focus-visible) .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    transition: none;
+  }
+}

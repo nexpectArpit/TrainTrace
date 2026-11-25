@@ -1,0 +1,282 @@
+/* Shared, restrained geometry: controls, surfaces, and status pills. */
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--tt-font);
+}
+.app-shell {
+  background: var(--tt-canvas);
+  color: var(--tt-text);
+}
+.app-shell > aside {
+  border-color: var(--tt-border);
+  background: var(--tt-surface);
+}
+.app-shell > main {
+  background: var(--tt-canvas);
+}
+.app-shell .panel-heading {
+  border-color: var(--tt-border);
+}
+.app-shell .panel-heading h2,
+.app-shell .panel h2,
+.app-shell .panel h3 {
+  color: var(--tt-text);
+}
+.app-shell .panel,
+.app-shell .record,
+.app-shell .table-wrap,
+.app-shell .investigation-hero,
+.app-shell .active-investigation,
+.app-shell .investigation-columns > .panel,
+.app-shell .investigation-card,
+.app-shell .investigation-empty,
+.app-shell .investigation-progress-card,
+.app-shell .sidebar-status,
+.app-shell .context-bar,
+.app-shell .compare-filter-toolbar,
+.app-shell .metric-strip > div,
+.app-shell .chart,
+.app-shell .hero-count,
+.app-shell .active-record-heading,
+.app-shell .advanced-filter-panel,
+.app-shell details,
+.app-shell .architecture-controls,
+.app-shell .initialization-note,
+.app-shell .predecessor-context,
+.app-shell .empty,
+.app-shell .events,
+.app-shell pre,
+.app-shell .notice,
+.app-shell .error {
+  border-radius: var(--tt-radius-surface);
+  box-shadow: none;
+}
+.app-shell .training-page > .panel,
+.app-shell.theme-dark .panel,
+.app-shell.theme-dark .training-page > .panel,
+.app-shell.theme-dark .investigation-columns > .panel {
+  border-radius: var(--tt-radius-surface);
+}
+.app-shell button:not(.link),
+.app-shell input,
+.app-shell select,
+.app-shell textarea,
+.app-shell .theme-toggle,
+.app-shell .refresh-button,
+.app-shell .edit-record-button,
+.app-shell .table-scroll {
+  border-radius: var(--tt-radius-control);
+}
+.app-shell .badge,
+.app-shell .record-state {
+  border-radius: var(--tt-radius-pill);
+}
+.app-shell .workspace-nav button {
+  border: 1px solid transparent;
+  border-radius: var(--tt-radius-control);
+  background: transparent;
+  box-shadow: none;
+  color: #57606a;
+  font-weight: 500;
+  transform: none;
+}
+.app-shell .workspace-nav button:hover:enabled {
+  border-color: transparent;
+  background: #f3f4f6;
+  color: #24292f;
+  transform: none;
+}
+.app-shell .workspace-nav button[aria-current="page"] {
+  border-color: transparent;
+  background: #eaf3f9;
+  box-shadow: none;
+  color: #155b91;
+  font-weight: 600;
+}
+.app-shell .sidebar-status {
+  border-color: var(--tt-border);
+  background: var(--tt-surface);
+}
+.app-shell .active-record-heading {
+  background: #f6f8fa;
+}
+.app-shell .investigation-summary {
+  position: relative;
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-surface);
+  background: var(--tt-surface);
+  box-shadow: none;
+}
+.app-shell.theme-dark .investigation-summary {
+  border-color: var(--tt-border);
+  background: var(--tt-surface);
+}
+.app-shell .investigation-hero {
+  min-height: 150px;
+  background: var(--tt-surface);
+  box-shadow: none;
+}
+.app-shell .investigation-hero::after {
+  display: none;
+}
+.app-shell .panel,
+.app-shell .investigation-columns > .panel,
+.app-shell .active-investigation {
+  box-shadow: none;
+}
+.app-shell .theme-toggle,
+.app-shell .refresh-button,
+.app-shell button.primary {
+  box-shadow: none;
+  background-image: none;
+}
+.app-shell .theme-toggle {
+  border-color: transparent;
+  background: transparent;
+  color: #57606a;
+  font-size: 22px;
+}
+.app-shell.theme-dark .theme-toggle {
+  color: #c0cada;
+}
+.app-shell.theme-dark button.theme-toggle {
+  border-color: transparent;
+  background: transparent;
+  color: #c0cada;
+  font-size: 22px;
+}
+.app-shell .theme-toggle:hover:enabled {
+  border-color: transparent;
+  background: #f6f8fa;
+  color: #24292f;
+}
+.app-shell.theme-dark .theme-toggle:hover:enabled {
+  border-color: transparent;
+  background: #21262d;
+  color: #f0f3f6;
+}
+.app-shell.theme-dark button.theme-toggle:hover:enabled {
+  border-color: transparent;
+  background: #21262d;
+  color: #f0f3f6;
+}
+.app-shell button.primary {
+  border-color: var(--tt-blue);
+  background: var(--tt-blue);
+  color: #fff;
+}
+.app-shell button.primary:hover:enabled {
+  border-color: var(--tt-blue-strong);
+  background: var(--tt-blue-strong);
+}
+.app-shell .brand-logo {
+  width: min(100%, 194px);
+  height: auto;
+  object-fit: contain;
+  object-position: left center;
+}
+.app-shell.theme-dark > aside,
+.app-shell.theme-dark > main {
+  background: #0d1117;
+}
+.app-shell.theme-dark .investigation-hero {
+  border-color: var(--tt-border);
+  background: var(--tt-surface);
+}
+.app-shell.theme-dark .workspace-nav button {
+  background: transparent;
+  color: #9da7b3;
+}
+.app-shell.theme-dark .workspace-nav button:hover:enabled {
+  background: #21262d;
+  color: #e6edf3;
+}
+.app-shell.theme-dark .workspace-nav button[aria-current="page"] {
+  border-color: transparent;
+  background: #263548;
+  box-shadow: none;
+  color: #91caff;
+}
+.app-shell.theme-dark .sidebar-status {
+  border-color: var(--tt-border);
+  background: var(--tt-surface);
+}
+.app-shell.theme-dark .active-record-heading {
+  border-bottom-color: #30363d;
+  background: #1c2128;
+}
+.app-shell.theme-dark .active-investigation {
+  border-color: var(--tt-border);
+  background: var(--tt-surface);
+  color: var(--tt-text);
+}
+.app-shell.theme-dark .active-record-heading h2 {
+  color: var(--tt-text);
+}
+.app-shell.theme-dark .note-block {
+  border-color: #30363d;
+  background: #161b22;
+}
+.app-shell.theme-dark .note-block > span,
+.app-shell.theme-dark .report-links > span {
+  color: #9da7b3;
+}
+.app-shell.theme-dark .note-block p {
+  color: #c9d1d9;
+}
+.app-shell.theme-dark .conclusion-note {
+  border-color: #285543;
+}
+.app-shell.theme-dark .investigation-progress-card {
+  border-color: #30363d;
+  background: #161b22;
+}
+.app-shell.theme-dark .progress-numbers strong {
+  color: #e6edf3;
+}
+.app-shell.theme-dark .progress-numbers span,
+.app-shell.theme-dark .investigation-progress-card > small {
+  color: #9da7b3;
+}
+.app-shell.theme-dark .report-links {
+  border-top-color: #30363d;
+  background: #161b22;
+}
+.app-shell.theme-dark .report-links a {
+  color: #8bc5f0;
+}
+.app-shell.theme-dark .report-links a span {
+  color: #9da7b3;
+}
+.app-shell.theme-dark .investigation-summary {
+  background: var(--tt-surface);
+}
+.app-shell.theme-dark .panel-heading {
+  border-color: #30363d;
+}
+.app-shell.theme-dark .panel-heading h2,
+.app-shell.theme-dark .panel h2,
+.app-shell.theme-dark .panel h3 {
+  color: var(--tt-text);
+}
+.app-shell.theme-dark button.primary {
+  border-color: #398cc7;
+  background: #2272b4;
+  color: #fff;
+}
+@media (max-width: 1400px) {
+  .app-shell .investigation-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .app-shell .brand-logo {
+    width: min(100%, 178px);
+    height: auto;
+  }
+}

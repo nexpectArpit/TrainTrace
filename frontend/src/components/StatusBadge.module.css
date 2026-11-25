@@ -1,0 +1,30 @@
+:global(.app-shell) .base:global(.badge) {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 7px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+:global(.app-shell) .base:global(.badge).success {
+  background: var(--tt-success-bg);
+  color: var(--tt-success-fg);
+}
+:global(.app-shell) .base:global(.badge).warning {
+  background: var(--tt-warning-bg);
+  color: var(--tt-warning-fg);
+}
+:global(.app-shell) .base:global(.badge).danger {
+  background: var(--tt-danger-bg);
+  color: var(--tt-danger-fg);
+}
+:global(.app-shell) .base:global(.badge).info {
+  background: var(--tt-info-bg);
+  color: var(--tt-info-fg);
+}
+:global(.app-shell) .base:global(.badge).neutral {
+  background: var(--tt-neutral-bg);
+  color: var(--tt-neutral-fg);
+}

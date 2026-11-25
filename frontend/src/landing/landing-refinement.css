@@ -1,0 +1,254 @@
+/* A fixed reading width keeps the story at human scale on wide displays. */
+.tt-landing {
+  color-scheme: dark;
+  --tt-page-gutter: max(24px, calc((100vw - 1360px) / 2));
+}
+.tt-landing
+  :is(
+    .tt-hero,
+    .tt-problem,
+    .tt-intro,
+    .tt-chapters,
+    .tt-showcase,
+    .tt-lab-section,
+    .tt-capabilities,
+    .tt-feature-explorer,
+    .tt-evidence,
+    .tt-execution,
+    .tt-faq,
+    .tt-finale,
+    .tt-footer
+  ) {
+  padding-inline: var(--tt-page-gutter);
+}
+.tt-landing .tt-hero h1 {
+  font-size: clamp(52px, 5.3vw, 78px);
+}
+.tt-landing :is(.tt-intro h2, .tt-evidence h2) {
+  font-size: clamp(38px, 4.3vw, 62px);
+}
+.tt-landing
+  :is(.tt-problem, .tt-showcase, .tt-capabilities, .tt-execution, .tt-faq)
+  h2,
+.tt-landing :is(.tt-lab-section, .tt-feature-explorer) h2 {
+  font-size: clamp(36px, 3.7vw, 54px);
+}
+.tt-landing
+  :is(
+    .tt-intro p,
+    .tt-chapter p,
+    .tt-evidence p,
+    .tt-section-heading p,
+    .tt-feature-content p,
+    .tt-problem p,
+    .tt-showcase p,
+    .tt-capabilities p,
+    .tt-execution p,
+    .tt-faq p
+  ) {
+  font-size: clamp(16px, 1.1vw, 18px);
+  line-height: 1.65;
+}
+.tt-landing .tt-feature-browser {
+  grid-template-columns: minmax(235px, 280px) minmax(0, 1fr);
+}
+.tt-landing .tt-feature-menu button {
+  min-height: 58px;
+  padding: 15px 16px;
+  font-size: 16px;
+  transition:
+    color 220ms ease,
+    background 220ms ease,
+    border-color 220ms ease,
+    transform 220ms ease;
+}
+.tt-landing .tt-feature-menu button:hover {
+  transform: translateX(3px);
+}
+.tt-landing .tt-feature-content h3 {
+  font-size: clamp(24px, 2vw, 30px);
+}
+.tt-landing .tt-feature-content h4 {
+  font-size: 18px;
+}
+.tt-landing .tt-feature-content > div {
+  gap: 28px;
+}
+.tt-landing .tt-feature-content article {
+  padding-top: 20px;
+}
+.tt-landing .tt-capability-grid {
+  gap: 22px;
+}
+.tt-landing .tt-capability-grid article {
+  padding: 28px;
+}
+.tt-landing .tt-capability-grid h3 {
+  font-size: 22px;
+}
+.tt-landing .tt-chapter {
+  padding-block: 34px;
+}
+.tt-landing .tt-chapter h3 {
+  font-size: clamp(22px, 2vw, 28px);
+}
+.tt-landing .tt-problem-grid h3 {
+  font-size: 20px;
+}
+.tt-landing .tt-stage-tabs button {
+  min-height: 52px;
+  font-size: 15px;
+}
+.tt-landing .tt-stage-tabs button span {
+  font-size: 17px;
+}
+.tt-landing .tt-workflow-playback {
+  min-height: 38px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--tt-glass-border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--landing-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.tt-landing .tt-workflow-playback:hover:enabled,
+.tt-landing .tt-workflow-playback:focus-visible {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.tt-landing .tt-workflow-playback:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.tt-landing .tt-stage-panel h3 {
+  font-size: clamp(27px, 2.6vw, 36px);
+}
+.tt-landing .tt-preview-row {
+  font-size: 14px;
+}
+.tt-landing .tt-lab {
+  max-width: 1180px;
+}
+.tt-landing .tt-lab-controls button,
+.tt-landing .tt-lab-controls label,
+.tt-landing .tt-epoch-slider,
+.tt-landing .tt-lab-results > div {
+  font-size: 14px;
+}
+.tt-landing .tt-lab-controls button {
+  min-height: 44px;
+  padding-inline: 14px;
+}
+.tt-landing .tt-lab-main {
+  padding: clamp(22px, 3vw, 36px);
+}
+.tt-landing .tt-lab-chart svg {
+  cursor: crosshair;
+}
+.tt-landing .tt-lab-chart svg line[stroke-dasharray],
+.tt-landing .tt-lab-chart svg circle {
+  transition:
+    x1 400ms ease,
+    x2 400ms ease,
+    cx 400ms ease,
+    cy 400ms ease;
+}
+.tt-landing .tt-lab-replay {
+  min-height: 44px;
+  padding: 9px 16px;
+  border: 1px solid var(--landing-line);
+  border-radius: 8px;
+  background: var(--landing-card);
+  color: var(--ink);
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+.tt-landing .tt-lab-replay:hover:enabled {
+  background: color-mix(in srgb, var(--accent) 12%, var(--landing-card));
+}
+
+/* Section contents enter in sequence; cards have their own observer. */
+.tt-landing .tt-reveal > :not(.tt-atmosphere) {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 520ms ease,
+    transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.tt-landing .tt-reveal.tt-revealed > :not(.tt-atmosphere) {
+  opacity: 1;
+  transform: none;
+}
+.tt-landing .tt-reveal > :nth-child(2) {
+  transition-delay: 90ms;
+}
+.tt-landing .tt-reveal > :nth-child(3) {
+  transition-delay: 170ms;
+}
+.tt-landing .tt-reveal > :nth-child(4) {
+  transition-delay: 230ms;
+}
+.tt-landing .tt-card-enter {
+  transition-duration: 480ms;
+}
+.tt-landing .tt-feature-content {
+  animation: tt-panel-enter 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes tt-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .tt-landing .tt-feature-browser {
+    grid-template-columns: 1fr;
+  }
+  .tt-landing .tt-feature-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tt-landing .tt-feature-menu button {
+    min-width: 0;
+  }
+}
+@media (max-width: 700px) {
+  .tt-landing {
+    --tt-page-gutter: 22px;
+  }
+  .tt-landing .tt-hero h1 {
+    font-size: clamp(42px, 9vw, 58px);
+  }
+  .tt-landing .tt-capability-grid {
+    grid-template-columns: 1fr;
+  }
+  .tt-landing .tt-feature-menu button {
+    font-size: 14px;
+  }
+  .tt-landing .tt-lab-main {
+    padding: 20px;
+  }
+}
+@media (max-width: 420px) {
+  .tt-landing .tt-feature-menu {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tt-landing .tt-reveal > :not(.tt-atmosphere),
+  .tt-landing .tt-card-enter,
+  .tt-landing .tt-feature-content {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
+  }
+}

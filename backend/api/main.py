@@ -7,9 +7,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from db.database import init_db, database
-from api.routers import experiments, runs, registry, inference
+from api.routers import experiments, runs, registry, inference, cloud
 from config import BASE_DIR, get_device_info
 import torch
+from process_lock import try_lock, unlock
 
 
 @asynccontextmanager
@@ -47,16 +48,16 @@ def system_info_endpoint():
     with database() as c:
         active = c.execute("SELECT id,kind FROM jobs WHERE status='RUNNING'").fetchone()
         queued = c.execute("SELECT count(*) FROM jobs WHERE status='QUEUED'").fetchone()[0]
-    import fcntl
     from config import STORAGE_DIR
 
-    worker_online = False
-    with (STORAGE_DIR / "worker.lock").open("a") as f:
-        try:
-            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            fcntl.flock(f, fcntl.LOCK_UN)
-        except BlockingIOError:
-            worker_online = True
+    lock = (STORAGE_DIR / "worker.lock").open("a+b")
+    try:
+        acquired = try_lock(lock)
+        worker_online = not acquired
+        if acquired:
+            unlock(lock)
+    finally:
+        lock.close()
     return {
         "status": "online",
         "hardware": get_device_info(),
@@ -68,5 +69,5 @@ def system_info_endpoint():
     }
 
 
-for router in [experiments.router, runs.router, registry.router, inference.router]:
+for router in [experiments.router, runs.router, registry.router, inference.router, cloud.router]:
     app.include_router(router)

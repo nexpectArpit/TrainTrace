@@ -1,10 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
-import "./App.css";
+import Entry from "./app/Entry";
+
+import "./styles/index.css";
+import "./styles/mlflow-design.css";
+import "./styles/decisions.css";
+import "./styles/workflow-evidence.css";
+import "./styles/compare.css";
+import "./styles/registry.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    <Entry />
   </React.StrictMode>,
 );

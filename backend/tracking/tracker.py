@@ -1,24 +1,30 @@
 """Durable training orchestration; invoked only by the single worker."""
 
-import csv
 import json
 import os
-import platform
 import random
-import subprocess
-import sys
-import time
 import traceback
 from pathlib import Path
 import numpy as np
 import torch
 import torchvision
-from config import DATA_DIR, ARTIFACTS_DIR, get_device_info, BASE_DIR
+from config import DATA_DIR
 from core.models import get_model_by_name
-from core.dataset import get_cifar10_dataloaders, CIFAR10_MEAN, CIFAR10_STD
+from core.dataset import (
+    get_dataloaders,
+    dataset_spec,
+    preprocessing_contract,
+)
 from core.trainer import Trainer, TrainingStopped
 from db.database import database
-from storage import record_artifact, write_json, sha256, contained
+from storage import record_artifact, write_json, sha256, run_artifact_path, find_run_artifact
+from snapshot_contracts import encode_snapshot
+from reporting import render_dataset_preview
+from tracking.provenance import checkpoint_state_sha256, environment
+from tracking.external import WandbBridge
+from tracking.metrics_export import initialize_metrics_csv, publish_metrics_csv
+from tracking.dataset_preparation import load_training_data
+from tracking.progress_recorder import TrainingProgressRecorder
 
 
 def seed_everything(seed):
@@ -33,39 +39,13 @@ def seed_everything(seed):
     torch.backends.cudnn.deterministic = True
 
 
-def environment():
-    def git(*args):
-        try:
-            return subprocess.check_output(
-                ["git", "-C", str(BASE_DIR.parent), *args], stderr=subprocess.DEVNULL, text=True
-            ).strip()
-        except (OSError, subprocess.CalledProcessError):
-            return None
-
-    # Hash source as well as commit: uncommitted code is part of the actual environment.
-    source = {
-        str(p.relative_to(BASE_DIR)): sha256(p)
-        for p in sorted(BASE_DIR.rglob("*.py"))
-        if "storage" not in p.parts and "tests" not in p.parts
-    }
-    return {
-        "python": sys.version.split()[0],
-        "torch": torch.__version__,
-        "torchvision": torchvision.__version__,
-        "numpy": np.__version__,
-        "platform": platform.platform(),
-        "device": get_device_info(),
-        "git_commit": git("rev-parse", "HEAD"),
-        "git_dirty": bool(git("status", "--porcelain")),
-        "source_hashes": source,
-        "deterministic_algorithms": True,
-        "torch_threads": torch.get_num_threads(),
-    }
 
 
 def event(run_id, message):
     with database() as c:
         c.execute("INSERT INTO events(run_id,message) VALUES(?,?)", (run_id, str(message)))
+
+
 
 
 def cancelled(job_id):
@@ -82,8 +62,12 @@ def set_run(run_id, **fields):
         )
 
 
+
+
 def execute_run(config, job_id):
     run_id = config["run_id"]
+    wandb_bridge = None
+    recorder = None
 
     def check():
         return cancelled(job_id)
@@ -93,44 +77,102 @@ def execute_run(config, job_id):
             raise TrainingStopped("Stopped before execution")
         seed_everything(config["seed"])
         env = environment()
-        set_run(run_id, status="RUNNING", environment_json=json.dumps(env))
+        set_run(run_id, status="RUNNING", environment_json=encode_snapshot("environment", env))
+        dataset_key, spec = dataset_spec(config.get("dataset_name", "cifar10"))
+        set_run(
+            run_id,
+            progress_json=json.dumps(
+                {
+                    "phase": "model_setup",
+                    "message": "Creating the selected model and loading initialization weights.",
+                }
+            ),
+        )
+        model = get_model_by_name(
+            config["model_name"],
+            num_classes=spec["num_classes"],
+            pretrained=config["pretrained"],
+            architecture_config=config.get("architecture_config"),
+        )
+        if config.get("initialize_from_run_id"):
+            source_id = config["initialize_from_run_id"]
+            checkpoint_kind = config["warm_start_checkpoint_kind"]
+            checkpoint_path = find_run_artifact(
+                source_id, f"{source_id}_{checkpoint_kind}.pt", "checkpoints"
+            )
+            if not checkpoint_path.is_file() or sha256(checkpoint_path) != config.get(
+                "warm_start_checkpoint_sha256"
+            ):
+                raise ValueError("Warm-start checkpoint changed after run admission")
+            checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+            if checkpoint.get("run_id") != source_id:
+                raise ValueError("Warm-start checkpoint identity mismatch")
+            model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+            event(
+                run_id,
+                f"Initialized model weights from run {source_id}; optimizer and scheduler start fresh.",
+            )
+        train, val, dataset_started = load_training_data(
+            config, dataset_key, spec, set_run=set_run, event=event,
+            loader=get_dataloaders,
+        )
         event(
             run_id,
-            "Loading CIFAR-10; cached data is reused. Split seed is independent of initialization seed.",
+            f"{spec['name']} is ready: {len(train.dataset):,} training and {len(val.dataset):,} validation examples.",
         )
-        model = get_model_by_name(config["model_name"], pretrained=config["pretrained"])
-        loaders = get_cifar10_dataloaders(
-            batch_size=config["batch_size"],
-            seed=config["seed"],
-            split_seed=config["split_seed"],
-            num_workers=0,
+        set_run(
+            run_id,
+            progress_json=json.dumps(
+                {
+                    "phase": "model_setup",
+                    "message": "Dataset ready; preparing model and training pipeline.",
+                    "started_at": dataset_started,
+                }
+            ),
         )
-        train, val, test = loaders
+        wandb_bridge = WandbBridge(config, run_id)
+        set_run(run_id, tracking_json=json.dumps(wandb_bridge.metadata))
+        if wandb_bridge.reason:
+            event(run_id, wandb_bridge.reason + "; local training will continue.")
+        base_dataset = getattr(train.dataset, "dataset", None)
+        class_names = (
+            spec.get("classes")
+            or getattr(base_dataset, "classes", None)
+        )
+        if not class_names or len(class_names) != spec["num_classes"]:
+            raise ValueError(f"{spec['name']} did not provide its expected class names")
+        try:
+            render_dataset_preview(run_id, base_dataset, class_names)
+        except (OSError, ValueError, TypeError) as exc:
+            event(run_id, f"Dataset preview unavailable: {exc}")
         # Store split index hash and dataset file hash, not merely a descriptive label.
         indexes = {"train": list(train.dataset.indices), "validation": list(val.dataset.indices)}
         split_path = write_json(run_id, "split", indexes)
         dataset = {
-            "name": "CIFAR-10",
-            "version": "torchvision-cifar10-python",
+            "name": spec["name"],
+            "dataset_name": dataset_key,
+            "version": f"torchvision-{torchvision.__version__}",
+            "num_classes": spec["num_classes"],
+            "classes": list(class_names),
             "split_seed": config["split_seed"],
             "split_sha256": sha256(split_path),
+            "split_ratios": {"train": 0.9, "validation": 0.1, "test": "official test partition"},
             "counts": {
                 "train": len(train.dataset),
                 "validation": len(val.dataset),
-                "test": len(test.dataset),
+                "test": "official test partition (sealed until final evaluation)",
             },
-            "preprocessing": {
-                "size": [32, 32],
-                "mean": CIFAR10_MEAN,
-                "std": CIFAR10_STD,
-                "augmentation": ["RandomCrop(32,padding=4)", "RandomHorizontalFlip"],
-            },
+            "preprocessing": _preprocessing_manifest(
+                dataset_key, config["pretrained"], config["model_name"]
+            ),
             "file_hashes": {
                 str(p.relative_to(DATA_DIR)): sha256(p)
-                for p in sorted(DATA_DIR.rglob("data_batch_*"))
+                for p in sorted((DATA_DIR / spec["source_dir"]).rglob("*"))
+                if p.is_file()
             },
         }
-        set_run(run_id, dataset_json=json.dumps(dataset))
+        set_run(run_id, dataset_json=encode_snapshot("dataset", dataset))
+        initialize_metrics_csv(run_id)
         trainer = Trainer(
             model,
             train,
@@ -140,123 +182,81 @@ def execute_run(config, job_id):
             optimizer=config["optimizer"],
             weight_decay=config["weight_decay"],
             config=config,
+            save_dir=run_artifact_path(
+                run_id, f"{run_id}_best_checkpoint.pt", "checkpoints"
+            ).parent,
         )
 
-        def progress(**p):
-            if check():
-                raise TrainingStopped("Stopped by user")
-            p["lr"] = trainer.optimizer.param_groups[0]["lr"]
-            set_run(run_id, progress_json=json.dumps(p))
-
-        def epoch(number, m):
-            with database() as c:
-                c.execute(
-                    """INSERT INTO epoch_metrics(run_id,epoch,train_loss,train_acc,val_loss,val_acc,epoch_time_sec,learning_rate)
-                             VALUES(?,?,?,?,?,?,?,?)""",
-                    (
-                        run_id,
-                        number,
-                        m["train_loss"],
-                        m["train_acc"],
-                        m["val_loss"],
-                        m["val_acc"],
-                        m["epoch_time_sec"],
-                        m["learning_rate"],
-                    ),
-                )
+        recorder = TrainingProgressRecorder(run_id, trainer, check, set_run, wandb_bridge)
 
         history = trainer.train(
             config["epochs"],
             run_id,
-            progress,
+            recorder.progress,
             lambda m: event(run_id, m),
-            epoch,
+            recorder.epoch,
             check,
             lambda kind, path: record_artifact(run_id, kind, path),
         )
+        publish_metrics_csv(run_id)
         set_run(run_id, status="EVALUATING")
-        event(run_id, "Evaluating the best validation checkpoint on the holdout test set.")
+        event(
+            run_id,
+            "Finalizing validation evidence. The test partition remains sealed until selection.",
+        )
         checkpoint = torch.load(
             history["best_checkpoint_path"], map_location=trainer.device, weights_only=True
         )
-        model.load_state_dict(checkpoint["model_state_dict"])
-        evaluation = evaluate_candidate(model, test, trainer.device, check)
-        evaluation.update(
-            checkpoint_sha256=sha256(history["best_checkpoint_path"]),
-            checkpoint_epoch=checkpoint["epoch"],
-            parameter_count=sum(p.numel() for p in model.parameters()),
-            model_size_bytes=Path(history["best_checkpoint_path"]).stat().st_size,
+        best_epoch_index = max(range(len(history["val_acc"])), key=history["val_acc"].__getitem__)
+        validation = {
+            "metric_set": "validation",
+            "validation_loss": history["val_loss"][best_epoch_index],
+            "validation_accuracy": history["val_acc"][best_epoch_index],
+            "checkpoint_sha256": sha256(history["best_checkpoint_path"]),
+            "model_state_sha256": checkpoint_state_sha256(history["best_checkpoint_path"]),
+            "checkpoint_epoch": checkpoint["epoch"],
+            "parameter_count": sum(p.numel() for p in model.parameters()),
+            "model_size_bytes": Path(history["best_checkpoint_path"]).stat().st_size,
+        }
+        write_json(run_id, "validation", validation)
+        set_run(
+            run_id, status="COMPLETED", validation_json=encode_snapshot("validation", validation)
         )
-        write_json(run_id, "evaluation", evaluation)
-        with database() as c:
-            metrics = [
-                dict(r)
-                for r in c.execute(
-                    "SELECT * FROM epoch_metrics WHERE run_id=? ORDER BY epoch", (run_id,)
-                )
-            ]
-        path = contained(ARTIFACTS_DIR, f"{run_id}_metrics.csv")
-        with path.open("w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=list(metrics[0]))
-            writer.writeheader()
-            writer.writerows(metrics)
-        record_artifact(run_id, "metrics_csv", path)
-        set_run(run_id, status="COMPLETED", evaluation_json=json.dumps(evaluation))
-        event(run_id, f"Completed: holdout accuracy {evaluation['test_accuracy']:.2f}%")
-        return evaluation
+        event(
+            run_id, f"Completed: best validation accuracy {validation['validation_accuracy']:.2f}%"
+        )
+        return validation
     except TrainingStopped as e:
+        publish_metrics_csv(run_id)
         set_run(run_id, status="STOPPED", error=str(e))
         event(run_id, str(e))
         raise
     except Exception:
+        publish_metrics_csv(run_id)
         error = traceback.format_exc()
         set_run(run_id, status="FAILED", error=error)
         event(run_id, error)
         raise
+    finally:
+        if recorder:
+            try:
+                recorder.flush_samples()
+            except Exception as exc:
+                event(run_id, f"Could not persist partial-epoch samples: {type(exc).__name__}: {exc}")
+        if wandb_bridge:
+            wandb_bridge.close()
 
 
-def evaluate_candidate(model, loader, device, cancel=None):
-    model.eval()
-    matrix = torch.zeros(10, 10, dtype=torch.int64)
-    loss_sum = count = 0
-    if device.type == "cuda":
-        torch.cuda.synchronize()
-    if device.type == "mps":
-        torch.mps.synchronize()
-    start = time.perf_counter()
-    with torch.inference_mode():
-        for x, y in loader:
-            if cancel and cancel():
-                raise TrainingStopped("Stopped during holdout evaluation")
-            x, y = x.to(device), y.to(device)
-            out = model(x)
-            loss = torch.nn.functional.cross_entropy(out, y)
-            if not torch.isfinite(loss):
-                raise ValueError("Non-finite holdout loss")
-            count += len(y)
-            loss_sum += loss.item() * len(y)
-            values = (y * 10 + out.argmax(1)).cpu()
-            matrix += torch.bincount(values, minlength=100).reshape(10, 10)
-    if not count:
-        raise ValueError("Empty holdout dataset")
-    if device.type == "cuda":
-        torch.cuda.synchronize()
-    if device.type == "mps":
-        torch.mps.synchronize()
-    elapsed = time.perf_counter() - start
-    tp = matrix.diag().double()
-    precision = tp / matrix.sum(0).clamp(min=1)
-    recall = tp / matrix.sum(1).clamp(min=1)
-    f1 = 2 * precision * recall / (precision + recall).clamp(min=1e-15)
-    return {
-        "test_loss": loss_sum / count,
-        "test_accuracy": 100 * tp.sum().item() / count,
-        "precision_macro": precision.mean().item(),
-        "recall_macro": recall.mean().item(),
-        "f1_macro": f1.mean().item(),
-        "confusion_matrix": matrix.tolist(),
-        "latency_ms_per_sample": 1000 * elapsed / count,
-        "latency_method": "Batched holdout wall time including loading/transfers, divided by sample count",
-        "samples": count,
-        "evaluation_seconds": elapsed,
-    }
+def _preprocessing_manifest(dataset_name, pretrained, model_name):
+    contract = preprocessing_contract(dataset_name, pretrained, model_name)
+    size = contract["size"][0]
+    key = contract["dataset_name"]
+    if key in {"cifar10", "cifar100"}:
+        contract["augmentation"] = [f"RandomCrop({size},padding=4)", "RandomHorizontalFlip"]
+    elif key in {"mnist", "fashion_mnist"}:
+        contract["augmentation"] = ["RandomAffine(degrees=10,translate=0.08,scale=0.9-1.1,shear=5)"]
+    elif key == "svhn":
+        contract["augmentation"] = ["RandomAffine(degrees=5,translate=0.05,scale=0.95-1.05)"]
+    else:
+        contract["augmentation"] = []
+    return contract

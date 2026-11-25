@@ -13,6 +13,14 @@ Senior Engineering Rationale:
 
 from pathlib import Path
 import os
+try:
+    from dotenv import load_dotenv
+
+    # Load project root .env and backend .env if present
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    load_dotenv(Path(__file__).resolve().parent / ".env")
+except ImportError:
+    pass
 import torch
 
 # -----------------------------------------------------------------------------
@@ -29,7 +37,7 @@ DOCS_DIR = BASE_DIR.parent / "docs"
 STORAGE_DIR = Path(os.getenv("TRAINTRACE_STORAGE_DIR", str(BASE_DIR / "storage"))).resolve()
 DATA_DIR = Path(
     os.getenv("TRAINTRACE_DATA_DIR", str(STORAGE_DIR / "data"))
-).resolve()  # Raw & preprocessed dataset storage (CIFAR-10)
+).resolve()  # Raw & preprocessed CIFAR dataset storage
 DATABASE_DIR = STORAGE_DIR / "db"  # SQLite database storage directory
 ARTIFACTS_DIR = STORAGE_DIR / "artifacts"  # Checkpoints (.pt), plots, JSON eval reports
 REGISTRY_DIR = STORAGE_DIR / "registry"  # Promoted production model packages
