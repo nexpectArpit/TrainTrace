@@ -1,0 +1,665 @@
+.investigations-page {
+  --ink: #182b45;
+  --soft-ink: #425675;
+  --line: #dbe4ef;
+  --accent: #315cca;
+  --mint: #d8f2e9;
+  color: var(--ink);
+}
+.investigation-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  overflow: hidden;
+  min-height: 190px;
+  padding: 2rem 2.25rem;
+  margin: 0 0 1.4rem;
+  border: 1px solid #ceddf0;
+  border-radius: 20px;
+  background:
+    radial-gradient(
+      circle at 82% 24%,
+      rgba(109, 150, 255, 0.2),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 92% 100%,
+      rgba(85, 200, 162, 0.16),
+      transparent 30%
+    ),
+    linear-gradient(112deg, #f5f8ff 4%, #edf3ff 58%, #eef8f5 100%);
+}
+.investigation-hero::after {
+  position: absolute;
+  right: 17%;
+  bottom: -76px;
+  width: 190px;
+  height: 190px;
+  border: 1px solid rgba(62, 96, 160, 0.12);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 22px rgba(62, 96, 160, 0.035),
+    0 0 0 46px rgba(62, 96, 160, 0.025);
+  content: "";
+  pointer-events: none;
+}
+.investigation-hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 690px;
+}
+.section-kicker {
+  display: block;
+  margin-bottom: 0.55rem;
+  color: #496592;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.investigation-hero h2 {
+  margin: 0;
+  color: #1a3152;
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  letter-spacing: -0.045em;
+}
+.investigation-hero p {
+  max-width: 570px;
+  margin: 0.65rem 0 0;
+  color: #526783;
+  font-size: 0.95rem;
+}
+.hero-count {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 0 0 132px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 132px;
+  height: 132px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 10px 30px rgba(48, 77, 131, 0.08);
+  backdrop-filter: blur(6px);
+}
+.hero-count > span {
+  color: #294f9e;
+  font-size: 2.5rem;
+  font-weight: 750;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+.hero-count small {
+  max-width: 95px;
+  margin-top: 0.45rem;
+  color: #536987;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  text-align: center;
+}
+.investigation-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(310px, 0.9fr);
+  align-items: start;
+  gap: 1.2rem;
+}
+.investigation-columns > .panel {
+  height: 100%;
+  padding: 1.4rem;
+  border-color: #dde5ef;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(32, 55, 91, 0.045);
+}
+.investigation-columns .panel-heading {
+  margin-bottom: 0.55rem;
+}
+.investigation-columns .panel-heading h2 {
+  color: #1d3454;
+  font-size: 1.13rem;
+}
+.panel-intro {
+  min-height: 2.8rem;
+  margin: 0 0 1.15rem;
+  color: #687992;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.investigation-form .field,
+.edit-investigation-form .field {
+  margin-bottom: 1rem;
+  color: #344b69;
+  font-size: 0.78rem;
+}
+.investigation-form textarea {
+  min-height: 74px;
+}
+.investigation-form input,
+.investigation-form textarea,
+.edit-investigation-form input,
+.edit-investigation-form textarea,
+.investigation-search-row input {
+  border-color: #d2dce9;
+  border-radius: 9px;
+  background: #fbfcfe;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+.investigation-form input:focus,
+.investigation-form textarea:focus,
+.edit-investigation-form input:focus,
+.edit-investigation-form textarea:focus,
+.investigation-search-row input:focus {
+  border-color: #6686d9;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 111, 204, 0.11);
+  outline: 0;
+}
+.investigation-form textarea {
+  min-height: 94px;
+}
+.investigation-form input::placeholder,
+.investigation-form textarea::placeholder,
+.investigation-search-row input::placeholder {
+  color: #92a0b3;
+  font-weight: 400;
+}
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+.form-footer > span {
+  color: #738198;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+.create-investigation {
+  flex: 0 0 auto;
+  border-radius: 9px;
+  padding: 0.7rem 1rem;
+  box-shadow: 0 5px 12px rgba(37, 79, 180, 0.18);
+}
+.create-investigation span {
+  margin-right: 0.25rem;
+  font-size: 1.05rem;
+  vertical-align: -1px;
+}
+.investigation-search-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+.investigation-search-row .field {
+  flex: 1;
+  margin-bottom: 0.25rem;
+}
+.result-count {
+  flex: 0 0 auto;
+  margin-bottom: 0.85rem;
+  color: #77869b;
+  font-size: 0.68rem;
+}
+.investigation-list {
+  display: grid;
+  gap: 0.7rem;
+  max-height: 480px;
+  overflow-y: auto;
+  padding: 0.3rem 0.2rem 0.3rem 0;
+}
+.investigation-card {
+  min-width: 0;
+  padding: 0.95rem 1rem 0.85rem;
+  border: 1px solid #e0e7f0;
+  border-radius: 12px;
+  background: #fff;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    transform 140ms ease;
+}
+.investigation-card:hover {
+  transform: translateY(-1px);
+  border-color: #b8c9e5;
+  background: #fcfdff;
+}
+.investigation-card.is-current {
+  border-color: #d0d7de;
+  background: #f6f8fa;
+  box-shadow: none;
+}
+.investigation-card-topline,
+.investigation-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.investigation-card-topline {
+  min-height: 1rem;
+}
+.record-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: #40a986;
+  box-shadow: 0 0 0 3px #e0f4ed;
+}
+.record-dot.is-archived {
+  background: #929fb0;
+  box-shadow: 0 0 0 3px #edf0f4;
+}
+.investigation-state {
+  color: #718198;
+  font-size: 0.66rem;
+  font-weight: 650;
+}
+.current-marker {
+  margin-left: auto;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background: #e4ecff;
+  color: #3157aa;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.investigation-card h3 {
+  margin: 0.65rem 0 0.3rem;
+  color: #203858;
+  font-size: 0.91rem;
+  line-height: 1.4;
+}
+.investigation-card p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #718097;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.investigation-card-bottom {
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #edf1f6;
+}
+.investigation-card code,
+.active-record-heading code {
+  overflow: hidden;
+  color: #8592a4;
+  font-size: 0.64rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.record-open {
+  flex: 0 0 auto;
+  min-height: 32px !important;
+  border: 0;
+  padding: 0.35rem 0.4rem;
+  background: transparent;
+  color: #345fbb;
+  font-size: 0.7rem;
+}
+.record-open:hover:enabled {
+  background: #edf3ff;
+}
+.record-open.current-open {
+  color: #5d6e86;
+  cursor: default;
+}
+.investigation-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  border: 1px dashed #d4deeb;
+  border-radius: 12px;
+  background: #fafcff;
+  text-align: center;
+}
+.investigation-empty > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin-bottom: 0.7rem;
+  border-radius: 12px;
+  background: #eaf0ff;
+  color: #4166bd;
+  font-size: 1.2rem;
+}
+.investigation-empty strong {
+  color: #344b69;
+  font-size: 0.82rem;
+}
+.investigation-empty p {
+  max-width: 230px;
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+}
+.compact-empty {
+  padding: 1.5rem 1rem;
+}
+.active-investigation {
+  overflow: hidden;
+  margin-top: 1.3rem;
+  border: 1px solid #d9e3ef;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 24px rgba(32, 55, 91, 0.045);
+}
+.active-record-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem 1.5rem;
+  border-bottom: 1px solid #e7edf4;
+  background: linear-gradient(100deg, #f7f9ff, #fff 70%);
+}
+.active-record-heading .section-kicker {
+  margin-bottom: 0.35rem;
+}
+.active-record-heading h2 {
+  margin: 0 0 0.3rem;
+  color: #1d3558;
+  font-size: 1.17rem;
+}
+.edit-record-button {
+  border-color: #d4deeb;
+  border-radius: 8px;
+  color: #3d5576;
+  font-size: 0.75rem;
+}
+.active-record-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+.investigation-notes {
+  display: grid;
+  gap: 0.95rem;
+  align-content: start;
+}
+.note-block {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+.note-block > span,
+.report-links > span {
+  color: #8290a3;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+.note-block p {
+  margin: 0.28rem 0 0;
+  color: #405570;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+.conclusion-note {
+  border-color: #a4d7c4;
+}
+.investigation-progress-card {
+  align-self: start;
+  padding: 1rem;
+  border: 1px solid #e1e9f2;
+  border-radius: 12px;
+  background: #f8fafd;
+}
+.progress-numbers {
+  display: flex;
+  gap: 2rem;
+  margin: 0.9rem 0 1rem;
+}
+.progress-numbers div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.progress-numbers strong {
+  color: #203a60;
+  font-size: 1.5rem;
+  letter-spacing: -0.05em;
+}
+.progress-numbers span {
+  color: #79889d;
+  font-size: 0.67rem;
+}
+.configure-approach {
+  width: 100%;
+  border-radius: 8px;
+  font-size: 0.73rem;
+}
+.investigation-progress-card > small {
+  margin-top: 0.55rem;
+  color: #7c899b;
+  text-align: center;
+}
+.report-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.2rem;
+  padding: 0.9rem 1.5rem;
+  border-top: 1px solid #e7edf4;
+  background: #fcfdff;
+}
+.report-links > span {
+  margin-right: 0.25rem;
+}
+.report-links a {
+  color: #365eaa;
+  font-size: 0.7rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+.report-links a:hover {
+  text-decoration: underline;
+}
+.report-links a span {
+  margin-left: 0.15rem;
+  color: #8395b3;
+}
+.edit-investigation-form {
+  padding: 1.3rem 1.5rem 1.5rem;
+}
+.edit-investigation-form textarea {
+  min-height: 76px;
+}
+.archive-check {
+  width: fit-content;
+  margin-top: 0.4rem;
+  color: #526681;
+}
+.edit-actions {
+  display: flex;
+  gap: 0.55rem;
+}
+
+/* The record list is the landing task; creation stays available on demand. */
+.investigations-page .investigation-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.investigations-page .investigation-columns > .panel {
+  order: 1;
+  width: 100%;
+  height: auto;
+}
+.investigations-page .investigation-create-disclosure {
+  order: 0;
+  width: 100%;
+  border: 1px solid var(--tt-border);
+  background: var(--tt-surface);
+}
+.investigations-page .investigation-create-disclosure > summary {
+  padding: 12px 16px;
+  color: var(--tt-text);
+  font-weight: 650;
+}
+.investigations-page .investigation-create-disclosure[open] > summary {
+  border-bottom: 1px solid var(--tt-border);
+}
+.investigations-page .investigation-create-disclosure > .panel {
+  max-width: 800px;
+  border: 0;
+  box-shadow: none;
+}
+.app-shell .investigations-page .investigation-hero {
+  min-height: 0;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  border-radius: var(--tt-radius-surface);
+  background: var(--tt-surface);
+}
+.app-shell .investigations-page .investigation-hero::after {
+  display: none;
+}
+.app-shell .investigations-page .investigation-hero h2 {
+  font-size: 1.4rem;
+}
+.investigations-page .investigation-hero p {
+  font-size: 0.84rem;
+}
+.investigations-page .hero-count {
+  width: auto;
+  height: auto;
+  flex-basis: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-surface);
+  box-shadow: none;
+  background: var(--tt-canvas);
+}
+.investigations-page .hero-count > span {
+  font-size: 1.35rem;
+  color: var(--tt-text);
+}
+.investigations-page .hero-count small {
+  max-width: 90px;
+  margin-top: 2px;
+  color: var(--tt-muted);
+}
+.investigations-page .active-investigation {
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .investigation-records-table caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .app-shell .investigations-page .investigation-hero {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+  }
+  .investigations-page .hero-count {
+    display: none;
+  }
+}
+
+.investigation-records-table {
+  width: 100%;
+  min-width: 0 !important;
+  table-layout: fixed;
+  white-space: normal;
+}
+
+.investigation-records-table th,
+.investigation-records-table td {
+  padding: 0.58rem 0.38rem;
+}
+
+.investigation-records-table th {
+  white-space: nowrap;
+}
+
+.investigation-records-table td {
+  white-space: normal;
+}
+
+.investigation-records-table th:nth-child(1) {
+  width: 29%;
+}
+
+.investigation-records-table th:nth-child(2) {
+  width: 49%;
+}
+
+.investigation-records-table th:nth-child(3) {
+  width: 12%;
+}
+
+.investigation-records-table th:nth-child(4) {
+  width: 10%;
+}
+
+.investigation-records-table td .link {
+  white-space: nowrap;
+  font-size: 0.67rem;
+}
+
+.investigation-records-table .record-state {
+  padding: 0.18rem 0.34rem;
+}
+
+.app-shell.theme-dark .investigation-records-table td code {
+  color: var(--tt-muted);
+}
+
+@media (max-width: 600px) {
+  .investigation-records-table thead {
+    display: none;
+  }
+  .investigation-records-table,
+  .investigation-records-table tbody,
+  .investigation-records-table tr,
+  .investigation-records-table td {
+    display: block;
+    width: 100%;
+  }
+  .investigation-records-table tbody {
+    display: grid;
+    gap: 8px;
+  }
+  .investigation-records-table tr {
+    padding: 10px 12px;
+    border: 1px solid var(--tt-border);
+    border-radius: var(--tt-radius-surface);
+    background: var(--tt-surface);
+  }
+  .investigation-records-table td {
+    padding: 3px 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .investigation-records-table td:first-child strong {
+    font-size: 0.88rem;
+  }
+  .investigation-records-table td:last-child {
+    padding-top: 7px;
+  }
+  .investigation-records-table td .link {
+    font-size: 0.8rem;
+  }
+}

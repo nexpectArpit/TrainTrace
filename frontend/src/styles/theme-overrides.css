@@ -1,0 +1,393 @@
+/* Final dark overrides follow page-specific styling so every screen stays themed. */
+.app-shell.theme-dark .panel,
+.app-shell.theme-dark .investigation-columns > .panel {
+  border-color: #2d394b;
+  background: #1b2432;
+  color: #e6ebf3;
+}
+
+.app-shell.theme-dark .panel-heading h2,
+.app-shell.theme-dark .panel h2,
+.app-shell.theme-dark .panel h3 {
+  color: #e6ebf3;
+}
+
+.app-shell.theme-dark .panel-intro,
+.app-shell.theme-dark .panel > p,
+.app-shell.theme-dark .panel p {
+  color: #aab7c9;
+}
+
+.app-shell.theme-dark
+  input:not([type="checkbox"]):not([type="file"]):not([type="radio"]),
+.app-shell.theme-dark select,
+.app-shell.theme-dark textarea {
+  border-color: #3a485d;
+  background-color: #151e2a;
+  color: #e2e8f1;
+  color-scheme: dark;
+}
+
+.app-shell.theme-dark input[aria-invalid="true"],
+.app-shell.theme-dark textarea[aria-invalid="true"] {
+  border-color: #f85149;
+}
+
+.app-shell.theme-dark thead th {
+  border-color: #344154;
+  background: #202b3a;
+  color: #aebbd0;
+}
+
+.app-shell.theme-dark tbody td {
+  border-color: #2b384a;
+  color: #c1ccdc;
+}
+
+.app-shell.theme-dark tbody tr:hover td {
+  background: #202b3a;
+}
+
+.app-shell.theme-dark .investigation-card,
+.app-shell.theme-dark .record {
+  border-color: #344154;
+  background: #202b3a;
+  box-shadow: none;
+}
+
+.app-shell.theme-dark .investigation-card.is-current {
+  border-color: #30363d;
+  background: #1b2432;
+  box-shadow: none;
+}
+
+.app-shell.theme-dark .investigation-card h3,
+.app-shell.theme-dark .investigation-empty strong {
+  color: #dbe3ef;
+}
+
+.app-shell.theme-dark .investigation-card p,
+.app-shell.theme-dark .record p {
+  color: #aab7c9;
+}
+
+.app-shell.theme-dark .investigation-card-bottom {
+  border-color: #354154;
+}
+
+.app-shell.theme-dark .investigation-empty {
+  border-color: #3a485d;
+  background: #182230;
+}
+
+.app-shell.theme-dark .investigation-empty > span {
+  background: #293552;
+  color: #b8c4ff;
+}
+
+.app-shell.theme-dark .chart {
+  border-color: #354154;
+  background: #182230;
+}
+
+.app-shell.theme-dark .chart figcaption {
+  color: #e1e7f1;
+}
+
+.app-shell.theme-dark .chart .legend {
+  border-color: #354154;
+}
+
+.app-shell.theme-dark .advanced-filter-panel,
+.app-shell.theme-dark details,
+.app-shell.theme-dark .architecture-controls,
+.app-shell.theme-dark .checkpoint-picker,
+.app-shell.theme-dark .upload-preview,
+.app-shell.theme-dark .model-input-preview {
+  border-color: #354154;
+  background: #182230;
+}
+
+.app-shell.theme-dark .checkpoint-picker legend,
+.app-shell.theme-dark .checkpoint-option label strong,
+.app-shell.theme-dark .upload-preview strong,
+.app-shell.theme-dark .model-input-preview figcaption,
+.app-shell.theme-dark .compare-inference-table tbody th {
+  color: #e6ebf3;
+}
+
+.app-shell.theme-dark .checkpoint-picker-toolbar,
+.app-shell.theme-dark .checkpoint-option label small {
+  color: #aab7c9;
+}
+
+.app-shell.theme-dark .checkpoint-option {
+  border-color: #344154;
+  background: #202b3a;
+}
+
+.app-shell.theme-dark .checkpoint-option.is-selected {
+  border-color: #5b84d6;
+  background: #22324c;
+}
+
+.app-shell.theme-dark .inference-compare-note {
+  border-color: #354b6e;
+  background: #1b2a40;
+  color: #c5d6ee;
+}
+
+.app-shell.theme-dark .compare-inference-results {
+  border-top-color: #2d394b;
+}
+
+.app-shell.theme-dark .queue-disabled-reason,
+.app-shell.theme-dark .form-footer > span {
+  color: #aab7c9;
+}
+
+.app-shell.theme-dark footer {
+  border-color: #293445;
+  color: #8998ae;
+}
+
+/* Localhost review fixes: reliable dark contrast, reachable tables, and a consistent icon set. */
+.app-shell.theme-dark main h1,
+.app-shell.theme-dark main h2,
+.app-shell.theme-dark main h3,
+.app-shell.theme-dark .training-page > .panel:first-child .panel-heading h2 {
+  color: #edf2fa;
+}
+
+.app-shell.theme-dark .eyebrow,
+.app-shell.theme-dark .section-kicker,
+.app-shell.theme-dark .field > span,
+.app-shell.theme-dark .form-footer > span,
+.app-shell.theme-dark .queue-disabled-reason,
+.app-shell.theme-dark .field-range-hint {
+  color: #b8c5d7;
+}
+
+.app-shell.theme-dark .required-indicator,
+.app-shell.theme-dark .required-fields-legend > span {
+  color: #ff7b72;
+}
+
+.app-shell.theme-dark .required-fields-legend {
+  color: #b8c5d7;
+}
+
+.app-shell.theme-dark .initialization-note,
+.app-shell.theme-dark .predecessor-context,
+.app-shell.theme-dark .execution-stage,
+.app-shell.theme-dark .compare-filter-toolbar,
+.app-shell.theme-dark .table-wrap,
+.app-shell.theme-dark .metric-strip > div,
+.app-shell.theme-dark .empty {
+  border-color: #354357;
+  background: #182230;
+  color: #c5d0df;
+}
+
+.app-shell.theme-dark .execution-stage {
+  border-color: #354357;
+  background: #182230;
+}
+
+.app-shell.theme-dark .execution-stage-heading strong {
+  color: #e1e8f2;
+}
+
+.app-shell.theme-dark .execution-stage-heading p,
+.app-shell.theme-dark .execution-stage-count {
+  color: #aab7c9;
+}
+
+.app-shell.theme-dark .execution-stage-track {
+  background: #354357;
+}
+
+.app-shell.theme-dark .note-block {
+  border-color: #30363d;
+}
+
+.app-shell.theme-dark .table-wrap table {
+  background: transparent;
+}
+
+.app-shell.theme-dark .table-wrap caption {
+  color: #c2cede;
+}
+
+.app-shell.theme-dark .table-wrap tbody td {
+  color: #d0d9e6;
+}
+
+.app-shell.theme-dark details summary,
+.app-shell.theme-dark .advanced-run-id summary {
+  color: #c5d0df;
+}
+
+.app-shell.theme-dark .investigation-summary small {
+  color: #b8c5d7;
+}
+
+.app-shell.theme-dark main a:not(.skip) {
+  color: #8bc5f0;
+}
+
+.app-shell.theme-dark main a:not(.skip):hover {
+  color: #b2ddfa;
+}
+
+.app-shell.theme-dark input[type="file"] {
+  border-color: #52627a;
+  background: #182230;
+  color: #d0dae7;
+  color-scheme: dark;
+}
+
+.app-shell.theme-dark input[type="file"]::file-selector-button {
+  border: 1px solid #52627a;
+  border-radius: 5px;
+  background: #27364a;
+  color: #e1e8f2;
+}
+
+.app-shell button:disabled {
+  opacity: 0.82;
+}
+
+.app-shell button.primary:disabled {
+  background: #7894aa;
+  color: #fff;
+}
+
+.app-shell.theme-dark button:disabled {
+  border-color: #52627a;
+  background: #29384b;
+  color: #d1dbe8;
+  opacity: 1;
+}
+
+.app-shell.theme-dark button.primary:disabled {
+  border-color: #54799a;
+  background: #365a75;
+  color: #f0f5fa;
+}
+
+.table-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #9ba9bb #eef1f5;
+}
+
+.table-scroll:focus-visible {
+  outline: 2px solid #5a78d4;
+  outline-offset: 2px;
+}
+
+.table-scroll > table {
+  min-width: 820px;
+}
+
+.table-scroll > table.compare-runs-table {
+  min-width: 1080px;
+}
+
+.table-scroll-hint {
+  margin: 0.5rem 0 -0.65rem;
+  color: #64748b;
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+.app-shell.theme-dark .table-scroll {
+  scrollbar-color: #687b96 #1a2533;
+}
+
+.app-shell.theme-dark .table-scroll-hint {
+  color: #c0ccdc;
+}
+
+.workspace-nav button {
+  gap: 0.62rem;
+}
+
+.workspace-nav button .nav-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  color: #71829c;
+  stroke-width: 1.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.workspace-nav button[aria-current="page"] .nav-icon {
+  color: #2272b4;
+  stroke-width: 2;
+}
+
+.app-shell.theme-dark .workspace-nav button .nav-icon {
+  color: #a3b1c5;
+}
+
+.app-shell.theme-dark .workspace-nav button[aria-current="page"] .nav-icon {
+  color: #9ccdf2;
+}
+
+/* Dark theme investigation table & typography refinements */
+.app-shell.theme-dark .investigation-objective-cell {
+  color: #cbd5e1;
+}
+
+.app-shell.theme-dark .investigation-records-table th {
+  color: #94a3b8;
+  border-bottom-color: #334155;
+}
+
+.app-shell.theme-dark .investigation-records-table td {
+  color: #e2e8f0;
+  border-bottom-color: #1e293b;
+}
+
+.app-shell.theme-dark .investigation-records-table td strong {
+  color: #f8fafc;
+}
+
+.app-shell.theme-dark .investigation-records-table td small {
+  color: #94a3b8;
+}
+
+.app-shell.theme-dark .record-state.is-active {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+  border: 1px solid rgba(74, 222, 128, 0.28);
+}
+
+.app-shell.theme-dark .record-state.is-archived {
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.app-shell.theme-dark .investigation-records-table td .link {
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+.app-shell.theme-dark .investigation-records-table td .link:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+@media (max-width: 760px) {
+  .workspace-nav button .nav-icon {
+    width: 16px;
+    height: 16px;
+    flex-basis: 16px;
+  }
+}

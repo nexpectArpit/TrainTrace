@@ -1,0 +1,133 @@
+.timeline {
+  border-top: 1px solid var(--tt-border);
+  padding: 20px 24px;
+  color: var(--tt-text);
+  background: var(--tt-surface);
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.heading h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+.heading p {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--tt-muted);
+  font-size: 0.82rem;
+}
+.heading > span {
+  flex: 0 0 auto;
+  color: var(--tt-muted);
+  font-size: 0.78rem;
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 14px;
+  border-left: 1px solid var(--tt-border);
+}
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 20px;
+  padding: 4px 0 18px 18px;
+  border-bottom: 1px solid var(--tt-border);
+}
+.item + .item {
+  padding-top: 18px;
+}
+.item::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: -19px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tt-blue);
+  border: 2px solid var(--tt-surface);
+}
+.item + .item::before {
+  top: 26px;
+}
+.item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.itemMain {
+  min-width: 0;
+}
+.itemMain strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+.meta {
+  display: block;
+  margin-top: 4px;
+  color: var(--tt-muted);
+  font-size: 0.76rem;
+}
+.itemMain p {
+  margin: 7px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.rationale {
+  color: var(--tt-muted);
+}
+.evidence {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+}
+.evidence > span:last-child {
+  color: var(--tt-muted);
+  font-variant-numeric: tabular-nums;
+}
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+}
+.actions button {
+  min-height: 32px;
+  padding: 5px 9px;
+  font-size: 0.76rem;
+}
+.empty {
+  margin: 0;
+  color: var(--tt-muted);
+}
+@media (max-width: 720px) {
+  .timeline {
+    padding: 16px;
+  }
+  .item {
+    display: block;
+  }
+  .evidence {
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+  .actions {
+    margin-top: 10px;
+  }
+  .heading {
+    display: block;
+  }
+  .heading > span {
+    display: block;
+    margin-top: 8px;
+  }
+}

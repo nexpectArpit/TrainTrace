@@ -1,0 +1,87 @@
+.compare-selected-runs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+.compare-filter-panel {
+  margin: 12px 0;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-control);
+  background: var(--tt-surface);
+}
+.compare-filter-panel > summary {
+  padding: 11px 14px;
+  cursor: pointer;
+  font-weight: 650;
+}
+.compare-filter-panel[open] > summary {
+  border-bottom: 1px solid var(--tt-border);
+}
+.compare-filter-panel .compare-filter-toolbar,
+.compare-filter-panel .compare-advanced-filters {
+  margin: 12px 14px;
+}
+.compare-advanced-filters h3 {
+  margin: 8px 0 12px;
+  font-size: 0.85rem;
+}
+.compare-selected-runs button {
+  display: inline-flex;
+  align-items: center;
+  max-width: min(280px, 100%);
+  overflow: hidden;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-control);
+  background: var(--tt-surface);
+  color: var(--tt-text);
+  white-space: nowrap;
+}
+.compare-selected-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.compare-selected-runs button span {
+  margin-left: 6px;
+  color: var(--tt-muted);
+}
+.compare-runs-table th:nth-child(n + 6):not(:last-child),
+.compare-runs-table td:nth-child(n + 6):not(:last-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.compare-runs-table th:nth-child(2),
+.compare-runs-table td:nth-child(2) {
+  position: sticky;
+  left: 40px;
+  z-index: 1;
+  background: var(--tt-surface);
+}
+.compare-runs-table thead th:nth-child(2) {
+  z-index: 2;
+  background: var(--tt-canvas);
+}
+.compare-runs-table tbody tr:hover td:nth-child(2) {
+  background: var(--tt-canvas);
+}
+.compare-runs-table .compare-sort-button {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  white-space: nowrap;
+}
+.compare-runs-table .compare-sort-button:hover {
+  color: var(--tt-blue);
+  background: transparent;
+}
+@media (max-width: 760px) {
+  .compare-runs-table th:nth-child(2),
+  .compare-runs-table td:nth-child(2) {
+    position: static;
+  }
+}

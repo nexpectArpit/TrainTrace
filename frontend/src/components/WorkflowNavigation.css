@@ -1,0 +1,28 @@
+.workflow-navigation {
+  margin-top: 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--tt-border);
+  color: var(--tt-text);
+}
+.workflow-navigation p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.workflow-navigation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.workflow-navigation-actions .primary {
+  margin-left: auto;
+}
+@media (max-width: 620px) {
+  .workflow-navigation-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .workflow-navigation-actions .primary {
+    margin-left: 0;
+  }
+}

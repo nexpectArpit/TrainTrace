@@ -1,0 +1,31 @@
+.registry-model-table {
+  min-width: 950px;
+  font-variant-numeric: tabular-nums;
+}
+.registry-model-table th:nth-child(5),
+.registry-model-table td:nth-child(5) {
+  text-align: right;
+}
+.registry-model-table th:first-child,
+.registry-model-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--tt-surface);
+}
+.registry-model-table thead th:first-child {
+  z-index: 3;
+  background: var(--tt-surface-2);
+}
+.registry-model-table tbody tr:hover td:first-child {
+  background: var(--tt-surface-2);
+}
+.registry-model-table td:first-child strong {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .registry-model-table th:first-child,
+  .registry-model-table td:first-child {
+    position: static;
+  }
+}

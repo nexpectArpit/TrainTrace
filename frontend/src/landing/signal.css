@@ -1,0 +1,311 @@
+.tt-landing .tt-signal {
+  width: min(100%, 980px);
+  margin-inline: auto;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  animation: tt-enter 700ms both;
+}
+.tt-landing .tt-signal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--landing-line);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.tt-signal-top > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.tt-landing .tt-signal-top strong {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.tt-signal-live-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 5px rgb(69 173 240 / 12%);
+  animation: tt-signal-breathe 2.8s ease-in-out infinite;
+}
+.tt-signal-run {
+  color: var(--landing-muted);
+  font:
+    10px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.04em;
+}
+.tt-signal-demo {
+  color: var(--landing-muted);
+  font-size: 11px;
+}
+.tt-signal-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(230px, 0.8fr);
+  min-width: 0;
+}
+.tt-signal-chart {
+  padding: 24px 28px 19px;
+  min-width: 0;
+}
+.tt-signal-chart-title {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.tt-signal-chart-title small,
+.tt-signal-insight-head small {
+  display: block;
+  color: var(--accent);
+  font:
+    700 10px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.11em;
+}
+.tt-landing .tt-signal-chart-title h3 {
+  margin: 8px 0 0;
+  color: var(--ink);
+  font-size: clamp(18px, 1.8vw, 24px);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.tt-signal-chart-title > span,
+.tt-signal-chart-foot {
+  color: var(--landing-muted);
+  font-size: 11px;
+}
+.tt-landing .tt-signal-chart svg {
+  width: 100%;
+  height: auto;
+  max-height: 270px;
+  margin: 16px 0 0;
+  overflow: hidden;
+}
+.tt-signal-grid {
+  stroke: var(--landing-line);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+}
+.tt-signal-axis {
+  fill: var(--landing-muted);
+  font:
+    11px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.tt-signal-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tt-signal-train {
+  stroke: #45adf0;
+}
+.tt-signal-ghost-line {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+  opacity: 0.35;
+}
+.tt-signal-ghost-train {
+  stroke: #45adf0;
+}
+.tt-signal-ghost-validation {
+  stroke: #a36edf;
+}
+.tt-signal-epoch-label {
+  transition:
+    fill 150ms ease,
+    font-weight 150ms ease;
+}
+.tt-signal-epoch-label:hover {
+  fill: var(--accent);
+  font-weight: 700;
+}
+.tt-signal-epoch-label.is-active-epoch {
+  fill: var(--accent);
+  font-weight: 700;
+}
+.tt-signal-validation {
+  stroke: #a36edf;
+  stroke-width: 2.5;
+}
+.tt-signal-cursor {
+  stroke: var(--landing-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  opacity: 0.8;
+}
+.tt-signal-marker {
+  stroke: var(--landing-card);
+  stroke-width: 2;
+}
+.tt-signal-chart svg {
+  cursor: crosshair;
+}
+.tt-signal-chart svg:focus-visible {
+  outline: 2px solid #45adf0;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+.tt-signal-train-marker {
+  fill: #45adf0;
+}
+.tt-signal-validation-marker {
+  fill: #a36edf;
+}
+.tt-signal-chart-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding-left: 22px;
+}
+.tt-signal-legend {
+  display: flex;
+  gap: 20px;
+}
+.tt-signal-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.tt-signal-legend i {
+  display: inline-block;
+  width: 19px;
+  border-top: 3px solid #45adf0;
+}
+.tt-signal-legend span:nth-child(2) i {
+  border-color: #a36edf;
+  border-top-style: dashed;
+}
+.tt-signal-insight {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 25px;
+  background: color-mix(in srgb, var(--tt-band-a) 52%, var(--landing-card));
+  border-left: 1px solid var(--landing-line);
+}
+.tt-signal-insight-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 10px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--landing-line);
+}
+.tt-landing .tt-signal-insight-head strong {
+  font:
+    650 30px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink);
+}
+.tt-signal-insight-head strong span {
+  font-size: 13px;
+  color: var(--landing-muted);
+  letter-spacing: 0;
+}
+.tt-signal-reading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--landing-line);
+  font-size: 12px;
+  color: var(--landing-muted);
+}
+.tt-landing .tt-signal-reading strong {
+  font:
+    650 16px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.tt-landing .tt-signal-insight p {
+  margin: 19px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--landing-muted);
+}
+.tt-landing .tt-signal-pause {
+  align-self: flex-start;
+  margin-top: auto;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--landing-line);
+  background: var(--landing-card);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 650;
+}
+.tt-landing .tt-signal-pause:hover:enabled {
+  background: color-mix(in srgb, var(--accent) 13%, var(--landing-card));
+  color: var(--ink);
+}
+@keyframes tt-signal-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes tt-signal-breathe {
+  50% {
+    box-shadow: 0 0 0 9px rgb(69 173 240 / 4%);
+  }
+}
+@media (max-width: 760px) {
+  .tt-signal-layout {
+    grid-template-columns: 1fr;
+  }
+  .tt-signal-insight {
+    border-left: 0;
+    border-top: 1px solid var(--landing-line);
+    padding: 18px;
+  }
+  .tt-signal-chart {
+    padding: 18px 14px 14px;
+  }
+  .tt-signal-run {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tt-signal-line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .tt-signal-live-dot {
+    animation: none;
+  }
+  .tt-signal-cursor,
+  .tt-signal-marker {
+    transition: none;
+  }
+}

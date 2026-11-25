@@ -1,0 +1,293 @@
+/* MLflow-inspired utility controls, chart treatment, and complete dark palette */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.theme-toggle {
+  display: inline-grid;
+  width: 36px;
+  min-width: 36px;
+  min-height: 32px !important;
+  place-items: center;
+  align-items: center;
+  padding: 0;
+  font-size: 22px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #667085;
+  cursor: pointer;
+}
+.theme-toggle svg {
+  display: block;
+  width: auto;
+  height: 1em;
+  fill: currentColor;
+}
+.theme-toggle:hover:enabled {
+  border-color: transparent;
+  background: #f6f8fa;
+  color: #24292f;
+}
+.nav-icon {
+  height: 18px;
+}
+.chart svg text {
+  fill: var(--chart-label, #718096);
+  font-size: 10px;
+}
+.chart .chart-axis-label {
+  fill: var(--chart-label, #718096);
+}
+.chart figcaption {
+  color: var(--ink, #263a59);
+}
+.chart .legend span {
+  font-weight: 650;
+}
+.app-shell.theme-dark {
+  --ink: #e6ebf3;
+  --muted: #a2afc2;
+  --border: #354154;
+  --surface: #1b2432;
+  --blue: #92a5ff;
+  --chart-grid: #354154;
+  --chart-label: #a9b6c8;
+  color: var(--ink);
+  background: #111923;
+}
+body.traintrace-dark {
+  background: #111923;
+  color: #e6ebf3;
+}
+.theme-dark > aside {
+  border-color: #293445;
+  background: #151e2a;
+}
+.theme-dark .brand {
+  border-color: #293445;
+  color: #e5ebf5;
+}
+.theme-dark .brand small,
+.theme-dark .nav-group-label,
+.theme-dark .eyebrow,
+.theme-dark .page-description {
+  color: #95a4b9;
+}
+.theme-dark .workspace-nav button {
+  color: #b0bdcf;
+}
+.theme-dark .workspace-nav button:hover:enabled {
+  border-color: #354256;
+  background: #202b3b;
+  color: #eef2f8;
+}
+.theme-dark .workspace-nav button[aria-current="page"] {
+  border-color: #394774;
+  background: #252f4c;
+  color: #c0caff;
+}
+.theme-dark .workspace-nav button[aria-current="page"] .nav-icon {
+  color: #a7b4ff;
+}
+.theme-dark .sidebar-status {
+  border-color: #303c4f;
+  background: linear-gradient(145deg, #1b2635, #192331);
+}
+.theme-dark .sidebar-status p {
+  color: #c6d0df;
+}
+.theme-dark .sidebar-status small {
+  color: #93a2b7;
+}
+.theme-dark > main {
+  background: #111923;
+}
+.theme-dark > main > header {
+  border-color: #293445;
+}
+.theme-dark h1,
+.theme-dark h2,
+.theme-dark h3 {
+  color: #e6ebf3;
+}
+.theme-dark .refresh-button,
+.theme-dark .theme-toggle {
+  border-color: transparent;
+  background: transparent;
+  color: #c0cada;
+}
+.theme-dark .refresh-button:hover:enabled,
+.theme-dark .theme-toggle:hover:enabled {
+  border-color: transparent;
+  background: #21262d;
+  color: #f0f3f6;
+}
+.theme-dark .context-bar {
+  border-color: #2c394b;
+  background: #182230;
+  box-shadow: none;
+}
+.theme-dark .investigation-summary strong {
+  color: #e0e7f2;
+}
+.theme-dark .investigation-summary p,
+.theme-dark .investigation-summary small {
+  color: #aab7c9;
+}
+.theme-dark .panel {
+  border-color: #2d394b;
+  background: #1b2432;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+}
+.theme-dark .panel-intro,
+.theme-dark .panel > p {
+  color: #aab7c9;
+}
+.theme-dark .field > span {
+  color: #c2cddd;
+}
+.theme-dark input:not([type="checkbox"]):not([type="file"]):not([type="radio"]),
+.theme-dark select,
+.theme-dark textarea {
+  border-color: #3a485d;
+  background-color: #151e2a;
+  color: #e2e8f1;
+  color-scheme: dark;
+}
+.theme-dark input::placeholder,
+.theme-dark textarea::placeholder {
+  color: #8493a8;
+}
+.theme-dark input:focus,
+.theme-dark select:focus,
+.theme-dark textarea:focus {
+  border-color: #6683c7;
+  box-shadow: 0 0 0 2px rgba(102, 131, 199, 0.16);
+}
+.theme-dark button:not(.primary) {
+  border-color: #3a485b;
+  background: #202b3b;
+  color: #d4dce8;
+}
+.theme-dark button:not(.primary):hover:enabled {
+  border-color: #6779ce;
+  background: #293650;
+  color: #f2f5fc;
+}
+.theme-dark button.primary {
+  border-color: #7487f2;
+  background: linear-gradient(135deg, #6077ec, #7165dc);
+  color: #fff;
+}
+.theme-dark .architecture-controls,
+.theme-dark .advanced-run-id,
+.theme-dark details {
+  border-color: #354154;
+  background: #182230;
+}
+.theme-dark .architecture-controls legend,
+.theme-dark details summary {
+  color: #b9c5d6;
+}
+.theme-dark thead th {
+  border-color: #344154;
+  background: #202b3a;
+  color: #aebbd0;
+}
+.theme-dark tbody td {
+  border-color: #2b384a;
+  color: #c1ccdc;
+}
+.theme-dark tbody tr:hover td {
+  background: #202b3a;
+}
+.theme-dark .record {
+  border-color: #344154;
+  background: #202b3a;
+  box-shadow: none;
+}
+.theme-dark .record h3 {
+  color: #dbe3ef;
+}
+.theme-dark .record p,
+.theme-dark small,
+.theme-dark .app-shell footer {
+  color: #9cabc0;
+}
+.theme-dark .empty {
+  border-color: #354154;
+  background: #182230;
+  color: #a4b2c5;
+}
+.theme-dark .badge {
+  border-color: #3b485b;
+  background: #283548;
+  color: #c0ccdc;
+}
+.theme-dark .badge.good {
+  border-color: #285b4a;
+  background: #193a31;
+  color: #8edbb5;
+}
+.theme-dark .badge.bad {
+  border-color: #633b48;
+  background: #3d252e;
+  color: #f0a0ac;
+}
+.theme-dark .investigation-hero {
+  border-color: #39445f;
+  background:
+    radial-gradient(
+      circle at 94% 10%,
+      rgba(72, 86, 156, 0.3),
+      transparent 17rem
+    ),
+    linear-gradient(115deg, #1b2432 12%, #20283c 100%);
+  box-shadow: 0 15px 42px rgba(0, 0, 0, 0.18);
+}
+.theme-dark .investigation-hero h2 {
+  color: #edf1fa;
+}
+.theme-dark .investigation-hero p {
+  color: #b0bdcf;
+}
+.theme-dark .section-kicker {
+  color: #abb6ff;
+}
+.theme-dark .hero-count {
+  border-color: #3c4860;
+  background: rgba(27, 36, 50, 0.88);
+}
+.theme-dark .hero-count span {
+  color: #b1bdff;
+}
+.theme-dark .notice {
+  border-color: #315c4d;
+  background: #19382f;
+  color: #a0e3bf;
+}
+.theme-dark .error {
+  border-color: #663e48;
+  background: #3c252e;
+  color: #f2abb5;
+}
+.theme-dark footer {
+  border-color: #293445;
+  color: #8998ae;
+}
+@media (max-width: 760px) {
+  .header-actions {
+    gap: 5px;
+  }
+  .theme-toggle {
+    width: 36px;
+    justify-content: center;
+    padding: 0;
+  }
+  .theme-toggle span {
+    display: none;
+  }
+}

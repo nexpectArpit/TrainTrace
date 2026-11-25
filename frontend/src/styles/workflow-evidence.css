@@ -1,0 +1,57 @@
+.model-registration-disclosure,
+.audit-seed-protocol {
+  margin-block: 16px;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-surface);
+  background: var(--tt-surface);
+}
+.model-registration-disclosure > summary,
+.audit-seed-protocol > summary {
+  padding: 14px 16px;
+  color: var(--tt-text);
+  font-weight: 650;
+  cursor: pointer;
+}
+.model-registration-disclosure[open] > .panel {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--tt-border);
+  box-shadow: none;
+}
+.audit-seed-protocol[open] {
+  padding-bottom: 16px;
+}
+.audit-seed-protocol > p,
+.audit-seed-protocol > .field,
+.audit-seed-protocol > button {
+  margin-inline: 16px;
+}
+.audit-protocol-intro {
+  margin-block: 16px 8px;
+}
+.audit-protocol-intro p {
+  margin: 4px 0 8px;
+  color: var(--tt-muted);
+}
+.audit-member-list {
+  margin: 12px 0;
+  padding-left: 20px;
+}
+.audit-member-list li {
+  margin-bottom: 8px;
+}
+.audit-member-list code {
+  overflow-wrap: anywhere;
+}
+.search-advanced-filters {
+  margin-block: 12px 16px;
+  border-top: 1px solid var(--tt-border);
+  padding-top: 12px;
+}
+.search-advanced-filters > summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.search-advanced-filters > p {
+  color: var(--tt-muted);
+}

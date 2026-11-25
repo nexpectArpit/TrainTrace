@@ -1,96 +1,114 @@
-import React from "react";
-import { request } from "../services/api";
-import { fmt, Panel, Json } from "../components/Common";
-export default function Inference({ workspace }) {
+import InferenceImageFields from "../features/inference/InferenceImageFields";
+import CheckpointPicker from "../features/inference/CheckpointPicker";
+import React, { useId } from "react";
+import useCheckpointComparison, {
+  MAX_COMPARE_RUNS,
+} from "../features/inference/useCheckpointComparison";
+import ServingInference from "../features/inference/ServingInference";
+import CheckpointComparisonResults from "../features/inference/CheckpointComparisonResults";
+import { Panel, RequiredFieldLegend } from "../components/Common";
+
+const ARCH_LABELS = {
+  custom_cnn: "Custom CNN",
+  resnet18: "ResNet-18",
+  mobilenet_v2: "MobileNetV2",
+  efficientnet_b0: "EfficientNet-B0",
+};
+
+export default function Inference({
+  workspace,
+  mode = "both",
+  preferredRunIds = [],
+}) {
+  const { online, busy } = workspace;
+
+  const comparison = useCheckpointComparison({
+    workspace,
+    mode,
+    preferredRunIds,
+  });
   const {
-    models,
-    activeModel,
-    online,
-    busy,
-    file,
-    setFile,
-    prediction,
-    setPrediction,
-    run,
-    act,
-  } = workspace;
+    candidatesError,
+    selectedRunIds,
+    compareFile,
+    compareBusy,
+    compareError,
+    compareResult,
+    handleCompareSubmit,
+  } = comparison;
+  const compareHeadingId = useId();
+
   return (
-    <Panel title="Predict with the active registered version">
-      <p>
-        Active version:{" "}
-        <strong>
-          {models.find((m) => m.id === activeModel)?.name || "None"}{" "}
-          {models.find((m) => m.id === activeModel)?.version || ""}
-        </strong>
-        . Activate a verified version in Registry first.
-      </p>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          act(async () => {
-            const data = new FormData();
-            data.append("file", file);
-            setPrediction(null);
-            setPrediction(
-              await request(
-                `/inference/predict?model_id=${activeModel}`,
-                "POST",
-                data,
-              ),
-            );
-          });
-        }}
-      >
-        <label className="field">
-          <span>
-            PNG or JPEG · at most 5 MB / 16 megapixels · resized to 32×32
-          </span>
-          <input
-            type="file"
-            accept="image/png,image/jpeg"
-            onChange={(e) => {
-              setFile(e.target.files[0] || null);
-              setPrediction(null);
-            }}
-            required
-          />
-        </label>
-        <button
-          className="primary"
-          disabled={busy || !online || !activeModel || !file}
+    <>
+      {mode !== "serving" && (
+        <Panel
+          title="Compare completed run checkpoints"
+          headingId={compareHeadingId}
         >
-          Predict image
-        </button>
-      </form>
-      {prediction && (
-        <article className="record">
-          <h3>
-            {prediction.predicted_class} ·{" "}
-            {fmt(prediction.confidence_score * 100)}%
-          </h3>
           <p>
-            {fmt(prediction.latency_ms)} ms · version {prediction.version} ·
-            originating run {prediction.run_id}
+            Run one uploaded image across up to {MAX_COMPARE_RUNS} completed
+            runs side by side using each run’s SHA-256 verified best checkpoint.
+            One image reports prediction, confidence, and optional label match —
+            not a dataset accuracy rate. Final-test selection rules and sealed
+            test sets are unchanged.
           </p>
-          {Object.entries(prediction.all_probabilities)
-            .sort((a, b) => b[1] - a[1])
-            .map(([label, p]) => (
-              <div className="probability" key={label}>
-                <span>{label}</span>
-                <progress
-                  aria-label={`${label} confidence`}
-                  value={p}
-                  max="1"
-                />
-                <span>{fmt(p * 100)}%</span>
+
+          {candidatesError && (
+            <div className="error" role="alert">
+              {candidatesError}
+            </div>
+          )}
+
+          <form
+            aria-labelledby={compareHeadingId}
+            onSubmit={handleCompareSubmit}
+          >
+            <RequiredFieldLegend />
+
+            <CheckpointPicker
+              comparison={comparison}
+              architectureLabels={ARCH_LABELS}
+            />
+
+            <InferenceImageFields comparison={comparison} />
+
+            {compareError && (
+              <div className="error" role="alert">
+                {compareError}
               </div>
-            ))}
-          <Json
-            data={prediction}
-            label="Prediction provenance and top-k classes"
-          />
-        </article>
+            )}
+
+            <button
+              type="submit"
+              className="primary"
+              disabled={
+                compareBusy ||
+                busy ||
+                !online ||
+                !compareFile ||
+                selectedRunIds.length === 0
+              }
+            >
+              {compareBusy
+                ? "Running checkpoint comparison…"
+                : selectedRunIds.length > 1
+                  ? `Compare ${selectedRunIds.length} checkpoints`
+                  : "Run checkpoint prediction"}
+            </button>
+          </form>
+
+          {compareResult && (
+            <CheckpointComparisonResults
+              compareResult={compareResult}
+              architectureLabels={ARCH_LABELS}
+            />
+          )}
+        </Panel>
       )}
-    </Panel>
+
+      {mode !== "candidates" && (
+        <ServingInference workspace={workspace} compareBusy={compareBusy} />
+      )}
+    </>
   );
 }

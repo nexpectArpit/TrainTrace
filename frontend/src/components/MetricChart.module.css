@@ -1,0 +1,111 @@
+.chart {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 16px;
+  border-radius: var(--tt-radius-surface, 8px);
+  border: 1px solid var(--tt-border, #d0d7de);
+  background: var(--tt-surface, #ffffff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.plotSvg {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: var(--tt-text, #1f2328);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.header small {
+  color: var(--tt-muted, #667085);
+  font-weight: 400;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.axisText {
+  fill: var(--tt-muted, #667085);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--tt-border, rgba(128, 128, 128, 0.15));
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 4px 10px;
+  border-radius: var(--tt-radius-control, 6px);
+  border: 1px solid var(--tt-border, #d0d7de);
+  background: var(--tt-canvas, #f6f8fa);
+  color: var(--tt-text, #1f2328);
+  font-size: 0.76rem;
+  line-height: 1.2;
+}
+
+.legendLineSvg {
+  width: 20px !important;
+  max-width: 20px !important;
+  min-width: 20px !important;
+  height: 10px !important;
+  flex: 0 0 20px !important;
+  display: block !important;
+}
+
+.legendName {
+  min-width: 0;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.legendValue {
+  margin-left: 2px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--tt-text, #1f2328);
+  white-space: nowrap;
+}
+
+.footnote {
+  margin: 10px 0 0;
+  color: var(--tt-muted, #667085);
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+@media (max-width: 700px) {
+  .header {
+    display: block;
+  }
+  .header small {
+    display: block;
+    margin-top: 4px;
+  }
+}

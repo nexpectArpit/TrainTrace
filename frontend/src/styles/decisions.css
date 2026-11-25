@@ -1,0 +1,99 @@
+.decision-candidate-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 16px 0;
+  border: 1px solid var(--tt-border);
+  background: var(--tt-surface);
+}
+.decision-candidate-summary > div {
+  min-width: 0;
+  padding: 14px 16px;
+}
+.decision-candidate-summary > div + div {
+  border-left: 1px solid var(--tt-border);
+}
+.decision-candidate-summary strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--tt-text);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.decision-candidate-summary small {
+  color: var(--tt-muted);
+  font-size: 0.74rem;
+}
+.decision-summary-label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--tt-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.decision-form {
+  max-width: 860px;
+}
+.decision-form .field {
+  margin-bottom: 14px;
+}
+.decision-form textarea {
+  min-height: 86px;
+}
+.decision-status-help {
+  max-width: 70ch;
+  margin: 4px 0 16px;
+  color: var(--tt-muted);
+  font-size: 0.81rem;
+}
+.app-shell .decision-reasoning-details {
+  margin: 0 0 16px;
+  padding: 0;
+  border: 1px solid var(--tt-border);
+  background: var(--tt-surface);
+}
+.decision-reasoning-details > summary {
+  padding: 12px 14px;
+  color: var(--tt-text);
+  font-weight: 650;
+}
+.decision-reasoning-details[open] > summary {
+  border-bottom: 1px solid var(--tt-border);
+}
+.decision-reasoning-details > p {
+  margin: 14px 14px 0;
+  color: var(--tt-muted);
+  font-size: 0.8rem;
+}
+.decision-reasoning-details > .field {
+  margin: 14px;
+}
+.decision-required-note {
+  color: var(--tt-muted);
+  font-size: 0.78rem;
+}
+@media (max-width: 700px) {
+  .decision-candidate-summary {
+    grid-template-columns: 1fr;
+  }
+  .decision-candidate-summary > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--tt-border);
+  }
+}
+.final-evaluation-confirm {
+  max-width: 760px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-surface);
+  background: var(--tt-canvas);
+}
+.final-evaluation-confirm p {
+  margin: 0 0 12px;
+}
+.final-evaluation-confirm button + button {
+  margin-left: 8px;
+}
