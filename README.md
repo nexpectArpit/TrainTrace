@@ -2,7 +2,7 @@
 
 TrainTrace is a local ML investigation workspace. It connects seeded PyTorch training, holdout evaluation, reproducibility studies, candidate comparisons, human decision history, immutable model versions, and version-bound inference.
 
-The supported core is **CIFAR-10 on a single-user macOS/Linux workstation**, with one compute job at a time. Additional datasets, W&B synchronization, multi-user authentication, and PDF/image report exports remain extensions. The original product specification is in [docs/PRD](docs/PRD/Tracked_Training_Pipeline_PRD.md); the implementation baseline and current limitations are documented below.
+The workspace supports **CIFAR-10, CIFAR-100, MNIST, Fashion-MNIST, and SVHN** on a single-user macOS/Linux workstation, with one local compute job at a time. Kaggle GPU execution is optional and requires your own credentials. The original product specification is in [docs/PRD](docs/PRD/Tracked_Training_Pipeline_PRD.md); the current refactor status is in [the MVP refactor plan](docs/architecture/MVP_REFACTOR_PLAN.md).
 
 ## Run locally
 
@@ -25,19 +25,68 @@ npm run dev -- --host 127.0.0.1
 
 Open [the workspace](http://127.0.0.1:3000) and [API documentation](http://127.0.0.1:8000/docs). The API starts one worker subprocess automatically. Restart the API after backend source changes; worker code is not hot-reloaded. Keep a single API service for this local deployment. Bind to loopback: this application has no multi-user authentication and is not intended for public hosting.
 
-CIFAR-10 downloads on first use, then works from its cache. ImageNet initialization also requires a first-use download. Existing cached datasets can be reused with `TRAINTRACE_DATA_DIR`. No cloud account is required.
+### Inspect a run from the terminal
+
+From the repository root, use the read-only inspector to find the latest main run and its metrics:
+
+```sh
+python3 scripts/inspect_run.py
+python3 scripts/inspect_run.py --run-id YOUR_RUN_ID --all-epochs
+python3 scripts/inspect_run.py --run-id YOUR_RUN_ID --json
+```
+
+The command prints the run status, latest saved epoch, latest sampled batch, errors, evaluation, and absolute artifact paths. By default it skips audit replay runs so a replay does not hide the latest run you launched. `--include-replays` selects the latest run of either kind. It honors `TRAINTRACE_STORAGE_DIR` and does not require the API or PyTorch to be running.
+
+For code tracing: `backend/tracking/tracker.py` coordinates local training; `backend/tracking/progress_recorder.py` writes batch samples and epoch metrics; `backend/tracking/metrics_export.py` mirrors completed epochs into CSV. `backend/db/database.py` and `backend/db/migrations.py` define the tables. `backend/repositories/run_repository.py` reads saved metrics; `backend/api/routers/runs.py` serves run status; `frontend/src/app/useLiveRun.js` polls it; `frontend/src/features/training/RunExecutionPanel.jsx` displays the evidence. SQLite is the durable source; `backend/storage/artifacts/runs/<run-id>/metrics/<run-id>_metrics.csv` is its readable per-epoch copy.
+
+### Artifact folders
+
+Each run's files live under `backend/storage/artifacts/runs/<run-id>/`:
+
+```text
+checkpoints/  best, last, and periodic PyTorch checkpoints
+metrics/      human-readable epoch CSV
+reports/      validation, evaluation, audit JSON, and PDF reports
+images/       generated dataset previews and confusion matrices
+data/         split indices and related dataset evidence
+```
+
+The SQLite `artifacts.path` column stores a path relative to `backend/storage/artifacts`; use it when resolving a recorded artifact. A one-time organizer moves old flat files into this layout and updates those database paths. It backs up the database first and stops if a job is queued or running:
+
+```sh
+python3 scripts/organize_artifacts.py          # preview only
+python3 scripts/organize_artifacts.py --apply  # organize existing files
+```
+
+Files with no artifact record are kept under `backend/storage/artifacts/legacy-untracked/`; the storage orphan cleanup excludes this archive. The organizer already ran for the local storage on 2026-11-18; rerunning it should report zero flat files. Set `TRAINTRACE_STORAGE_DIR` to organize another storage location.
+
+Datasets download on first use, then work from their caches. ImageNet initialization also requires a first-use download. Existing cached datasets can be reused with `TRAINTRACE_DATA_DIR`. Local runs require no cloud account.
 
 ## Workflow
 
 1. **Investigations:** define an objective, hypothesis, and optional accuracy/latency targets. Targets and all accuracy measurements use **0–100 percent**. Edit conclusions and archive investigations here.
-2. **Training:** configure an architecture, optimizer, schedule, initialization seed, and independent split seed. Queue a unique run ID. Completed epoch metrics persist immediately, and best/last/periodic checkpoints are catalogued with SHA256 checksums. A stopped or failed run retains completed evidence.
+2. **Training:** choose one of the five image datasets, configure an architecture, optimizer, schedule, initialization seed, and independent split seed. CustomCNN also exposes depth, width, classifier size, and dropout. Choose local execution or connect a Kaggle account for cloud execution. Queue a unique run ID. Completed epoch metrics persist immediately, and best/last/periodic checkpoints are catalogued with SHA256 checksums. A stopped or failed run retains completed evidence.
 3. **Compare:** select up to four candidate runs and inspect validation trajectories, hyperparameters, measured parameter counts, holdout accuracy, checkpoint size, duration, and latency. The overfitting gap uses training and validation accuracy from the same final epoch.
 4. **Audits:** Protocol A replays the original full configuration twice and compares exact numerical trajectories plus test loss/accuracy against the original. Timing is excluded. Conditions must match. Protocol B defaults to five distinct initialization seeds, holds the data split fixed, and persists per-seed test accuracies, mean, population standard deviation, minimum, maximum, and spread. Both use the same sequential queue as ordinary training.
 5. **Decisions and History:** record rationale, limitations/strengths, alternatives, why alternatives were rejected, and acknowledged trade-offs. Evidence is snapshotted when the decision is saved. Link successor approaches to the run and limitation that motivated them. A single current Selected candidate is allowed per investigation; supersede the previous selection explicitly.
 6. **Registry:** register a Selected, completed, evaluated candidate using a new semantic version such as `v1.0.0`. Versions cannot be overwritten. Registration freezes the checkpoint hash, source configuration, environment/source hashes, split metadata, decision, and investigation history.
-7. **Inference:** activate a registered version, then upload PNG/JPEG images (up to 5 MB and 16 megapixels). Preprocessing comes from the frozen manifest. Predictions identify the model version, run, checkpoint checksum, top classes, and confidence. Missing or changed checkpoints produce errors; there is no random-weight fallback.
+7. **Inference:** compare completed run checkpoints on one PNG/JPEG image (up to 5 MB and 16 megapixels), optionally supplying its true class to see which prediction matches. Each run uses its recorded preprocessing and a checksum-verified best checkpoint. This is a single-image correctness check, not dataset accuracy; the Compare page shows validation accuracy. Separately, activate a registered version for version-bound serving predictions. Missing or changed checkpoints produce errors; there is no random-weight fallback.
+
+## Viva notebook and model architecture controls
+
+Open [`notebooks/TrainTrace_Viva_and_Inspection.ipynb`](notebooks/TrainTrace_Viva_and_Inspection.ipynb) in JupyterLab or VS Code with the Jupyter extension. Use it as the pipeline analysis stage: choose a run and display its actual epoch metrics, holdout evaluation, confusion matrix, configuration and checkpoint tensor shapes. Epoch metrics are available in SQLite and the readable CSV is refreshed after each completed epoch, including for runs later stopped or failed. The worker currently writes metrics to SQLite/CSV and holdout results to JSON; `.pt` files are model checkpoints, and the current code does not generate metric `.pkl` files. Training still goes through the app's durable queue so notebook analysis remains tied to the recorded run. Point `TRAINTRACE_STORAGE_DIR` at the same storage directory used by the app when using a non-default location.
+
+To launch it from the activated project environment, install JupyterLab once with `python -m pip install jupyterlab`, then run `jupyter lab notebooks/TrainTrace_Viva_and_Inspection.ipynb`. Select the same Python environment as the app and start the API at least once so database migrations have run.
+
+The per-run notebook export embeds the recorded model source, shared dataset/preprocessing contract, and run settings so it can train separately in Jupyter or Colab. It does not stream live results back to TrainTrace. Runs initialized from another checkpoint require those original weights and cannot be exported as a standalone reproduction; the API reports this explicitly.
+
+For the CustomCNN family, the Training screen exposes convolution-block depth (2–6), starting channel width (8–128), classifier width, and dropout. The selected architecture profile is validated by the API and saved in run configuration/checkpoints, then reused during model registration and inference. Preset ResNet-18, MobileNetV2 and EfficientNet-B0 retain their fixed backbone layouts.
 
 Decision reports download as Markdown. Epoch logs download as CSV; evaluation, split and audit evidence download as JSON; checkpoints download as `.pt`. Load checkpoint files only from trusted origins.
+
+### Kaggle execution limit
+
+The backend verifies Kaggle credentials before queuing a cloud run. TrainTrace reads Kaggle status and log markers to show progress, then downloads recorded outputs when the remote kernel completes. The installed Kaggle SDK does not provide a kernel stop operation: stopping TrainTrace monitoring can leave the Kaggle kernel running. Stop that kernel on Kaggle if needed. If status cannot be confirmed for the configured grace period, TrainTrace reports a connection error; it does not claim the remote kernel stopped. A complete real Kaggle launch through inference still needs acceptance verification.
 
 ## Configuration
 
@@ -104,16 +153,21 @@ This starts two replay runs and a five-seed study using the source run's complet
 - `backend/domain.py`: validated request contracts and safe identifiers.
 - `backend/api/`: HTTP boundary, investigation/reporting, run monitoring, registry and serving.
 - `backend/jobs.py`, `backend/worker.py`: durable admission, single-process scheduling, stop and restart handling.
-- `backend/core/`: CIFAR-10 preprocessing, four model factories, explicit autograd training and checkpoint lifecycle.
-- `backend/tracking/`: per-epoch persistence, measured holdout evaluation, full-config audits, environment/source capture.
+- `backend/core/dataset_contract.py`: the five dataset identities and preprocessing contract used by local training and embedded in generated Kaggle scripts.
+- `backend/core/`: DataLoader transforms, four model factories, explicit autograd training and checkpoint lifecycle.
+- `backend/tracking/`: local coordinator, dataset preparation, durable progress, readable CSV, optional W&B, environment/source capture, and evaluation measurements.
+- `backend/cloud/`: Kaggle credentials, kernel submission, remote status/telemetry, and artifact ingestion.
+- `backend/services/inference_runtime.py`, `backend/services/inference_provenance.py`: upload/model execution and recorded dataset/checkpoint validation.
 - `backend/db/database.py`: SQLite connections, schema migration and integrity constraints.
 - `backend/storage.py`, `backend/registry/`: managed artifacts, checksums and frozen model manifests.
-- `frontend/src/screens/`: investigation, training, comparison, audits, decisions, history, registry and inference screens.
+- `frontend/src/screens/`: workflow screens that compose smaller feature modules.
+- `frontend/src/features/`: training charts/forms, comparison filters/table, and checkpoint inference controls/results.
+- `frontend/src/app/useLiveRun.js`: selected-run polling and persisted live sample state.
 - `frontend/src/components/`: shared accessible inputs/panels and metric charts.
-- `frontend/src/App.jsx`: selection, refresh coordination and workspace navigation.
+- `frontend/src/app/useWorkspace.js`: shared selection, catalog refresh, and workspace actions.
 
 ## Status and remaining scope
 
 See [the repair status and evidence](docs/audits/2026-10-15/REPAIR_STATUS.md) and [the original audit](docs/audits/2026-10-15/PROJECT_AUDIT_AND_REPAIR_PLAN.md). The audit is a historical record of the pre-repair code; its probe script intentionally describes that old implementation.
 
-The core pipeline is implemented and tested. Expanded dataset support, W&B, multi-user sessions, tags/global cross-entity filtering, PDF reports, confusion-matrix image exports, and a fully interactive graph remain extensions. The current history view exposes predecessor relationships and decision evidence as cards. Performance, accessibility and GPU claims must be read alongside the recorded verification limits; passing tests is not proof of every PRD requirement.
+The local pipeline, optional Kaggle adapter, comparison, inference, and reports are implemented at different verification levels. See [the MVP refactor plan](docs/architecture/MVP_REFACTOR_PLAN.md) for remaining cloud, browser, migration, and cross-runner checks. Passing local tests does not establish that a real Kaggle job or every UI state works end to end.
