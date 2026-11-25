@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -14,6 +15,7 @@ from api.main import app
 from db.database import init_db
 from domain import LaunchRun
 import tracking.tracker as tracker
+import tracking.evaluator as evaluator
 
 
 def tiny_loaders(**kwargs):
@@ -24,6 +26,7 @@ def tiny_loaders(**kwargs):
     x = torch.rand(12, 3, 32, 32, generator=generator)
     y = torch.arange(12) % 10
     ds = TensorDataset(x, y)
+    ds.classes = [str(index) for index in range(10)]
     return tuple(
         DataLoader(
             Subset(ds, indices),
@@ -51,6 +54,7 @@ def isolated(monkeypatch):
         "artifacts",
         "audits",
         "jobs",
+        "run_progress_samples",
         "epoch_metrics",
         "runs",
         "experiments",
@@ -64,7 +68,21 @@ def isolated(monkeypatch):
         for path in root.iterdir():
             if path.is_file():
                 path.unlink()
-    monkeypatch.setattr(tracker, "get_cifar10_dataloaders", tiny_loaders)
+            elif path.is_dir():
+                shutil.rmtree(path)
+    monkeypatch.setattr(tracker, "get_dataloaders", tiny_loaders)
+    monkeypatch.setattr(
+        evaluator, "get_test_dataloader", lambda *args, **kwargs: tiny_loaders(**kwargs)[2]
+    )
+    monkeypatch.setattr(
+        evaluator,
+        "benchmark_model_latency",
+        lambda *args, **kwargs: {
+            "model_only_latency_ms_p50": 0.1,
+            "model_only_latency_ms_p95": 0.2,
+            "latency_method": "test stub",
+        },
+    )
     yield
 
 
@@ -134,3 +152,17 @@ def selected(client, completed):
     response = client.post("/api/v1/experiments/decisions", json=decision_payload(completed["id"]))
     assert response.status_code == 201, response.text
     return completed
+
+
+@pytest.fixture
+def final_evaluated(client, selected):
+    response = client.post("/api/v1/runs/final-evaluation", json={"run_id": selected["id"]})
+    assert response.status_code == 202, response.text
+    from worker import claim, work
+
+    work(claim())
+    from api.routers.runs import detail
+
+    run = detail(selected["id"])
+    assert run["final_evaluation_status"] == "COMPLETED", run["final_evaluation_error"]
+    return run

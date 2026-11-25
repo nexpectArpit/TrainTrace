@@ -6,7 +6,7 @@ from PIL import Image
 from torch.utils.data import TensorDataset, DataLoader
 from core.models import get_model_by_name
 from core.trainer import Trainer, train_one_epoch, evaluate, TrainingStopped
-from core.dataset import get_cifar10_dataloaders, seed_worker
+from core.dataset import get_cifar10_dataloaders, get_dataloaders, seed_worker
 from domain import LaunchRun
 from storage import sha256
 from .conftest import tiny_loaders, decision_payload, complete
@@ -57,6 +57,43 @@ def test_dataset_split_independent_of_initialization(monkeypatch, tmp_path):
     assert set(a[0].dataset.indices).isdisjoint(a[1].dataset.indices)
     assert next(iter(a[0]))[0].shape == (4, 3, 32, 32)
     seed_worker(0)
+
+
+def test_cifar100_dataset_transforms_and_model_head(monkeypatch, tmp_path):
+    import torchvision
+
+    class FakeCifar100:
+        classes = [f"class_{i}" for i in range(100)]
+
+        def __init__(self, root, train, download, transform):
+            self.transform = transform
+            self.train = train
+
+        def __len__(self):
+            return 100 if self.train else 20
+
+        def __getitem__(self, i):
+            return self.transform(Image.new("RGB", (32, 32), (0, 0, 0))), i % 100
+
+    monkeypatch.setattr(torchvision.datasets, "CIFAR100", FakeCifar100)
+    train, validation, test = get_dataloaders(
+        dataset_name="cifar100",
+        batch_size=4,
+        seed=1,
+        split_seed=2,
+        num_workers=0,
+        data_dir=str(tmp_path),
+    )
+    x, y = next(iter(test))
+    assert x.shape == (4, 3, 32, 32) and y.max().item() < 100
+    assert len(train.dataset.dataset.classes) == 100
+    assert len(validation.dataset.dataset.classes) == 100
+    assert x[0, :, 0, 0].tolist() == pytest.approx(
+        [-0.5071 / 0.2675, -0.4867 / 0.2565, -0.4408 / 0.2761], abs=1e-5
+    )
+    model = get_model_by_name("custom_cnn", num_classes=100).eval()
+    with torch.inference_mode():
+        assert model(x).shape == (4, 100)
 
 
 @pytest.mark.parametrize("scheduler", ["cosine", "step"])
@@ -137,7 +174,8 @@ def test_constraints_and_branches(client, config, completed):
             )
 
 
-def test_second_selection_and_registry_version_collision(client, selected, config):
+def test_final_selection_and_registry_version_collision(client, final_evaluated, config):
+    selected = final_evaluated
     assert (
         client.post(
             "/api/v1/registry/register",
@@ -145,29 +183,23 @@ def test_second_selection_and_registry_version_collision(client, selected, confi
         ).status_code
         == 201
     )
-    from .test_lifecycle import register
-
     model = client.get("/api/v1/registry/models").json()["models"][0]
     from registry.model_registry import ModelRegistry
 
     original = ModelRegistry().get_model(model["id"])
-    digest = sha256(original["checkpoint_path"])
+    from config import REGISTRY_DIR
+    digest = sha256(REGISTRY_DIR / original["checkpoint_path"])
     other = complete(config.model_copy(update={"run_id": "other", "seed": 1}))
     assert (
         client.post("/api/v1/experiments/decisions", json=decision_payload(other["id"])).status_code
         == 409
     )
-    client.post(
+    assert client.post(
         "/api/v1/experiments/decisions",
         json={**decision_payload(selected["id"]), "status": "SUPERSEDED"},
-    )
-    assert (
-        client.post("/api/v1/experiments/decisions", json=decision_payload(other["id"])).status_code
-        == 201
-    )
-    assert register(client, other["id"]).status_code == 409
+    ).status_code == 409
     assert ModelRegistry().get_model(model["id"])["run_id"] == selected["id"]
-    assert sha256(original["checkpoint_path"]) == digest
+    assert sha256(REGISTRY_DIR / original["checkpoint_path"]) == digest
 
 
 def test_audit_mismatch_and_stopped_audit(client, completed):
