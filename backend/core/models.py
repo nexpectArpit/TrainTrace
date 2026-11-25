@@ -23,79 +23,82 @@ import torchvision.models as torchvision_models
 # APPROACH 1: CUSTOM 3-LAYER CNN (Baseline Architecture)
 # =============================================================================
 class CustomCNN(nn.Module):
-    """
-    A lightweight 3-block Convolutional Neural Network built for 32x32 CIFAR-10 images.
+    """Configurable CIFAR CNN with 2-6 convolutional feature blocks."""
 
-    Tensor Dimensional Trajectory:
-    - Input Image Batch: [Batch_Size, 3, 32, 32]
-    - Block 1 (Conv -> BN -> ReLU -> Pool): [Batch_Size, 32, 16, 16]
-    - Block 2 (Conv -> BN -> ReLU -> Pool): [Batch_Size, 64, 8, 8]
-    - Block 3 (Conv -> BN -> ReLU -> Pool): [Batch_Size, 128, 4, 4]
-    - Flatten: [Batch_Size, 128 * 4 * 4] = [Batch_Size, 2048]
-    - Classifier (Linear -> Dropout -> Linear): [Batch_Size, num_classes]
-    """
-
-    def __init__(self, num_classes: int = 10):
-        # Always call super().__init__() to register PyTorch module parameters correctly
+    def __init__(
+        self,
+        num_classes: int = 10,
+        depth: int = 3,
+        width: int = 32,
+        classifier_width: int = 256,
+        dropout: float = 0.3,
+    ):
         super().__init__()
-
-        # Block 1: Extracts low-level visual features (edges, color gradients)
-        # in_channels=3 (RGB), out_channels=32 (number of 3x3 filters)
-        # padding=1 ensures spatial dimensions stay 32x32 before pooling
-        self.conv_block1 = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1),
-            nn.BatchNorm2d(32),  # Normalizes activations across batch to stabilize training
-            nn.ReLU(inplace=True),  # Non-linear activation function
-            nn.MaxPool2d(kernel_size=2, stride=2),  # Downsamples spatial grid from 32x32 -> 16x16
-        )
-
-        # Block 2: Extracts mid-level visual features (textures, simple patterns)
-        # in_channels=32, out_channels=64
-        self.conv_block2 = nn.Sequential(
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # Downsamples spatial grid from 16x16 -> 8x8
-        )
-
-        # Block 3: Extracts high-level semantic features (object parts)
-        # in_channels=64, out_channels=128
-        self.conv_block3 = nn.Sequential(
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # Downsamples spatial grid from 8x8 -> 4x4
-        )
-
-        # Fully Connected Classification Head
-        # Converts 2D spatial feature maps into class logits vector
+        if (
+            not 2 <= depth <= 6
+            or not 8 <= width <= 128
+            or not 16 <= classifier_width <= 2048
+            or not 0 <= dropout < 1
+        ):
+            raise ValueError("Invalid CustomCNN architecture configuration")
+        self.legacy_layout = (depth, width, classifier_width, dropout) == (3, 32, 256, 0.3)
+        if self.legacy_layout:
+            # Keep the original state-dict names and tensor shapes for saved v1 checkpoints.
+            self.conv_block1 = nn.Sequential(
+                nn.Conv2d(3, 32, 3, padding=1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(inplace=True),
+                nn.MaxPool2d(2, 2),
+            )
+            self.conv_block2 = nn.Sequential(
+                nn.Conv2d(32, 64, 3, padding=1),
+                nn.BatchNorm2d(64),
+                nn.ReLU(inplace=True),
+                nn.MaxPool2d(2, 2),
+            )
+            self.conv_block3 = nn.Sequential(
+                nn.Conv2d(64, 128, 3, padding=1),
+                nn.BatchNorm2d(128),
+                nn.ReLU(inplace=True),
+                nn.MaxPool2d(2, 2),
+            )
+            self.classifier = nn.Sequential(
+                nn.Flatten(),
+                nn.Linear(128 * 4 * 4, 256),
+                nn.ReLU(inplace=True),
+                nn.Dropout(p=0.3),
+                nn.Linear(256, num_classes),
+            )
+            return
+        blocks = []
+        in_channels = 3
+        for index in range(depth):
+            out_channels = min(width * (2**index), 256)
+            layers = [
+                nn.Conv2d(in_channels, out_channels, 3, padding=1),
+                nn.BatchNorm2d(out_channels),
+                nn.ReLU(inplace=True),
+            ]
+            if index < 3:
+                layers.append(nn.MaxPool2d(2, stride=2))
+            blocks.append(nn.Sequential(*layers))
+            in_channels = out_channels
+        self.feature_blocks = nn.ModuleList(blocks)
+        self.pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
-            nn.Flatten(),  # Flattens 3D tensor [128, 4, 4] into 1D vector of length 2048
-            nn.Linear(128 * 4 * 4, 256),  # First dense projection layer
+            nn.Flatten(),
+            nn.Linear(in_channels, classifier_width),
             nn.ReLU(inplace=True),
-            nn.Dropout(
-                p=0.3
-            ),  # Randomly zeroes 30% of units during training to prevent overfitting
-            nn.Linear(
-                256, num_classes
-            ),  # Final projection to 10 class logits (unnormalized scores)
+            nn.Dropout(p=dropout),
+            nn.Linear(classifier_width, num_classes),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Executes the forward pass computation graph.
-
-        Args:
-            x (torch.Tensor): Input batch of shape [B, 3, 32, 32]
-
-        Returns:
-            torch.Tensor: Raw output class logits of shape [B, num_classes]
-        """
-        x = self.conv_block1(x)
-        x = self.conv_block2(x)
-        x = self.conv_block3(x)
-        logits = self.classifier(x)
-        return logits
+        if self.legacy_layout:
+            return self.classifier(self.conv_block3(self.conv_block2(self.conv_block1(x))))
+        for block in self.feature_blocks:
+            x = block(x)
+        return self.classifier(self.pool(x))
 
 
 # =============================================================================
@@ -110,18 +113,20 @@ class ResNet18Wrapper(nn.Module):
     For 32x32 CIFAR-10, we modify initial conv layer to 3x3 with stride 1 so small features are not lost.
     """
 
-    def __init__(self, num_classes: int = 10, pretrained: bool = False):
+    def __init__(
+        self, num_classes: int = 10, pretrained: bool = False, native_stem: bool | None = None
+    ):
         super().__init__()
 
         # Instantiate base ResNet-18 from torchvision
         weights = torchvision_models.ResNet18_Weights.DEFAULT if pretrained else None
         self.model = torchvision_models.resnet18(weights=weights)
 
-        # Modify initial convolution to preserve 32x32 input resolution without aggressive downsampling
-        self.model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.model.maxpool = (
-            nn.Identity()
-        )  # Remove initial aggressive 3x3 max pooling for small images
+        # Use the native ImageNet stem for pretrained weights. For scratch-trained
+        # CIFAR models, retain the small-image stem used by the project baseline.
+        if not (pretrained if native_stem is None else native_stem):
+            self.model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+            self.model.maxpool = nn.Identity()
 
         # Replace final fully connected classification layer to output num_classes logits
         in_features = self.model.fc.in_features  # 512 for ResNet-18
@@ -178,7 +183,11 @@ class EfficientNetB0Wrapper(nn.Module):
 # FACTORY HELPER FUNCTION
 # =============================================================================
 def get_model_by_name(
-    model_name: str, num_classes: int = 10, pretrained: bool = False
+    model_name: str,
+    num_classes: int = 10,
+    pretrained: bool = False,
+    architecture_config: dict | None = None,
+    native_stem: bool | None = None,
 ) -> nn.Module:
     """
     Factory function to instantiate model architectures cleanly by name.
@@ -194,9 +203,9 @@ def get_model_by_name(
     name_clean = model_name.lower().strip()
 
     if name_clean in ["custom_cnn", "customcnn", "baseline"]:
-        return CustomCNN(num_classes=num_classes)
+        return CustomCNN(num_classes=num_classes, **(architecture_config or {}))
     elif name_clean in ["resnet18", "resnet-18"]:
-        return ResNet18Wrapper(num_classes=num_classes, pretrained=pretrained)
+        return ResNet18Wrapper(num_classes=num_classes, pretrained=pretrained, native_stem=native_stem)
     elif name_clean in ["mobilenet_v2", "mobilenetv2", "mobilenet"]:
         return MobileNetV2Wrapper(num_classes=num_classes, pretrained=pretrained)
     elif name_clean in ["efficientnet_b0", "efficientnetb0", "efficientnet"]:

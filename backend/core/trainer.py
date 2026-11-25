@@ -2,8 +2,16 @@
 
 import math
 import os
+import random
+import shutil
 import time
+import sys
+try:
+    import resource
+except ImportError:
+    resource = None
 from pathlib import Path
+import numpy as np
 import torch
 from config import ARTIFACTS_DIR, get_default_device
 from storage import contained
@@ -25,6 +33,8 @@ def train_one_epoch(
     cancel=None,
 ):
     model.train()
+    started = time.perf_counter()
+    cpu_started = time.process_time()
     loss_sum = correct = count = 0
     for index, (x, y) in enumerate(dataloader):
         if cancel and cancel():
@@ -41,6 +51,8 @@ def train_one_epoch(
         loss_sum += loss.item() * len(y)
         correct += (logits.argmax(1) == y).sum().item()
         if progress_callback and (index % 25 == 0 or index + 1 == len(dataloader)):
+            elapsed = max(time.perf_counter() - started, 1e-9)
+            peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss if resource else None
             progress_callback(
                 epoch=epoch,
                 total_epochs=total_epochs,
@@ -48,6 +60,9 @@ def train_one_epoch(
                 total_batches=len(dataloader),
                 batch_loss=loss.item(),
                 running_acc=100 * correct / count,
+                samples_per_sec=count / elapsed,
+                worker_cpu_percent=100 * (time.process_time() - cpu_started) / elapsed,
+                peak_rss_mb=(peak_rss / (1024 * 1024) if sys.platform == "darwin" else peak_rss / 1024) if peak_rss is not None else None,
             )
     if not count:
         raise ValueError("Empty training dataset")
@@ -143,6 +158,24 @@ class Trainer:
         def checkpoint(kind, epoch, metrics):
             path = contained(self.save_dir, f"{run_id}_{kind}_checkpoint.pt")
             temp = path.with_suffix(".tmp")
+            numpy_state = np.random.get_state()
+            rng_state = {
+                "python": random.getstate(),
+                "numpy": {
+                    "algorithm": numpy_state[0],
+                    "keys": torch.from_numpy(numpy_state[1].copy()),
+                    "position": int(numpy_state[2]),
+                    "has_gauss": int(numpy_state[3]),
+                    "cached_gaussian": float(numpy_state[4]),
+                },
+                "torch_cpu": torch.get_rng_state(),
+                "torch_cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
+                "train_loader_generator": (
+                    self.train_loader.generator.get_state()
+                    if getattr(self.train_loader, "generator", None) is not None
+                    else None
+                ),
+            }
             torch.save(
                 {
                     "epoch": epoch,
@@ -150,7 +183,7 @@ class Trainer:
                     "model_state_dict": self.model.state_dict(),
                     "optimizer_state_dict": self.optimizer.state_dict(),
                     "scheduler_state_dict": self.scheduler.state_dict() if self.scheduler else None,
-                    "torch_rng_state": torch.get_rng_state(),
+                    "rng_state": rng_state,
                     "config": self.config,
                     **metrics,
                 },
@@ -177,6 +210,14 @@ class Trainer:
                 progress_callback,
                 cancel,
             )
+            if progress_callback:
+                progress_callback(
+                    phase="validation",
+                    epoch=epoch,
+                    total_epochs=num_epochs,
+                    batch_idx=0,
+                    total_batches=0,
+                )
             vl, va = evaluate(self.model, self.val_loader, self.criterion, self.device, cancel)
             metrics = {
                 "train_loss": tl,
@@ -198,7 +239,17 @@ class Trainer:
             checkpoint("last", epoch, metrics)
             if va > best:
                 best = va
-                best_path = checkpoint("best", epoch, metrics)
+                # Copy the already-serialised last checkpoint to best instead of
+                # calling torch.save a second time (saves ~40–90 MB/epoch for
+                # ResNet / EfficientNet without sacrificing any durability guarantee).
+                last_path = contained(self.save_dir, f"{run_id}_last_checkpoint.pt")
+                best_path_target = contained(self.save_dir, f"{run_id}_best_checkpoint.pt")
+                best_temp = best_path_target.with_suffix(".tmp")
+                shutil.copy2(str(last_path), str(best_temp))
+                os.replace(best_temp, best_path_target)
+                best_path = str(best_path_target)
+                if artifact_callback:
+                    artifact_callback("best", best_path_target)
             if epoch % 5 == 0:
                 checkpoint(f"epoch_{epoch}", epoch, metrics)
             if log_callback:

@@ -3,19 +3,19 @@
 import json
 import os
 import shutil
-from pathlib import Path
 from uuid import uuid4
-from config import ARTIFACTS_DIR, REGISTRY_DIR
+from config import REGISTRY_DIR
 from db.database import database
-from storage import contained, sha256
+from storage import contained, sha256, resolve_managed_path, find_run_artifact
+from snapshot_contracts import decode_config, decode_snapshot, encode_snapshot
 
 
 class ModelRegistry:
-    def promote_candidate(self, name, run_id, version="v1.0.0"):
+    def promote_candidate(self, name, run_id, version="v1.0.0", tags=None):
         # Validate even when called outside HTTP.
         from domain import RegisterModel
 
-        request = RegisterModel(name=name, run_id=run_id, version=version)
+        request = RegisterModel(name=name, run_id=run_id, version=version, tags=tags or {})
         version = "v" + request.version.lstrip("v")
         target = None
         try:
@@ -27,8 +27,16 @@ class ModelRegistry:
                 ).fetchone():
                     raise ValueError("Model name/version already exists; versions are immutable")
                 run = c.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
-                if not run or run["status"] != "COMPLETED" or not run["evaluation_json"]:
-                    raise ValueError("A completed, holdout-evaluated run is required")
+                if (
+                    not run
+                    or run["status"] != "COMPLETED"
+                    or not run["validation_json"]
+                    or not run["final_evaluation_json"]
+                    or run["final_evaluation_status"] != "COMPLETED"
+                ):
+                    raise ValueError(
+                        "A selected run with completed final test evaluation is required"
+                    )
                 decision = c.execute(
                     "SELECT * FROM decisions WHERE run_id=? ORDER BY id DESC LIMIT 1", (run_id,)
                 ).fetchone()
@@ -42,8 +50,9 @@ class ModelRegistry:
                     raise ValueError(
                         "Historical provenance is unknown. Re-run this legacy candidate."
                     )
-                source = contained(ARTIFACTS_DIR, f"{run_id}_best_checkpoint.pt")
-                evaluation = json.loads(run["evaluation_json"])
+                source = find_run_artifact(run_id, f"{run_id}_best_checkpoint.pt", "checkpoints")
+                evaluation = decode_snapshot(run["final_evaluation_json"], "final_evaluation")
+                validation = decode_snapshot(run["validation_json"], "validation")
                 if not source.is_file() or sha256(source) != evaluation["checkpoint_sha256"]:
                     raise ValueError("Evaluated checkpoint missing or modified")
                 exp = dict(
@@ -76,29 +85,33 @@ class ModelRegistry:
                 finally:
                     temp.unlink(missing_ok=True)
                 manifest = {
+                    "manifest_schema_version": 1,
                     "source_experiment": exp,
                     "originating_run": dict(run),
                     "decision": dict(decision),
                     "investigation_history": investigation,
                     "evaluation": evaluation,
+                    "validation": validation,
                     "checkpoint_sha256": digest,
-                    "environment": json.loads(run["environment_json"]),
-                    "dataset": json.loads(run["dataset_json"]),
-                    "configuration": json.loads(run["config_json"]),
+                    "environment": decode_snapshot(run["environment_json"], "environment"),
+                    "dataset": decode_snapshot(run["dataset_json"], "dataset"),
+                    "configuration": decode_config(run["config_json"]),
+                    "tags": request.tags,
                 }
                 c.execute(
-                    "INSERT INTO models(id,name,version,run_id,checkpoint_path,test_accuracy,latency_ms,status,manifest_json,sha256) VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    "INSERT INTO models(id,name,version,run_id,checkpoint_path,test_accuracy,latency_ms,status,manifest_json,sha256,tags_json) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                     (
                         model_id,
                         name,
                         version,
                         run_id,
-                        str(target),
+                        target.relative_to(REGISTRY_DIR.resolve()).as_posix(),
                         evaluation["test_accuracy"],
-                        evaluation["latency_ms_per_sample"],
+                        evaluation.get("model_only_latency_ms_p50"),
                         "REGISTERED",
-                        json.dumps(manifest),
+                        encode_snapshot("model_manifest", manifest),
                         digest,
+                        json.dumps(request.tags),
                     ),
                 )
             return self.get_model(model_id)
@@ -125,12 +138,15 @@ class ModelRegistry:
         return {
             "model": {k: v for k, v in model.items() if k != "manifest_json"},
             "verified": True,
-            **json.loads(model["manifest_json"]),
+            **decode_snapshot(model["manifest_json"], "model_manifest"),
         }
 
     def activate(self, model_id):
         model = self.get_model(model_id)
-        path = Path(model["checkpoint_path"]).resolve()
+        try:
+            path = resolve_managed_path(REGISTRY_DIR, model["checkpoint_path"])
+        except ValueError:
+            raise ValueError("Registered checkpoint path is outside managed storage") from None
         if (
             not model["manifest_json"]
             or not model["sha256"]
@@ -143,8 +159,15 @@ class ModelRegistry:
         import torch
         from core.models import get_model_by_name
 
-        manifest = json.loads(model["manifest_json"])
-        net = get_model_by_name(manifest["configuration"]["model_name"])
+        manifest = decode_snapshot(model["manifest_json"], "model_manifest")
+        configuration = manifest["configuration"]
+        num_classes = manifest.get("dataset", {}).get("num_classes", 10)
+        net = get_model_by_name(
+            configuration["model_name"],
+            num_classes=num_classes,
+            native_stem=bool(configuration.get("pretrained")),
+            architecture_config=configuration.get("architecture_config"),
+        )
         checkpoint = torch.load(path, map_location="cpu", weights_only=True)
         if checkpoint["run_id"] != model["run_id"]:
             raise ValueError("Checkpoint run identity mismatch")

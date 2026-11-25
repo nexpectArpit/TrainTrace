@@ -3,6 +3,7 @@
 import sqlite3
 from contextlib import contextmanager, closing
 from config import DB_PATH
+from db.migrations import MIGRATIONS
 
 
 def get_db_connection():
@@ -11,6 +12,13 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys=ON")
     conn.execute("PRAGMA journal_mode=WAL")
+    # NORMAL: fsync only at WAL checkpoints, not on every write transaction.
+    # Safe with WAL — a crash can only lose the last committed transaction,
+    # and the WAL file itself ensures atomicity on recovery.
+    conn.execute("PRAGMA synchronous=NORMAL")
+    # 64 MB page cache keeps hot index pages in memory across queries.
+    conn.execute("PRAGMA cache_size=-65536")
+    conn.execute("PRAGMA busy_timeout=5000")
     return conn
 
 
@@ -100,4 +108,19 @@ def init_db():
         WHEN EXISTS(SELECT 1 FROM models WHERE name=NEW.name AND ltrim(version,'v')=ltrim(NEW.version,'v'))
         BEGIN SELECT RAISE(ABORT, 'Model name/version already registered'); END;
         """)
-        c.execute("PRAGMA user_version=1")
+        if version < 1:
+            c.execute("PRAGMA user_version=1")
+            version = 1
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS schema_migrations "
+            "(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+        )
+        for migration_version, migration in MIGRATIONS:
+            if version < migration_version:
+                migration(c)
+                c.execute(
+                    "INSERT OR IGNORE INTO schema_migrations(version) VALUES(?)",
+                    (migration_version,),
+                )
+                c.execute(f"PRAGMA user_version={migration_version}")
+                version = migration_version
