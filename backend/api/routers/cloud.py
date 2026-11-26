@@ -79,4 +79,3 @@ def verify_cloud_connection():
 def check_kernel(kernel_id: str):
     """Check status of a running remote Kaggle kernel."""
     return get_kaggle_run_status(kernel_id)
-

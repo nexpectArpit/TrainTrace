@@ -6,6 +6,7 @@ import torch
 
 from core.trainer import TrainingStopped
 
+
 def evaluate_candidate(model, loader, device, cancel=None, num_classes=10):
     """Evaluate a selected model once against the final test partition."""
     model.eval()

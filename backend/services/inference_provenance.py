@@ -7,6 +7,7 @@ from storage import resolve_managed_path
 
 MAX_COMPARE_RUNS = 6
 
+
 def _locate_run_best_checkpoint(conn, run_id: str, expected_sha: str):
     artifact = conn.execute(
         "SELECT path, sha256 FROM artifacts WHERE run_id=? AND kind='best' ORDER BY id DESC LIMIT 1",
@@ -56,26 +57,40 @@ def require_inference_dataset(dataset: dict) -> tuple[str, str, list[str], int, 
     preprocessing = dataset.get("preprocessing")
     if not isinstance(key, str) or not key.strip() or not isinstance(name, str) or not name.strip():
         raise ValueError("dataset identity is missing")
-    if (not isinstance(classes, list) or not classes or
-            not all(isinstance(label, str) and label.strip() for label in classes) or
-            len(set(classes)) != len(classes) or
-            type(count) is not int or count != len(classes)):
+    if (
+        not isinstance(classes, list)
+        or not classes
+        or not all(isinstance(label, str) and label.strip() for label in classes)
+        or len(set(classes)) != len(classes)
+        or type(count) is not int
+        or count != len(classes)
+    ):
         raise ValueError("dataset class names or class count are missing or inconsistent")
     if not isinstance(preprocessing, dict):
         raise ValueError("preprocessing contract is missing")
     size = preprocessing.get("size")
     mean = preprocessing.get("mean")
     std = preprocessing.get("std")
-    if (not isinstance(size, list) or len(size) != 2 or
-            any(type(value) is not int or value <= 0 for value in size)):
+    if (
+        not isinstance(size, list)
+        or len(size) != 2
+        or any(type(value) is not int or value <= 0 for value in size)
+    ):
         raise ValueError("preprocessing input size is missing or invalid")
-    if (not isinstance(mean, list) or not isinstance(std, list) or
-            len(mean) != 3 or len(std) != 3 or
-            any(not isinstance(value, (int, float)) for value in mean + std) or
-            any(value <= 0 for value in std)):
+    if (
+        not isinstance(mean, list)
+        or not isinstance(std, list)
+        or len(mean) != 3
+        or len(std) != 3
+        or any(not isinstance(value, (int, float)) for value in mean + std)
+        or any(value <= 0 for value in std)
+    ):
         raise ValueError("preprocessing normalization is missing or invalid")
     if preprocessing.get("input_conversion") not in {"rgb", "grayscale_to_rgb"}:
         raise ValueError("preprocessing input conversion is missing or invalid")
-    if preprocessing.get("external_input_adapter") not in {"digit_photo_ink_v2", "aspect_fit_mean_pad"}:
+    if preprocessing.get("external_input_adapter") not in {
+        "digit_photo_ink_v2",
+        "aspect_fit_mean_pad",
+    }:
         raise ValueError("preprocessing upload adapter is missing or unsupported")
     return key, name, classes, count, preprocessing

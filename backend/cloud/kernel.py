@@ -12,6 +12,7 @@ from typing import Any
 from cloud.credentials import get_authenticated_api
 from config import BASE_DIR, STORAGE_DIR
 
+
 def generate_kernel_code(config: dict[str, Any]) -> str:
     """Build the Kaggle script from the same model definitions used locally."""
     template = Path(__file__).with_name("kaggle_runner.py").read_text()
@@ -26,12 +27,16 @@ def generate_kernel_code(config: dict[str, Any]) -> str:
     try:
         git_commit = subprocess.check_output(
             ["git", "-C", str(BASE_DIR.parent), "rev-parse", "HEAD"],
-            text=True, stderr=subprocess.DEVNULL,
+            text=True,
+            stderr=subprocess.DEVNULL,
         ).strip()
-        git_dirty = bool(subprocess.check_output(
-            ["git", "-C", str(BASE_DIR.parent), "status", "--porcelain"],
-            text=True, stderr=subprocess.DEVNULL,
-        ).strip())
+        git_dirty = bool(
+            subprocess.check_output(
+                ["git", "-C", str(BASE_DIR.parent), "status", "--porcelain"],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+        )
     except (OSError, subprocess.CalledProcessError):
         git_commit, git_dirty = None, None
     callback_url = os.getenv("TRAINTRACE_CALLBACK_URL", "").strip().rstrip("/")
@@ -44,6 +49,7 @@ def generate_kernel_code(config: dict[str, Any]) -> str:
         .replace("__TT_GIT_DIRTY__", repr(git_dirty))
         .replace("__TT_CALLBACK_URL__", repr(callback_url))
     )
+
 
 def dispatch_kaggle_run(config: dict[str, Any]) -> dict[str, Any]:
     """Package and push a GPU training kernel to Kaggle."""
@@ -84,5 +90,3 @@ def dispatch_kaggle_run(config: dict[str, Any]) -> dict[str, Any]:
         "run_id": run_id,
         "staging_dir": str(staging_dir),
     }
-
-

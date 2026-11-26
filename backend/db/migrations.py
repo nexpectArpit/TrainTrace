@@ -57,19 +57,19 @@ def _migration_2(conn: sqlite3.Connection) -> None:
             conn.execute(
                 "UPDATE runs SET validation_json=? WHERE id=?",
                 (
-                    json.dumps({
-                        "metric_set": "validation",
-                        "validation_loss": metric["val_loss"],
-                        "validation_accuracy": metric["val_acc"],
-                        "checkpoint_epoch": metric["epoch"],
-                        "legacy_snapshot": True,
-                    }),
+                    json.dumps(
+                        {
+                            "metric_set": "validation",
+                            "validation_loss": metric["val_loss"],
+                            "validation_accuracy": metric["val_acc"],
+                            "checkpoint_epoch": metric["epoch"],
+                            "legacy_snapshot": True,
+                        }
+                    ),
                     row["id"],
                 ),
             )
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS decision_run_id ON decisions(run_id,id)"
-    )
+    conn.execute("CREATE INDEX IF NOT EXISTS decision_run_id ON decisions(run_id,id)")
     conn.execute("CREATE INDEX IF NOT EXISTS artifact_run_id ON artifacts(run_id,created_at)")
     conn.execute("CREATE INDEX IF NOT EXISTS job_status_created ON jobs(status,created_at)")
     conn.execute("CREATE INDEX IF NOT EXISTS audit_run_id ON audits(run_id,created_at)")
@@ -124,7 +124,9 @@ def _migration_6(conn: sqlite3.Connection) -> None:
         "batch_loss REAL NOT NULL,running_acc REAL NOT NULL,samples_per_sec REAL,device_memory_mb REAL,"
         "observed_at INTEGER NOT NULL,UNIQUE(run_id,epoch,batch_idx))"
     )
-    conn.execute("CREATE INDEX IF NOT EXISTS progress_sample_run ON run_progress_samples(run_id,id)")
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS progress_sample_run ON run_progress_samples(run_id,id)"
+    )
 
 
 def _migration_7(conn: sqlite3.Connection) -> None:

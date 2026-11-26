@@ -188,7 +188,11 @@ def get_run_live_status_endpoint(run_id: str, after: int = Query(0, ge=0)):
         if job and job["status"] in ("STOPPED", "FAILED"):
             c.execute(
                 "UPDATE runs SET status=?,error=COALESCE(error,?) WHERE id=? AND status IN ('QUEUED','RUNNING','EVALUATING')",
-                (job["status"], "Job stopped." if job["status"] == "STOPPED" else "Job failed.", run_id),
+                (
+                    job["status"],
+                    "Job stopped." if job["status"] == "STOPPED" else "Job failed.",
+                    run_id,
+                ),
             )
         events = [
             dict(r)
@@ -230,7 +234,9 @@ def run_detail(run_id: str):
 def record_run_telemetry(run_id: str, payload: dict[str, Any]):
     """Ingest real-time batch telemetry from remote runners (e.g., Kaggle Cloud GPU)."""
     with database() as c:
-        row = c.execute("SELECT id, status, progress_json FROM runs WHERE id=?", (run_id,)).fetchone()
+        row = c.execute(
+            "SELECT id, status, progress_json FROM runs WHERE id=?", (run_id,)
+        ).fetchone()
         if not row:
             raise HTTPException(404, "Run not found")
         c.execute(
@@ -265,25 +271,36 @@ def record_run_telemetry(run_id: str, payload: dict[str, Any]):
                 current_progress = json.loads(row["progress_json"])
             except Exception:
                 pass
-        current_progress.update({
-            "phase": "training",
-            "epoch": payload.get("epoch", current_progress.get("epoch", 1)),
-            "batch_idx": payload.get("batch_idx", current_progress.get("batch_idx", 1)),
-            "total_batches": payload.get("total_batches", current_progress.get("total_batches", 1)),
-            "batch_loss": float(payload.get("batch_loss", 0.0)),
-            "running_acc": float(payload.get("running_acc", 0.0)),
-            "samples_per_sec": float(payload.get("samples_per_sec", 0.0)),
-            "device_memory_mb": float(payload.get("device_memory_mb", 0.0)),
-            "lr": payload.get("learning_rate", current_progress.get("lr")),
-        })
+        current_progress.update(
+            {
+                "phase": "training",
+                "epoch": payload.get("epoch", current_progress.get("epoch", 1)),
+                "batch_idx": payload.get("batch_idx", current_progress.get("batch_idx", 1)),
+                "total_batches": payload.get(
+                    "total_batches", current_progress.get("total_batches", 1)
+                ),
+                "batch_loss": float(payload.get("batch_loss", 0.0)),
+                "running_acc": float(payload.get("running_acc", 0.0)),
+                "samples_per_sec": float(payload.get("samples_per_sec", 0.0)),
+                "device_memory_mb": float(payload.get("device_memory_mb", 0.0)),
+                "lr": payload.get("learning_rate", current_progress.get("lr")),
+            }
+        )
         for key in (
-            "worker_cpu_percent", "peak_rss_mb", "gpu_utilization_pct",
-            "gpu_memory_used_mb", "gpu_memory_total_mb", "gpu_memory_utilization_pct", "gpu_temperature_c",
+            "worker_cpu_percent",
+            "peak_rss_mb",
+            "gpu_utilization_pct",
+            "gpu_memory_used_mb",
+            "gpu_memory_total_mb",
+            "gpu_memory_utilization_pct",
+            "gpu_temperature_c",
             "gpu_power_watts",
         ):
             if payload.get(key) is not None:
                 current_progress[key] = payload[key]
-        c.execute("UPDATE runs SET progress_json=? WHERE id=?", (json.dumps(current_progress), run_id))
+        c.execute(
+            "UPDATE runs SET progress_json=? WHERE id=?", (json.dumps(current_progress), run_id)
+        )
     return {"status": "ok"}
 
 
@@ -295,14 +312,14 @@ def record_run_epoch_telemetry(run_id: str, payload: dict[str, Any]):
         if not row:
             raise HTTPException(404, "Run not found")
         values = (
-                run_id,
-                payload["epoch"],
-                float(payload["train_loss"]),
-                float(payload["train_acc"]),
-                float(payload["val_loss"]),
-                float(payload["val_acc"]),
-                float(payload.get("epoch_time_sec", 0.0)),
-                float(payload.get("learning_rate", 0.001)),
+            run_id,
+            payload["epoch"],
+            float(payload["train_loss"]),
+            float(payload["train_acc"]),
+            float(payload["val_loss"]),
+            float(payload["val_acc"]),
+            float(payload.get("epoch_time_sec", 0.0)),
+            float(payload.get("learning_rate", 0.001)),
         )
         existing = c.execute(
             "SELECT id FROM epoch_metrics WHERE run_id=? AND epoch=?",

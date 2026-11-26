@@ -39,13 +39,9 @@ def seed_everything(seed):
     torch.backends.cudnn.deterministic = True
 
 
-
-
 def event(run_id, message):
     with database() as c:
         c.execute("INSERT INTO events(run_id,message) VALUES(?,?)", (run_id, str(message)))
-
-
 
 
 def cancelled(job_id):
@@ -60,8 +56,6 @@ def set_run(run_id, **fields):
             "UPDATE runs SET " + ",".join(f"{k}=?" for k in fields) + " WHERE id=?",
             (*fields.values(), run_id),
         )
-
-
 
 
 def execute_run(config, job_id):
@@ -113,7 +107,11 @@ def execute_run(config, job_id):
                 f"Initialized model weights from run {source_id}; optimizer and scheduler start fresh.",
             )
         train, val, dataset_started = load_training_data(
-            config, dataset_key, spec, set_run=set_run, event=event,
+            config,
+            dataset_key,
+            spec,
+            set_run=set_run,
+            event=event,
             loader=get_dataloaders,
         )
         event(
@@ -135,10 +133,7 @@ def execute_run(config, job_id):
         if wandb_bridge.reason:
             event(run_id, wandb_bridge.reason + "; local training will continue.")
         base_dataset = getattr(train.dataset, "dataset", None)
-        class_names = (
-            spec.get("classes")
-            or getattr(base_dataset, "classes", None)
-        )
+        class_names = spec.get("classes") or getattr(base_dataset, "classes", None)
         if not class_names or len(class_names) != spec["num_classes"]:
             raise ValueError(f"{spec['name']} did not provide its expected class names")
         try:
@@ -242,7 +237,9 @@ def execute_run(config, job_id):
             try:
                 recorder.flush_samples()
             except Exception as exc:
-                event(run_id, f"Could not persist partial-epoch samples: {type(exc).__name__}: {exc}")
+                event(
+                    run_id, f"Could not persist partial-epoch samples: {type(exc).__name__}: {exc}"
+                )
         if wandb_bridge:
             wandb_bridge.close()
 

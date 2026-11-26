@@ -13,10 +13,15 @@ def submit_run(config):
         c.execute("BEGIN IMMEDIATE")
         payload = config.model_dump()
         queue_policy = payload.pop("queue_policy", "queue")
-        if queue_policy == "reject" and c.execute(
-            "SELECT 1 FROM jobs WHERE status IN ('QUEUED','RUNNING') LIMIT 1"
-        ).fetchone():
-            raise ValueError("Another job is active; this run was rejected by the selected queue policy.")
+        if (
+            queue_policy == "reject"
+            and c.execute(
+                "SELECT 1 FROM jobs WHERE status IN ('QUEUED','RUNNING') LIMIT 1"
+            ).fetchone()
+        ):
+            raise ValueError(
+                "Another job is active; this run was rejected by the selected queue policy."
+            )
         exp = c.execute("SELECT * FROM experiments WHERE id=?", (config.experiment_id,)).fetchone()
         if not exp or exp["archived"]:
             raise ValueError("Choose an existing, active investigation.")
@@ -43,11 +48,13 @@ def submit_run(config):
             source_config = decode_config(source["config_json"]) or {}
             source_dataset = decode_snapshot(source["dataset_json"], "dataset") or {}
             from core.dataset import dataset_spec
+
             _, target_spec = dataset_spec(config.dataset_name)
             if (
                 source_config.get("model_name") != config.model_name
                 or bool(source_config.get("pretrained")) != bool(config.pretrained)
-                or source_config.get("architecture_config", {}) != payload.get("architecture_config", {})
+                or source_config.get("architecture_config", {})
+                != payload.get("architecture_config", {})
                 or source_dataset.get("num_classes") != target_spec["num_classes"]
             ):
                 raise ValueError("Warm-start source architecture and output classes must match")
@@ -60,7 +67,9 @@ def submit_run(config):
                 raise ValueError("Warm-start source has no saved checkpoint")
             checkpoint_path = resolve_managed_path(ARTIFACTS_DIR, checkpoint["path"])
             if not checkpoint_path.is_file() or sha256(checkpoint_path) != checkpoint["sha256"]:
-                raise ValueError("Warm-start checkpoint is missing or failed integrity verification")
+                raise ValueError(
+                    "Warm-start checkpoint is missing or failed integrity verification"
+                )
             payload["warm_start_checkpoint_sha256"] = checkpoint["sha256"]
             payload["warm_start_checkpoint_kind"] = checkpoint["kind"]
         payload["config_schema_version"] = 1
@@ -114,7 +123,9 @@ def submit_final_evaluation(request):
             raise ValueError("A completed run with validation evidence is required")
         validation = decode_snapshot(run["validation_json"], "validation")
         if not validation.get("checkpoint_sha256"):
-            raise ValueError("This legacy run has no checkpoint integrity snapshot; retrain it before final evaluation")
+            raise ValueError(
+                "This legacy run has no checkpoint integrity snapshot; retrain it before final evaluation"
+            )
         decision = c.execute(
             "SELECT status FROM decisions WHERE run_id=? ORDER BY id DESC LIMIT 1",
             (request.run_id,),
@@ -206,14 +217,23 @@ def stop_job(job_id):
             raise ValueError("Job not found")
         if job["status"] not in ["QUEUED", "RUNNING"]:
             raise ValueError("Job is already finished")
-        if job["kind"] in ("train", "kaggle_train", "final_evaluation") and job["status"] == "RUNNING":
+        if (
+            job["kind"] in ("train", "kaggle_train", "final_evaluation")
+            and job["status"] == "RUNNING"
+        ):
             run = c.execute(
                 "SELECT status,final_evaluation_status FROM runs WHERE id=? OR final_evaluation_job_id=?",
                 (job_id, job_id),
             ).fetchone()
             if run and (
-                (job["kind"] in ("train", "kaggle_train") and run["status"] in ("COMPLETED", "FAILED", "STOPPED"))
-                or (job["kind"] == "final_evaluation" and run["final_evaluation_status"] in ("COMPLETED", "FAILED", "STOPPED"))
+                (
+                    job["kind"] in ("train", "kaggle_train")
+                    and run["status"] in ("COMPLETED", "FAILED", "STOPPED")
+                )
+                or (
+                    job["kind"] == "final_evaluation"
+                    and run["final_evaluation_status"] in ("COMPLETED", "FAILED", "STOPPED")
+                )
             ):
                 raise ValueError("The job finished before the stop request was applied")
         if job["status"] == "QUEUED":

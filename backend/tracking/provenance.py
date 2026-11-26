@@ -12,6 +12,7 @@ import torchvision
 from config import BASE_DIR, get_device_info
 from storage import sha256
 
+
 def checkpoint_state_sha256(checkpoint_path):
     checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
     digest = hashlib.sha256()
@@ -54,4 +55,3 @@ def environment():
         "deterministic_algorithms": True,
         "torch_threads": torch.get_num_threads(),
     }
-

@@ -122,9 +122,13 @@ def get_dataloaders(
 
     # Download / load raw 50,000 training images using training transformations
     if dataset_key == "svhn":
-        full_train_dataset = dataset_class(root=data_dir, split="train", download=True, transform=train_transform)
+        full_train_dataset = dataset_class(
+            root=data_dir, split="train", download=True, transform=train_transform
+        )
     else:
-        full_train_dataset = dataset_class(root=data_dir, train=True, download=True, transform=train_transform)
+        full_train_dataset = dataset_class(
+            root=data_dir, train=True, download=True, transform=train_transform
+        )
 
     # Download / load raw 10,000 holdout test images using evaluation transformations
     if include_test:
@@ -181,16 +185,25 @@ def get_dataloaders(
 
     # Test DataLoader: Holdout evaluation dataset
     test_loader = (
-        DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers,
-                   pin_memory=torch.cuda.is_available())
-        if test_dataset is not None else None
+        DataLoader(
+            test_dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers,
+            pin_memory=torch.cuda.is_available(),
+        )
+        if test_dataset is not None
+        else None
     )
 
     return train_loader, val_loader, test_loader
 
 
 def get_test_dataloader(
-    dataset_name: str, batch_size: int = DEFAULT_BATCH_SIZE, data_dir: str = str(DATA_DIR), pretrained: bool = False
+    dataset_name: str,
+    batch_size: int = DEFAULT_BATCH_SIZE,
+    data_dir: str = str(DATA_DIR),
+    pretrained: bool = False,
 ) -> DataLoader:
     """Load only the final-test partition; training/selection code never receives it."""
     dataset_key, spec = dataset_spec(dataset_name)
@@ -201,8 +214,13 @@ def get_test_dataloader(
         if dataset_key == "svhn"
         else cls(root=data_dir, train=False, download=True, transform=transform)
     )
-    return DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0,
-                      pin_memory=torch.cuda.is_available())
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=torch.cuda.is_available(),
+    )
 
 
 def get_cifar10_dataloaders(
@@ -217,8 +235,15 @@ def get_cifar10_dataloaders(
 ):
     """Backward-compatible CIFAR-10 loader entry point."""
     return get_dataloaders(
-        "cifar10", batch_size, val_split_ratio, seed, num_workers, data_dir, split_seed,
-        pretrained, include_test
+        "cifar10",
+        batch_size,
+        val_split_ratio,
+        seed,
+        num_workers,
+        data_dir,
+        split_seed,
+        pretrained,
+        include_test,
     )
 
 
