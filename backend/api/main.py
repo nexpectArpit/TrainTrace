@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db.database import init_db, database
 from api.routers import experiments, runs, registry, inference, cloud
 from config import BASE_DIR, get_device_info
-import torch
+from importlib import metadata
 from process_lock import try_lock, unlock
 
 
@@ -67,10 +67,14 @@ def system_info_endpoint():
             unlock(lock)
     finally:
         lock.close()
+    try:
+        pytorch_version = metadata.version("torch")
+    except metadata.PackageNotFoundError:
+        pytorch_version = "unknown"
     return {
         "status": "online",
         "hardware": get_device_info(),
-        "pytorch_version": torch.__version__,
+        "pytorch_version": pytorch_version,
         "active_job": dict(active) if active else None,
         "queued_jobs": queued,
         "worker_online": worker_online,

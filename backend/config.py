@@ -12,6 +12,7 @@ Senior Engineering Rationale:
 """
 
 from pathlib import Path
+from typing import Any
 import os
 
 try:
@@ -22,7 +23,6 @@ try:
     load_dotenv(Path(__file__).resolve().parent / ".env")
 except ImportError:
     pass
-import torch
 
 # -----------------------------------------------------------------------------
 # 1. BASE SYSTEM DIRECTORIES
@@ -72,7 +72,7 @@ DEFAULT_NUM_WORKERS = 2  # Number of parallel DataLoader worker subprocesses
 # -----------------------------------------------------------------------------
 # 4. HARDWARE COMPUTATION DEVICE SELECTION
 # -----------------------------------------------------------------------------
-def get_default_device() -> torch.device:
+def get_default_device() -> Any:
     """
     Dynamically select the optimal compute execution target on the host system.
     Supports environment override via TRAINTRACE_DEVICE (e.g., 'cuda', 'mps', 'cpu').
@@ -84,6 +84,12 @@ def get_default_device() -> torch.device:
     4. CPU (Universal fallback execution)
     """
     env_override = os.getenv("TRAINTRACE_DEVICE", "").strip().lower()
+    if env_override == "cpu":
+        import torch
+
+        return torch.device("cpu")
+    import torch
+
     if env_override:
         if env_override == "cuda" and torch.cuda.is_available():
             return torch.device("cuda")
@@ -108,6 +114,15 @@ def get_device_info() -> dict:
     """
     Returns platform-agnostic hardware metadata for the active compute device.
     """
+    if os.getenv("TRAINTRACE_LIGHTWEIGHT_INFO", "").strip() == "1":
+        return {
+            "type": "cpu",
+            "name": "Host CPU (Cloud Control Plane)",
+            "badge": "CPU Control Plane",
+            "is_accelerated": False,
+        }
+    import torch
+
     dev = get_default_device()
     dev_type = dev.type
 

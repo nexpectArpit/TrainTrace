@@ -7,7 +7,6 @@ from db.database import database
 from snapshot_contracts import decode_config, decode_snapshot
 from storage import sha256, resolve_managed_path
 
-from services.inference_runtime import _decode_uploaded_image, _predict_with_checkpoint
 from services.inference_provenance import (
     _locate_run_best_checkpoint,
     _normalize_run_ids,
@@ -90,6 +89,8 @@ def compare_completed_runs(
 ):
     """Run one uploaded image through multiple verified completed-run checkpoints side by side."""
     normalized_ids = _normalize_run_ids(run_ids)
+    from services.inference_runtime import _decode_uploaded_image, _predict_with_checkpoint
+
     image = _decode_uploaded_image(file)
     expected_clean = expected_label.strip() if expected_label and expected_label.strip() else None
 
@@ -279,6 +280,8 @@ def predict_image(file: UploadFile = File(...), model_id: str | None = None):
         or sha256(path) != model["sha256"]
     ):
         raise HTTPException(409, "Serving checkpoint missing or changed")
+    from services.inference_runtime import _decode_uploaded_image, _predict_with_checkpoint
+
     image = _decode_uploaded_image(file)
     try:
         manifest = json.loads(model["manifest_json"])
