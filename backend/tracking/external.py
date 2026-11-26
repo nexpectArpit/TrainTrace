@@ -2,6 +2,7 @@
 
 import os
 
+
 class WandbBridge:
     """Best-effort optional W&B synchronization; training remains local-first."""
 
@@ -54,4 +55,3 @@ class WandbBridge:
                 self.run.finish()
             except Exception:
                 pass
-

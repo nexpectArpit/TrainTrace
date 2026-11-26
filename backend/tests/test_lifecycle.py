@@ -292,10 +292,15 @@ def register(client, run_id, name="release", version="v1.0.0"):
 def test_reports_withhold_historical_test_values(client, final_evaluated):
     run = final_evaluated
     with database() as conn:
-        row = conn.execute("SELECT final_evaluation_json FROM runs WHERE id=?", (run["id"],)).fetchone()
+        row = conn.execute(
+            "SELECT final_evaluation_json FROM runs WHERE id=?", (run["id"],)
+        ).fetchone()
         evaluation = json.loads(row["final_evaluation_json"])
         evaluation["legacy_preselection_test_exposure"] = True
-        conn.execute("UPDATE runs SET final_evaluation_json=? WHERE id=?", (json.dumps(evaluation), run["id"]))
+        conn.execute(
+            "UPDATE runs SET final_evaluation_json=? WHERE id=?",
+            (json.dumps(evaluation), run["id"]),
+        )
     csv_response = client.get(f"/api/v1/experiments/{run['experiment_id']}/report.csv")
     assert csv_response.status_code == 200
     rows = list(csv.DictReader(io.StringIO(csv_response.text)))

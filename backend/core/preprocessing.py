@@ -18,8 +18,7 @@ def _digit_photo(image: Image.Image, size: int) -> Image.Image:
         + [pixels[width - 1, y] for y in range(height)]
     )
     background = tuple(
-        sorted(pixel[channel] for pixel in edge)[len(edge) // 2]
-        for channel in range(3)
+        sorted(pixel[channel] for pixel in edge)[len(edge) // 2] for channel in range(3)
     )
     bg = Image.new("RGB", rgb.size, background)
     channels = ImageChops.difference(rgb, bg).split()
@@ -29,9 +28,7 @@ def _digit_photo(image: Image.Image, size: int) -> Image.Image:
     # not stretch the digit to the edge of the model input.
     scale = min(1.0, 512 / max(width, height))
     mask_size = (max(1, round(width * scale)), max(1, round(height * scale)))
-    mask = np.asarray(
-        foreground.resize(mask_size, Image.Resampling.BILINEAR), dtype=np.uint8
-    ) >= 24
+    mask = np.asarray(foreground.resize(mask_size, Image.Resampling.BILINEAR), dtype=np.uint8) >= 24
     visited = np.zeros(mask.shape, dtype=bool)
     best_count = 0
     best_bounds = None

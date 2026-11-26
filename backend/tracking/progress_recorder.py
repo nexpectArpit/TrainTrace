@@ -31,13 +31,21 @@ class TrainingProgressRecorder:
             reading["device_memory_mb"] = torch.mps.current_allocated_memory() / (1024 * 1024)
         self.set_run(self.run_id, progress_json=json.dumps(reading))
         if reading.get("batch_idx", 0) > 0:
-            self.samples.append((
-                self.run_id, reading["epoch"], reading["batch_idx"],
-                reading["total_batches"], reading["batch_loss"],
-                reading["running_acc"], reading.get("samples_per_sec"),
-                reading.get("device_memory_mb"), reading.get("worker_cpu_percent"),
-                reading.get("peak_rss_mb"), int(time.time() * 1000),
-            ))
+            self.samples.append(
+                (
+                    self.run_id,
+                    reading["epoch"],
+                    reading["batch_idx"],
+                    reading["total_batches"],
+                    reading["batch_loss"],
+                    reading["running_acc"],
+                    reading.get("samples_per_sec"),
+                    reading.get("device_memory_mb"),
+                    reading.get("worker_cpu_percent"),
+                    reading.get("peak_rss_mb"),
+                    int(time.time() * 1000),
+                )
+            )
 
     def _write_samples(self, conn):
         if not self.samples:
@@ -58,8 +66,13 @@ class TrainingProgressRecorder:
                     run_id,epoch,train_loss,train_acc,val_loss,val_acc,epoch_time_sec,learning_rate
                 ) VALUES(?,?,?,?,?,?,?,?)""",
                 (
-                    self.run_id, number, metrics["train_loss"], metrics["train_acc"],
-                    metrics["val_loss"], metrics["val_acc"], metrics["epoch_time_sec"],
+                    self.run_id,
+                    number,
+                    metrics["train_loss"],
+                    metrics["train_acc"],
+                    metrics["val_loss"],
+                    metrics["val_acc"],
+                    metrics["epoch_time_sec"],
                     metrics["learning_rate"],
                 ),
             )

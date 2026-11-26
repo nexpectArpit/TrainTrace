@@ -75,7 +75,9 @@ def work(job):
 
             def check_cancel():
                 with database() as c:
-                    row = c.execute("SELECT cancel_requested FROM jobs WHERE id=?", (job["id"],)).fetchone()
+                    row = c.execute(
+                        "SELECT cancel_requested FROM jobs WHERE id=?", (job["id"],)
+                    ).fetchone()
                     return bool(row and row["cancel_requested"])
 
             execute_remote_kaggle_run(payload, job["id"], check_cancelled=check_cancel)
@@ -99,7 +101,12 @@ def work(job):
         current = c.execute(
             "SELECT status,cancel_requested FROM jobs WHERE id=?", (job["id"],)
         ).fetchone()
-        if current and current["status"] == "RUNNING" and current["cancel_requested"] and status == "COMPLETED":
+        if (
+            current
+            and current["status"] == "RUNNING"
+            and current["cancel_requested"]
+            and status == "COMPLETED"
+        ):
             status, error = "STOPPED", "Stop requested before the job result was committed."
             if job["kind"] in ("train", "kaggle_train"):
                 c.execute(
@@ -107,7 +114,13 @@ def work(job):
                     (error, job["id"]),
                 )
         if job["kind"] == "final_evaluation":
-            final_status = "STOPPED" if status == "STOPPED" else "FAILED" if status == "FAILED" else "COMPLETED"
+            final_status = (
+                "STOPPED"
+                if status == "STOPPED"
+                else "FAILED"
+                if status == "FAILED"
+                else "COMPLETED"
+            )
             c.execute(
                 "UPDATE runs SET final_evaluation_status=?,final_evaluation_error=? "
                 "WHERE final_evaluation_job_id=?",
@@ -133,7 +146,9 @@ def supervise(job):
         while child.is_alive():
             (STORAGE_DIR / "worker.heartbeat").write_text(str(time.time()))
             with database() as c:
-                row = c.execute("SELECT status,cancel_requested FROM jobs WHERE id=?", (job["id"],)).fetchone()
+                row = c.execute(
+                    "SELECT status,cancel_requested FROM jobs WHERE id=?", (job["id"],)
+                ).fetchone()
             if row and row["status"] == "RUNNING" and row["cancel_requested"]:
                 if stop_started is None:
                     stop_started = time.monotonic()
@@ -148,17 +163,34 @@ def supervise(job):
         child.join()
         with database() as c:
             c.execute("BEGIN IMMEDIATE")
-            row = c.execute("SELECT status,cancel_requested FROM jobs WHERE id=?", (job["id"],)).fetchone()
+            row = c.execute(
+                "SELECT status,cancel_requested FROM jobs WHERE id=?", (job["id"],)
+            ).fetchone()
             if row and row["status"] == "RUNNING":
                 status = "STOPPED" if row["cancel_requested"] else "FAILED"
-                error = "Stopped by user; completed epochs and committed checkpoints retained." if status == "STOPPED" else f"Job process exited unexpectedly (exit code {child.exitcode})."
-                c.execute("UPDATE jobs SET status=?,error=?,updated_at=CURRENT_TIMESTAMP WHERE id=?", (status, error, job["id"]))
+                error = (
+                    "Stopped by user; completed epochs and committed checkpoints retained."
+                    if status == "STOPPED"
+                    else f"Job process exited unexpectedly (exit code {child.exitcode})."
+                )
+                c.execute(
+                    "UPDATE jobs SET status=?,error=?,updated_at=CURRENT_TIMESTAMP WHERE id=?",
+                    (status, error, job["id"]),
+                )
                 if job["kind"] in ("train", "kaggle_train"):
-                    c.execute("UPDATE runs SET status=?,error=? WHERE id=?", (status, error, job["id"]))
+                    c.execute(
+                        "UPDATE runs SET status=?,error=? WHERE id=?", (status, error, job["id"])
+                    )
                 elif job["kind"] == "final_evaluation":
-                    c.execute("UPDATE runs SET final_evaluation_status=?,final_evaluation_error=? WHERE final_evaluation_job_id=?", (status, error, job["id"]))
+                    c.execute(
+                        "UPDATE runs SET final_evaluation_status=?,final_evaluation_error=? WHERE final_evaluation_job_id=?",
+                        (status, error, job["id"]),
+                    )
                 elif job["kind"] == "audit":
-                    c.execute("UPDATE runs SET status=?,error=? WHERE audit_id=? AND status IN ('QUEUED','RUNNING','EVALUATING')", (status, error, job["id"]))
+                    c.execute(
+                        "UPDATE runs SET status=?,error=? WHERE audit_id=? AND status IN ('QUEUED','RUNNING','EVALUATING')",
+                        (status, error, job["id"]),
+                    )
     finally:
         if child.is_alive():
             child.terminate()

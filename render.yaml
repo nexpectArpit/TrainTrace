@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: traintrace-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/v1/system/info
+    envVars:
+      - key: TRAINTRACE_STORAGE_DIR
+        value: /data/storage
+      - key: KAGGLE_API_TOKEN
+        sync: false
+      - key: TRAINTRACE_CALLBACK_URL
+        sync: false
+      - key: TRAINTRACE_CORS_ORIGINS
+        sync: false
+    # Uncomment when upgrading from free to starter+ for persistent SQLite & checkpoints:
+    # disk:
+    #   name: traintrace-storage
+    #   mountPath: /data/storage
+    #   sizeGB: 5
+
+  - type: web
+    name: traintrace-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://traintrace-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+

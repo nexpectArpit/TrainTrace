@@ -9,14 +9,12 @@ from storage import sha256, resolve_managed_path
 
 from services.inference_runtime import _decode_uploaded_image, _predict_with_checkpoint
 from services.inference_provenance import (
-    _locate_run_best_checkpoint, _normalize_run_ids, require_inference_dataset,
+    _locate_run_best_checkpoint,
+    _normalize_run_ids,
+    require_inference_dataset,
 )
 
 router = APIRouter(prefix="/api/v1/inference", tags=["Inference"])
-
-
-
-
 
 
 @router.get("/candidates")
@@ -51,7 +49,9 @@ def list_inference_candidates(experiment_id: str | None = Query(None, max_length
                 continue
             expected_sha = (validation or {}).get("checkpoint_sha256")
             try:
-                dataset_key, dataset_name, class_names, num_classes, preprocessing = require_inference_dataset(dataset)
+                dataset_key, dataset_name, class_names, num_classes, preprocessing = (
+                    require_inference_dataset(dataset)
+                )
             except ValueError:
                 continue
             if not expected_sha:
@@ -115,17 +115,24 @@ def compare_completed_runs(
                 validation = decode_snapshot(row["validation_json"], "validation")
             except (ValueError, json.JSONDecodeError) as e:
                 raise HTTPException(409, f"Run '{run_id}' has unreadable provenance") from e
-            if not isinstance(configuration.get("model_name"), str) or not configuration["model_name"]:
-                raise HTTPException(409, f"Run '{run_id}' is missing its recorded model architecture")
+            if (
+                not isinstance(configuration.get("model_name"), str)
+                or not configuration["model_name"]
+            ):
+                raise HTTPException(
+                    409, f"Run '{run_id}' is missing its recorded model architecture"
+                )
             expected_sha = validation.get("checkpoint_sha256")
             try:
-                dataset_key, dataset_name, class_names, num_classes, preprocessing = require_inference_dataset(dataset)
-            except ValueError as exc:
-                raise HTTPException(409, f"Run '{run_id}' has invalid dataset provenance: {exc}") from exc
-            if not expected_sha:
-                raise HTTPException(
-                    409, f"Run '{run_id}' is missing checkpoint integrity metadata"
+                dataset_key, dataset_name, class_names, num_classes, preprocessing = (
+                    require_inference_dataset(dataset)
                 )
+            except ValueError as exc:
+                raise HTTPException(
+                    409, f"Run '{run_id}' has invalid dataset provenance: {exc}"
+                ) from exc
+            if not expected_sha:
+                raise HTTPException(409, f"Run '{run_id}' is missing checkpoint integrity metadata")
             path = _locate_run_best_checkpoint(conn, run_id, expected_sha)
             if not path or sha256(path) != expected_sha:
                 raise HTTPException(
@@ -283,7 +290,9 @@ def predict_image(file: UploadFile = File(...), model_id: str | None = None):
     except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
         raise HTTPException(409, f"Registered model manifest is invalid: {exc}") from exc
     try:
-        dataset_key, dataset_name, class_names, num_classes, preprocessing = require_inference_dataset(dataset)
+        dataset_key, dataset_name, class_names, num_classes, preprocessing = (
+            require_inference_dataset(dataset)
+        )
     except ValueError as exc:
         raise HTTPException(409, f"Registered dataset provenance is invalid: {exc}") from exc
     device = get_default_device()

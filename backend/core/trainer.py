@@ -6,6 +6,7 @@ import random
 import shutil
 import time
 import sys
+
 try:
     import resource
 except ImportError:
@@ -62,7 +63,11 @@ def train_one_epoch(
                 running_acc=100 * correct / count,
                 samples_per_sec=count / elapsed,
                 worker_cpu_percent=100 * (time.process_time() - cpu_started) / elapsed,
-                peak_rss_mb=(peak_rss / (1024 * 1024) if sys.platform == "darwin" else peak_rss / 1024) if peak_rss is not None else None,
+                peak_rss_mb=(
+                    peak_rss / (1024 * 1024) if sys.platform == "darwin" else peak_rss / 1024
+                )
+                if peak_rss is not None
+                else None,
             )
     if not count:
         raise ValueError("Empty training dataset")

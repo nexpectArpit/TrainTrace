@@ -22,20 +22,45 @@ DATASET_SPECS = {
         "source_dir": "cifar-100-python",
     },
     "mnist": {
-        "name": "MNIST", "torchvision_name": "MNIST", "mean": [0.1307] * 3,
-        "std": [0.3081] * 3, "num_classes": 10, "source_dir": "MNIST/raw",
-        "classes": [str(i) for i in range(10)], "grayscale": True,
+        "name": "MNIST",
+        "torchvision_name": "MNIST",
+        "mean": [0.1307] * 3,
+        "std": [0.3081] * 3,
+        "num_classes": 10,
+        "source_dir": "MNIST/raw",
+        "classes": [str(i) for i in range(10)],
+        "grayscale": True,
     },
     "fashion_mnist": {
-        "name": "Fashion-MNIST", "torchvision_name": "FashionMNIST", "mean": [0.2860] * 3,
-        "std": [0.3530] * 3, "num_classes": 10, "source_dir": "FashionMNIST/raw",
-        "classes": ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"],
+        "name": "Fashion-MNIST",
+        "torchvision_name": "FashionMNIST",
+        "mean": [0.2860] * 3,
+        "std": [0.3530] * 3,
+        "num_classes": 10,
+        "source_dir": "FashionMNIST/raw",
+        "classes": [
+            "T-shirt/top",
+            "Trouser",
+            "Pullover",
+            "Dress",
+            "Coat",
+            "Sandal",
+            "Shirt",
+            "Sneaker",
+            "Bag",
+            "Ankle boot",
+        ],
         "grayscale": True,
     },
     "svhn": {
-        "name": "SVHN", "torchvision_name": "SVHN", "mean": [0.4377, 0.4438, 0.4728],
-        "std": [0.1980, 0.2010, 0.1970], "num_classes": 10,
-        "source_dir": "SVHN", "classes": [str(i) for i in range(10)], "grayscale": False,
+        "name": "SVHN",
+        "torchvision_name": "SVHN",
+        "mean": [0.4377, 0.4438, 0.4728],
+        "std": [0.1980, 0.2010, 0.1970],
+        "num_classes": 10,
+        "source_dir": "SVHN",
+        "classes": [str(i) for i in range(10)],
+        "grayscale": False,
     },
 }
 
@@ -51,7 +76,9 @@ def preprocessing_contract(dataset_name="cifar10", pretrained=False, model_name=
         "mean": [0.485, 0.456, 0.406] if pretrained else list(spec["mean"]),
         "std": [0.229, 0.224, 0.225] if pretrained else list(spec["std"]),
         "input_conversion": "grayscale_to_rgb" if spec.get("grayscale") else "rgb",
-        "external_input_adapter": "digit_photo_ink_v2" if key in {"mnist", "fashion_mnist"} else "aspect_fit_mean_pad",
+        "external_input_adapter": "digit_photo_ink_v2"
+        if key in {"mnist", "fashion_mnist"}
+        else "aspect_fit_mean_pad",
         "pretrained_imagenet_normalization": bool(pretrained),
         "initialization": (
             f"torchvision {model_name} ImageNet DEFAULT weights; native pretrained stem preserved"
@@ -69,5 +96,3 @@ def dataset_spec(dataset_name="cifar10"):
     if key not in DATASET_SPECS:
         raise ValueError(f"Unsupported dataset: {dataset_name}")
     return key, DATASET_SPECS[key]
-
-

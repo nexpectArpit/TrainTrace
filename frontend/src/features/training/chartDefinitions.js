@@ -81,6 +81,9 @@ export const liveChartDefinitions = [
     title: "Epoch train loss",
     color: "#2272b4",
     source: "epoch",
+    compareField: "val_loss",
+    compareLabel: "Validation loss",
+    compareColor: "#f59e0b",
   },
   {
     field: "train_acc",
@@ -101,6 +104,9 @@ export const liveChartDefinitions = [
     color: "#308613",
     unit: "%",
     source: "epoch",
+    compareField: "train_acc",
+    compareLabel: "Train accuracy",
+    compareColor: "#38bdf8",
   },
   {
     field: "learning_rate",

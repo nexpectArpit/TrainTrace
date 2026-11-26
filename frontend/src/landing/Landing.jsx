@@ -42,6 +42,12 @@ export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const closeMenu = () => setMenuOpen(false);
+  const openDashboard = (event, path = "/dashboard/investigations") => {
+    event.preventDefault();
+    closeMenu();
+    window.history.pushState(null, "", path);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
   const scrollToSection = (id) => {
     closeMenu();
     document.getElementById(id)?.scrollIntoView({
@@ -52,7 +58,7 @@ export default function Landing() {
     });
   };
   useEffect(() => {
-    if (location.hash && !location.hash.startsWith("#/dashboard")) {
+    if (location.hash) {
       history.replaceState(null, "", location.pathname + location.search);
     }
   }, []);
@@ -95,7 +101,11 @@ export default function Landing() {
             FAQ
           </button>
         </div>
-        <a className="tt-nav-cta" href="#/dashboard">
+        <a
+          className="tt-nav-cta"
+          href="/dashboard/investigations"
+          onClick={(e) => openDashboard(e, "/dashboard/investigations")}
+        >
           <span>Open Workspace</span>
           <svg
             viewBox="0 0 16 16"
@@ -171,7 +181,11 @@ export default function Landing() {
               comparisons, and decisions you can trace back to the evidence.
             </p>
             <div className="tt-hero-actions">
-              <a className="tt-primary" href="#/dashboard">
+              <a
+                className="tt-primary"
+                href="/dashboard/investigations"
+                onClick={(e) => openDashboard(e, "/dashboard/investigations")}
+              >
                 <span>Start investigating</span>
                 <svg
                   className="tt-icon-arrow"
@@ -355,7 +369,11 @@ export default function Landing() {
             <br />
             <em>mean something.</em>
           </h2>
-          <a className="tt-primary" href="#/dashboard">
+          <a
+            className="tt-primary"
+            href="/dashboard/investigations"
+            onClick={(e) => openDashboard(e, "/dashboard/investigations")}
+          >
             <span>Open TrainTrace workspace</span>
             <svg
               className="tt-icon-arrow"
@@ -414,16 +432,32 @@ export default function Landing() {
           </div>
           <div className="tt-footer-links-group">
             <strong>Workflows</strong>
-            <a href="#/dashboard" className="tt-footer-link">
+            <a
+              href="/dashboard/training"
+              className="tt-footer-link"
+              onClick={(e) => openDashboard(e, "/dashboard/training")}
+            >
               Training Dashboard
             </a>
-            <a href="#/dashboard" className="tt-footer-link">
+            <a
+              href="/dashboard/compare"
+              className="tt-footer-link"
+              onClick={(e) => openDashboard(e, "/dashboard/compare")}
+            >
               Model Comparison
             </a>
-            <a href="#/dashboard" className="tt-footer-link">
+            <a
+              href="/dashboard/registry"
+              className="tt-footer-link"
+              onClick={(e) => openDashboard(e, "/dashboard/registry")}
+            >
               Model Registry
             </a>
-            <a href="#/dashboard" className="tt-footer-link">
+            <a
+              href="/dashboard/audits"
+              className="tt-footer-link"
+              onClick={(e) => openDashboard(e, "/dashboard/audits")}
+            >
               Audit Lineage
             </a>
           </div>

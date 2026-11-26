@@ -205,7 +205,9 @@ def get_model_by_name(
     if name_clean in ["custom_cnn", "customcnn", "baseline"]:
         return CustomCNN(num_classes=num_classes, **(architecture_config or {}))
     elif name_clean in ["resnet18", "resnet-18"]:
-        return ResNet18Wrapper(num_classes=num_classes, pretrained=pretrained, native_stem=native_stem)
+        return ResNet18Wrapper(
+            num_classes=num_classes, pretrained=pretrained, native_stem=native_stem
+        )
     elif name_clean in ["mobilenet_v2", "mobilenetv2", "mobilenet"]:
         return MobileNetV2Wrapper(num_classes=num_classes, pretrained=pretrained)
     elif name_clean in ["efficientnet_b0", "efficientnetb0", "efficientnet"]:

@@ -1,85 +1,85 @@
-.guide {
-  margin: 16px 0;
-  padding: 0;
-  border: 1px solid var(--tt-border);
-  border-radius: var(--tt-radius-surface);
-  background: var(--tt-surface);
+.bar {
+  margin: 1.25rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--tt-border);
 }
-.guide > summary {
-  padding: 12px 16px;
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.info {
+  min-width: 0;
+}
+
+.titleRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.titleRow strong {
   color: var(--tt-text);
-  cursor: pointer;
-  font-weight: 650;
+  font-size: 0.86rem;
 }
-.guide[open] > summary {
-  border-bottom: 1px solid var(--tt-border);
-}
-.guide p,
-.guide ol {
-  margin: 12px 16px;
+
+.subtitle {
+  margin: 0.2rem 0 0;
   color: var(--tt-muted);
-  font-size: 0.82rem;
-  line-height: 1.5;
+  font-size: 0.76rem;
 }
-.guide li {
-  margin-bottom: 8px;
-}
-.guide code {
-  color: var(--tt-text);
-  overflow-wrap: anywhere;
-}
-.content {
-  padding: 1px 16px 14px;
-}
-.content > p {
-  margin-left: 0;
-  margin-right: 0;
-}
+
 .actions {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 2px 0 4px;
+  gap: 0.55rem;
 }
+
 .action {
   display: inline-flex;
   align-items: center;
-  min-height: 42px;
-  padding: 0 16px;
+  min-height: 36px;
+  padding: 0 14px;
   border: 1px solid var(--tt-border);
   border-radius: var(--tt-radius-control, 5px);
   cursor: pointer;
-  font-weight: 650;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
+
 .primary {
   border-color: var(--tt-blue, #2272b4);
   background: var(--tt-blue, #2272b4);
   color: #fff;
 }
+
 .primary:hover:not(:disabled) {
   border-color: var(--tt-blue-strong, #185f99);
   background: var(--tt-blue-strong, #185f99);
 }
+
 .secondary {
   background: var(--tt-surface-2);
   color: var(--tt-text);
 }
+
 .secondary:hover:not(:disabled) {
   border-color: var(--tt-blue, #2272b4);
   background: var(--tt-surface);
 }
+
 .action:disabled {
   cursor: wait;
   opacity: 0.7;
 }
+
 .error {
-  color: var(--tt-danger, #ff8a8a) !important;
-  font-weight: 600;
-}
-.note {
-  margin-bottom: 0 !important;
-}
-.success {
-  color: var(--tt-success-fg, #16804a) !important;
+  margin: 0.5rem 0 0;
+  color: var(--tt-danger, #ff8a8a);
+  font-size: 0.78rem;
   font-weight: 600;
 }

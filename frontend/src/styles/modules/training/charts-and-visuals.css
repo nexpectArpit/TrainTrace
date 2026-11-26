@@ -1,0 +1,413 @@
+.live-training-panel {
+  margin: 1.25rem 0 0;
+  padding: 1.1rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--tt-border, #d6e3f0);
+  border-radius: 0;
+  background: transparent;
+}
+.live-training-heading,
+.live-training-kpis,
+.live-training-charts {
+  display: grid;
+  gap: 0.8rem;
+}
+.live-training-heading {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+.live-training-heading strong {
+  display: block;
+  color: #263c56;
+  font-size: 0.84rem;
+}
+.live-training-heading span,
+.live-sample-count {
+  color: #617187;
+  font-size: 0.7rem;
+}
+.live-training-kpis {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0.9rem;
+}
+.live-training-kpis > div {
+  padding: 0.7rem;
+  border: 1px solid #e0e8f0;
+  border-radius: 6px;
+  background: #f7fafc;
+}
+.live-training-kpis small {
+  display: block;
+  color: #617187;
+  font-size: 0.68rem;
+}
+.live-training-kpis strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #263c56;
+  font-size: 1rem;
+}
+.live-training-charts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.live-chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+  align-items: flex-end;
+}
+.live-chart-toolbar .field {
+  min-width: 170px;
+  flex: 1 1 180px;
+  margin-bottom: 0;
+}
+.live-chart-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding-bottom: 2px;
+}
+.live-chart-toolbar .live-chart-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--tt-text, #1f2328);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  margin: 0 4px;
+}
+.live-chart-toolbar-actions button {
+  height: 36px;
+  white-space: nowrap;
+  padding: 0 12px;
+  font-size: 0.76rem;
+}
+.live-chart-visibility {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 10px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.74rem;
+}
+.live-chart-visibility label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--tt-text, #1f2328);
+  cursor: pointer;
+}
+.live-chart-builder {
+  margin-top: 12px;
+}
+.live-chart-builder-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: 440px;
+}
+.live-chart-builder-controls .field {
+  flex: 1;
+  margin-bottom: 0;
+}
+.live-chart-builder-controls .add-chart-btn {
+  height: 38px;
+  white-space: nowrap;
+  padding: 0 14px;
+  font-size: 0.78rem;
+}
+.live-chart-card {
+  min-width: 0;
+}
+.live-chart-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--tt-canvas, rgba(0, 0, 0, 0.05));
+  padding: 1px;
+  border-radius: 4px;
+  border: 1px solid var(--tt-border, #d0d7de);
+}
+.live-chart-card-actions button {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--tt-muted, #667085);
+  font-size: 11px;
+  line-height: 1;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.live-chart-card-actions button:hover {
+  background: var(--tt-surface, #ffffff);
+  color: var(--tt-text, #1f2328);
+}
+.live-chart-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+  background: rgba(8, 18, 34, 0.72);
+  box-sizing: border-box;
+}
+.live-chart-modal-content {
+  width: min(940px, calc(100vw - 32px));
+  max-width: 100%;
+  max-height: calc(100dvh - 32px);
+  min-width: 0;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 9px;
+  background: #fff;
+  box-sizing: border-box;
+}
+.live-chart-modal-content > button {
+  display: block;
+  margin-left: auto;
+}
+.live-chart-modal-content .live-training-chart {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.live-chart-modal-content .live-training-chart svg {
+  width: 100%;
+  max-height: min(52dvh, 420px);
+  object-fit: contain;
+}
+.app-shell.theme-dark .live-chart-modal-content {
+  background: #182230;
+}
+.live-training-chart {
+  margin: 0;
+  min-width: 0;
+  position: relative;
+  border: 1px solid var(--tt-border, #d0d7de);
+  border-radius: var(--tt-radius-surface, 8px);
+  padding: 12px 14px;
+  background: var(--tt-surface, #ffffff);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.live-training-chart figcaption,
+.live-training-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--tt-text, #1f2328);
+  font-size: 0.82rem;
+}
+.live-chart-title-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.live-chart-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.live-chart-meta-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+.live-chart-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  color: var(--tt-text, #1f2328);
+}
+.live-chart-expand-btn {
+  font-size: 0.74rem;
+  color: var(--tt-blue, #2272b4);
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.live-chart-expand-btn:hover {
+  text-decoration: underline;
+}
+.live-training-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.live-training-chart svg text,
+.live-training-chart .chart-axis-label {
+  font-size: 11px;
+  fill: var(--tt-muted, #667085);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+.app-shell.theme-dark .live-training-chart svg text,
+.app-shell.theme-dark .live-training-chart .chart-axis-label {
+  fill: #8b949e;
+}
+.live-training-chart small,
+.live-chart-empty {
+  color: var(--tt-muted, #617187);
+  font-size: 0.68rem;
+}
+.live-chart-empty {
+  padding: 1rem;
+  border: 1px dashed var(--tt-border, #d6e3f0);
+  border-radius: 6px;
+}
+/* ── Hover tooltip ─────────────────────────────── */
+.live-chart-tooltip {
+  position: absolute;
+  /* Vertically anchor just below the SVG top padding (figcaption ~32px + svg top margin) */
+  top: 46px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--tt-surface-2, #1c2333);
+  border: 1px solid var(--tt-border, #354154);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  color: var(--tt-text, #e6edf3);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+.live-chart-tooltip-label {
+  color: var(--tt-muted, #8b949e);
+  font-size: 0.68rem;
+}
+.live-chart-tooltip-value {
+  font-weight: 650;
+  font-size: 0.8rem;
+  color: var(--tt-text, #e6edf3);
+}
+.live-chart-tooltip-smoothed {
+  color: var(--tt-muted, #8b949e);
+  font-size: 0.65rem;
+}
+.run-image-gallery h3 {
+  margin: 1.4rem 0 0.75rem;
+}
+.run-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 0.9rem;
+  align-items: stretch;
+}
+.evaluation-image-card {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--tt-border, #d6e3f0);
+  border-radius: 8px;
+  background: var(--tt-surface-2, transparent);
+}
+.evaluation-image-card figcaption {
+  margin-bottom: 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tt-text);
+}
+.evaluation-image-card a {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  overflow: hidden;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+.evaluation-image-card a:hover {
+  border-color: #2272b4;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+}
+.evaluation-image-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 280px;
+  object-fit: contain;
+}
+.app-shell.theme-dark .evaluation-image-card {
+  border-color: #30363d;
+  background: #161b22;
+}
+.app-shell.theme-dark .evaluation-image-card a {
+  border-color: #2b3440;
+}
+.app-shell.theme-dark .live-training-panel {
+  border-top-color: #30363d;
+  background: transparent;
+}
+.app-shell.theme-dark .live-training-heading strong,
+.app-shell.theme-dark .live-training-kpis strong,
+.app-shell.theme-dark .live-training-chart-header,
+.app-shell.theme-dark .live-chart-value {
+  color: #e6edf3;
+}
+.app-shell.theme-dark .live-training-kpis > div,
+.app-shell.theme-dark .live-training-chart {
+  border-color: #30363d;
+  background: #161b22;
+  box-shadow: none;
+}
+.app-shell.theme-dark .live-training-heading span,
+.app-shell.theme-dark .live-training-kpis small,
+.app-shell.theme-dark .live-training-chart small {
+  color: #8b949e;
+}
+.app-shell.theme-dark .live-chart-card-actions {
+  background: #0d1117;
+  border-color: #30363d;
+}
+.app-shell.theme-dark .live-chart-card-actions button {
+  color: #8b949e;
+}
+.app-shell.theme-dark .live-chart-card-actions button:hover {
+  background: #21262d;
+  color: #e6edf3;
+}
+.app-shell.theme-dark .live-chart-visibility {
+  background: transparent;
+  border-color: transparent;
+}
+.app-shell.theme-dark .live-chart-visibility label,
+.app-shell.theme-dark .live-chart-check {
+  color: #c9d1d9;
+}
+.app-shell.theme-dark .live-chart-expand-btn {
+  color: #58a6ff;
+}

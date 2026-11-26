@@ -16,99 +16,73 @@ export default function ExecutionTargetSelector({
   const [cloudWarning, setCloudWarning] = React.useState("");
   return (
     <div className="execution-target-selector">
-      <label className="execution-target-heading">
-        Execution Target
-        <InfoTooltip label="Execution target">
-          Train locally on your machine or dispatch to a free cloud NVIDIA Tesla
-          T4 GPU on Kaggle (30 hrs/week free quota).
-        </InfoTooltip>
-      </label>
-      <div className="execution-target-options">
-        <label
-          className={`execution-target-card ${
-            setup.execution_target !== "kaggle" ? "is-selected" : ""
-          }`}
-        >
-          <input
-            type="radio"
-            name="execution_target"
-            value="local"
-            checked={setup.execution_target !== "kaggle"}
-            onChange={() => setSetup({ ...setup, execution_target: "local" })}
-          />
-          <div className="execution-target-card-content">
-            <span className="execution-target-name">Local Compute</span>
-            <small className="execution-target-subtext">
-              {info?.hardware?.name || "Local CPU / Accelerator"}
-            </small>
-          </div>
+      <div className="execution-target-row">
+        <label className="execution-target-heading">
+          Execution Target
+          <InfoTooltip label="Execution target">
+            Train locally on your machine or dispatch to a free cloud NVIDIA
+            Tesla T4 GPU on Kaggle (30 hrs/week free quota).
+          </InfoTooltip>
         </label>
-        <label
-          className={`execution-target-card ${
-            setup.execution_target === "kaggle" ? "is-selected" : ""
-          }`}
+        <div
+          className="execution-segmented"
+          role="radiogroup"
+          aria-label="Execution target"
         >
-          <input
-            type="radio"
-            name="execution_target"
-            value="kaggle"
-            checked={setup.execution_target === "kaggle"}
-            onChange={() => setSetup({ ...setup, execution_target: "kaggle" })}
-          />
-          <div className="execution-target-card-content">
-            <span className="execution-target-name">Kaggle Cloud GPU</span>
-            <small className="execution-target-subtext">
-              {cloudStatus?.authenticated ? (
-                <span className="cloud-status-connected">
-                  Connected (@{cloudStatus.username})
-                </span>
-              ) : (
-                <span className="cloud-status-warning">
-                  {cloudStatus?.configured
-                    ? "Kaggle authentication needs attention"
-                    : "Key not connected"}
-                </span>
-              )}
+          <button
+            type="button"
+            role="radio"
+            aria-checked={setup.execution_target !== "kaggle"}
+            className={`execution-seg-btn${setup.execution_target !== "kaggle" ? " is-active" : ""}`}
+            onClick={() => setSetup({ ...setup, execution_target: "local" })}
+          >
+            <span className="execution-seg-dot" aria-hidden="true" />
+            <span>Local Compute</span>
+            <small>{info?.hardware?.name || "CPU / MPS"}</small>
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={setup.execution_target === "kaggle"}
+            className={`execution-seg-btn${setup.execution_target === "kaggle" ? " is-active" : ""}`}
+            onClick={() => setSetup({ ...setup, execution_target: "kaggle" })}
+          >
+            <span className="execution-seg-dot" aria-hidden="true" />
+            <span>Kaggle Cloud GPU</span>
+            <small>
+              {cloudStatus?.authenticated
+                ? `@${cloudStatus.username}`
+                : cloudStatus?.configured
+                  ? "Auth needed"
+                  : "BYOK"}
             </small>
-          </div>
-        </label>
+          </button>
+        </div>
       </div>
+
       {setup.execution_target === "kaggle" && (
-        <div className="cloud-byok-container">
+        <div className="cloud-status-inline">
           {cloudStatus?.authenticated && !showByokInput ? (
-            <div className="cloud-connected-banner">
-              <div className="cloud-connected-info">
-                <div>
-                  <strong>Connected to Kaggle Cloud GPU</strong>
-                  <p>
-                    Authenticated as <code>@{cloudStatus.username}</code> -
-                    NVIDIA Tesla T4 accelerator when available on your Kaggle
-                    account.
-                  </p>
-                </div>
-              </div>
+            <div className="cloud-inline-summary">
+              <span className="cloud-inline-ok">
+                Connected to Kaggle as <code>@{cloudStatus.username}</code> ·
+                NVIDIA Tesla T4 ready
+              </span>
               <button
                 type="button"
-                className="byok-action-btn"
+                className="link"
                 onClick={() => setShowByokInput(true)}
                 title="Switch or update Kaggle API key"
               >
-                Change Key
+                Change key
               </button>
             </div>
           ) : (
             <div
-              className="byok-form-card"
+              className="byok-inline-form"
               role="region"
               aria-label="Kaggle API Key Configuration"
             >
-              <div className="byok-header">
-                <strong>Bring Your Own Key (BYOK) - Free Cloud GPU</strong>
-                <p>
-                  Paste your Kaggle API token below to execute models on a free
-                  cloud NVIDIA Tesla T4 GPU.
-                </p>
-              </div>
               <div className="byok-input-row">
                 <input
                   type="password"
@@ -169,8 +143,7 @@ export default function ExecutionTargetSelector({
               )}
               <div className="byok-footer-hint">
                 <span>
-                  Need a key? In Kaggle, go to Settings &gt; API &gt; Generate
-                  New Token and paste it here.
+                  In Kaggle: Settings &gt; API &gt; Generate New Token.
                 </span>
               </div>
             </div>

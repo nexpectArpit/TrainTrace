@@ -1,0 +1,405 @@
+/* Modular Sidebar Styles */
+
+.app-shell > aside.app-sidebar {
+  position: sticky;
+  top: 0;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 100vh;
+  min-height: 600px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  gap: 0;
+  padding: 14px 12px;
+  border-right: 1px solid var(--mlflow-rail-border);
+  background: var(--mlflow-rail);
+  color: var(--mlflow-rail-text);
+}
+
+.app-shell.theme-dark > aside.app-sidebar {
+  background: #0f171a;
+  border-right-color: #2f3b41;
+}
+
+.app-shell > aside.app-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 20;
+  background: transparent;
+  transition: background 140ms ease;
+}
+
+.sidebar-resizer:hover,
+.app-shell.sidebar-resizing .sidebar-resizer,
+.sidebar-resizer:focus-visible {
+  background: rgba(22, 134, 210, 0.55);
+  outline: none;
+}
+
+.sidebar-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 2px 2px 14px;
+  border-bottom: 1px solid #39464c;
+}
+
+.sidebar-brand-row .brand {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border-bottom: 0;
+  color: #f3f6f7;
+  text-decoration: none;
+}
+
+.sidebar-collapse-button {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  width: 32px;
+  min-height: 32px !important;
+  padding: 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #a5b5bd;
+}
+
+.sidebar-collapse-button:hover:enabled {
+  border-color: #52636b;
+  background: #2c383e;
+  color: #e8f4f9;
+}
+
+.sidebar-collapse-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.app-shell .sidebar-collapse-button:focus-visible {
+  outline: 2px solid #80c7ff;
+  outline-offset: 1px;
+}
+
+.brand-logo {
+  width: min(100%, 174px);
+  height: 34px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-caption {
+  color: var(--mlflow-rail-muted) !important;
+  font-size: 0.64rem !important;
+  letter-spacing: 0.005em;
+}
+
+.brand-mark-image {
+  display: none;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.app-shell .brand-logo-light {
+  display: none;
+}
+
+.app-shell .brand-logo-dark {
+  display: block;
+}
+
+.app-shell.sidebar-collapsed .brand-mark-dark {
+  display: block;
+}
+
+.app-shell .brand-mark-light {
+  display: none;
+}
+
+.workspace-nav {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  gap: 14px;
+  padding: 16px 0 14px;
+}
+
+.workspace-nav .nav-group {
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  gap: 3px;
+}
+
+.nav-group + .nav-group {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid #344047;
+}
+
+.nav-group-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px 6px;
+  color: #9cabb2;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.nav-group-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+}
+
+.nav-group[data-group="outcomes"] .nav-group-label {
+  color: #a9d5b8;
+}
+
+.nav-group[data-group="outcomes"] .nav-group-label::before {
+  background: #56d364;
+}
+
+.nav-group[data-group="outcomes"]
+  button.workspace-nav-item[aria-current="page"] {
+  background: rgba(45, 164, 78, 0.16);
+  box-shadow: inset 3px 0 0 #56d364;
+  color: #b7f5c5;
+}
+
+.nav-group[data-group="outcomes"]
+  button.workspace-nav-item[aria-current="page"]
+  .nav-icon {
+  color: #56d364 !important;
+}
+
+.nav-group-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+}
+
+.nav-group[data-group="outcomes"] .nav-group-label {
+  color: #a9d5b8;
+}
+
+.nav-group[data-group="outcomes"] .nav-group-label::before {
+  background: #56d364;
+}
+
+.nav-group[data-group="outcomes"]
+  button.workspace-nav-item[aria-current="page"] {
+  background: rgba(45, 164, 78, 0.16);
+  box-shadow: inset 3px 0 0 #56d364;
+  color: #b7f5c5;
+}
+
+.nav-group[data-group="outcomes"]
+  button.workspace-nav-item[aria-current="page"]
+  .nav-icon {
+  color: #56d364 !important;
+}
+
+.workspace-nav button.workspace-nav-item {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 38px !important;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #d3dde1;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.workspace-nav button.workspace-nav-item:hover:enabled {
+  border-color: transparent;
+  background: #2b373d;
+  color: #fff;
+}
+
+.workspace-nav button.workspace-nav-item[aria-current="page"] {
+  border-color: transparent;
+  border-radius: 6px;
+  background: var(--mlflow-active);
+  box-shadow: inset 3px 0 0 #38bdf8;
+  color: #b7e1fa;
+  font-weight: 650;
+}
+
+.workspace-nav button .nav-icon,
+.app-shell.theme-dark .workspace-nav button .nav-icon,
+.workspace-nav button[aria-current="page"] .nav-icon,
+.app-shell.theme-dark .workspace-nav button[aria-current="page"] .nav-icon {
+  color: #a8bbc4;
+}
+
+.workspace-nav button[aria-current="page"] .nav-icon {
+  color: #a9dcfa !important;
+}
+
+.sidebar-status {
+  margin-top: auto;
+  padding: 10px 9px 2px;
+  border: 0;
+  border-radius: 0;
+  border-top: 1px solid #39464c;
+  background: transparent;
+  color: #c8d2d7;
+  font-size: 0.72rem;
+}
+
+.app-shell.theme-dark > aside .sidebar-status,
+.app-shell:not(.theme-dark) > aside .sidebar-status {
+  border: 0;
+  border-top: 1px solid #39464c;
+  border-radius: 0;
+  background: transparent;
+  color: #c8d2d7;
+}
+
+.app-shell > aside .sidebar-status p {
+  color: #d5dfe3;
+}
+
+.app-shell > aside .sidebar-status small {
+  color: #9baab1;
+}
+
+.sidebar-status .badge {
+  padding: 3px 7px;
+  border-radius: 3px;
+  font-size: 0.6rem;
+}
+
+.sidebar-status p {
+  margin: 8px 0 4px;
+  color: #d5dfe3;
+  font-size: 0.72rem;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+.sidebar-status small {
+  color: #9baab1;
+  font-size: 0.66rem;
+}
+
+.app-shell.sidebar-collapsed .app-sidebar {
+  overflow-x: hidden;
+  padding-right: 7px;
+  padding-left: 7px;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand-row {
+  position: relative;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 2px 0 10px;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand-row .brand {
+  align-items: center;
+  justify-content: center;
+  transition: opacity 140ms ease;
+}
+
+.app-shell.sidebar-collapsed .sidebar-collapse-button {
+  position: absolute;
+  inset: 0 0 10px 0;
+  margin: auto;
+  width: 36px;
+  height: 36px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand-row:hover .brand,
+.app-shell.sidebar-collapsed .sidebar-brand-row:focus-within .brand {
+  opacity: 0;
+}
+
+.app-shell.sidebar-collapsed .sidebar-brand-row:hover .sidebar-collapse-button,
+.app-shell.sidebar-collapsed
+  .sidebar-brand-row:focus-within
+  .sidebar-collapse-button {
+  opacity: 1;
+  pointer-events: auto;
+  border-color: #52636b;
+  background: #2c383e;
+  color: #e8f4f9;
+}
+
+.app-shell.sidebar-collapsed .brand-logo,
+.app-shell.sidebar-collapsed .brand-caption,
+.app-shell.sidebar-collapsed .nav-group-label,
+.app-shell.sidebar-collapsed .workspace-nav-item > span,
+.app-shell.sidebar-collapsed .sidebar-status p,
+.app-shell.sidebar-collapsed .sidebar-status small {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .workspace-nav {
+  gap: 14px;
+}
+
+.app-shell.sidebar-collapsed .workspace-nav button.workspace-nav-item {
+  justify-content: center;
+  min-height: 44px !important;
+  padding: 10px 4px;
+}
+
+.app-shell .workspace-nav button .nav-icon,
+.app-shell.sidebar-collapsed .workspace-nav button .nav-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+
+.app-shell.sidebar-collapsed .sidebar-status {
+  padding: 10px 0 2px;
+  display: flex;
+  justify-content: center;
+}
+
+.app-shell.sidebar-collapsed .sidebar-status .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+}

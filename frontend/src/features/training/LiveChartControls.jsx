@@ -2,7 +2,12 @@ import React from "react";
 import { Field, Select } from "../../components/Common";
 import { liveChartDefinitions } from "./chartDefinitions";
 
-export default function LiveChartControls({ settings, liveSamples, metrics }) {
+export default function LiveChartControls({
+  settings,
+  liveSamples,
+  metrics,
+  runInProgress,
+}) {
   const {
     chartSearch,
     setChartSearch,
@@ -25,6 +30,12 @@ export default function LiveChartControls({ settings, liveSamples, metrics }) {
     setNewChartField,
     hasRecordedMetric,
   } = settings;
+  const availableVisibilityCharts = chartOrder
+    .map((field) => liveChartDefinitions.find((chart) => chart.field === field))
+    .filter((chart) => chart && (hasRecordedMetric(chart) || runInProgress));
+  const addableCharts = liveChartDefinitions.filter(
+    (chart) => !chartOrder.includes(chart.field) && hasRecordedMetric(chart),
+  );
   return (
     <>
       <div className="live-chart-toolbar">
@@ -62,15 +73,17 @@ export default function LiveChartControls({ settings, liveSamples, metrics }) {
             />{" "}
             Log scale
           </label>
-          <button
-            type="button"
-            onClick={() => {
-              setPausedSamples(liveSamples);
-              setChartPaused(!chartPaused);
-            }}
-          >
-            {chartPaused ? "Resume charts" : "Pause charts"}
-          </button>
+          {runInProgress && (
+            <button
+              type="button"
+              onClick={() => {
+                setPausedSamples(liveSamples);
+                setChartPaused(!chartPaused);
+              }}
+            >
+              {chartPaused ? "Resume charts" : "Pause charts"}
+            </button>
+          )}
           <button
             type="button"
             disabled={!chartSamples.length && !metrics.length}
@@ -80,13 +93,9 @@ export default function LiveChartControls({ settings, liveSamples, metrics }) {
           </button>
         </div>
       </div>
-      <div className="live-chart-visibility" aria-label="Visible charts">
-        {chartOrder
-          .map((field) =>
-            liveChartDefinitions.find((chart) => chart.field === field),
-          )
-          .filter(Boolean)
-          .map((chart) => (
+      {availableVisibilityCharts.length > 0 && (
+        <div className="live-chart-visibility" aria-label="Visible charts">
+          {availableVisibilityCharts.map((chart) => (
             <label key={chart.field}>
               <input
                 type="checkbox"
@@ -102,42 +111,40 @@ export default function LiveChartControls({ settings, liveSamples, metrics }) {
               {chart.title}
             </label>
           ))}
-      </div>
-      <div className="live-chart-builder">
-        <div className="live-chart-builder-controls">
-          <Select
-            label="Add a metric chart"
-            value={newChartField}
-            onChange={setNewChartField}
-          >
-            <option value="">Choose a recorded metric</option>
-            {liveChartDefinitions
-              .filter(
-                (chart) =>
-                  !chartOrder.includes(chart.field) && hasRecordedMetric(chart),
-              )
-              .map((chart) => (
+        </div>
+      )}
+      {addableCharts.length > 0 && (
+        <div className="live-chart-builder">
+          <div className="live-chart-builder-controls">
+            <Select
+              label="Add a metric chart"
+              value={newChartField}
+              onChange={setNewChartField}
+            >
+              <option value="">Choose a recorded metric</option>
+              {addableCharts.map((chart) => (
                 <option key={chart.field} value={chart.field}>
                   {chart.title} · {chart.source}
                 </option>
               ))}
-          </Select>
-          <button
-            type="button"
-            className="add-chart-btn"
-            disabled={!newChartField}
-            onClick={() => {
-              setChartOrder((current) => [...current, newChartField]);
-              setHiddenCharts((current) =>
-                current.filter((field) => field !== newChartField),
-              );
-              setNewChartField("");
-            }}
-          >
-            Add chart
-          </button>
+            </Select>
+            <button
+              type="button"
+              className="add-chart-btn"
+              disabled={!newChartField}
+              onClick={() => {
+                setChartOrder((current) => [...current, newChartField]);
+                setHiddenCharts((current) =>
+                  current.filter((field) => field !== newChartField),
+                );
+                setNewChartField("");
+              }}
+            >
+              Add chart
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

@@ -13,6 +13,7 @@ Senior Engineering Rationale:
 
 from pathlib import Path
 import os
+
 try:
     from dotenv import load_dotenv
 

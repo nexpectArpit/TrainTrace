@@ -176,43 +176,51 @@ export default function Decisions({ workspace }) {
               These fields preserve why this approach was chosen or rejected.
               Complete them before saving the decision.
             </p>
-            {[
-              [
-                "limitations",
-                "Observed limitations / strengths",
-                "What did validation reveal about failure cases or strengths?",
-              ],
-              [
-                "alternatives_considered",
-                "Alternative approaches considered",
-                "Which other runs or configurations did you compare?",
-              ],
-              [
-                "why_not_alternative",
-                "Why alternatives were not selected",
-                "What evidence ruled out the alternatives?",
-              ],
-              [
-                "tradeoff_acknowledged",
-                "Trade-offs accepted",
-                "What cost, speed, size or accuracy compromise are you accepting?",
-              ],
-              [
-                "next_investigation",
-                "Next investigation (optional)",
-                "What should be tried next?",
-              ],
-            ].map(([key, label, placeholder]) => (
-              <Field
-                key={key}
-                type="textarea"
-                label={label}
-                required={key !== "next_investigation"}
-                value={decision[key]}
-                onChange={(value) => setDecision({ ...decision, [key]: value })}
-                placeholder={placeholder}
-              />
-            ))}
+            <div className="grid two">
+              {[
+                [
+                  "limitations",
+                  "Observed limitations / strengths",
+                  "What did validation reveal about failure cases or strengths?",
+                ],
+                [
+                  "alternatives_considered",
+                  "Alternative approaches considered",
+                  "Which other runs or configurations did you compare?",
+                ],
+                [
+                  "why_not_alternative",
+                  "Why alternatives were not selected",
+                  "What evidence ruled out the alternatives?",
+                ],
+                [
+                  "tradeoff_acknowledged",
+                  "Trade-offs accepted",
+                  "What cost, speed, size or accuracy compromise are you accepting?",
+                ],
+              ].map(([key, label, placeholder]) => (
+                <Field
+                  key={key}
+                  type="textarea"
+                  label={label}
+                  required
+                  value={decision[key]}
+                  onChange={(value) =>
+                    setDecision({ ...decision, [key]: value })
+                  }
+                  placeholder={placeholder}
+                />
+              ))}
+            </div>
+            <Field
+              type="textarea"
+              label="Next investigation (optional)"
+              value={decision.next_investigation}
+              onChange={(value) =>
+                setDecision({ ...decision, next_investigation: value })
+              }
+              placeholder="What should be tried next?"
+            />
           </details>
           {missingReasoning.length > 0 && (
             <p className="decision-required-note" role="status">

@@ -188,16 +188,20 @@ def test_final_selection_and_registry_version_collision(client, final_evaluated,
 
     original = ModelRegistry().get_model(model["id"])
     from config import REGISTRY_DIR
+
     digest = sha256(REGISTRY_DIR / original["checkpoint_path"])
     other = complete(config.model_copy(update={"run_id": "other", "seed": 1}))
     assert (
         client.post("/api/v1/experiments/decisions", json=decision_payload(other["id"])).status_code
         == 409
     )
-    assert client.post(
-        "/api/v1/experiments/decisions",
-        json={**decision_payload(selected["id"]), "status": "SUPERSEDED"},
-    ).status_code == 409
+    assert (
+        client.post(
+            "/api/v1/experiments/decisions",
+            json={**decision_payload(selected["id"]), "status": "SUPERSEDED"},
+        ).status_code
+        == 409
+    )
     assert ModelRegistry().get_model(model["id"])["run_id"] == selected["id"]
     assert sha256(REGISTRY_DIR / original["checkpoint_path"]) == digest
 

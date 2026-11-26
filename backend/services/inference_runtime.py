@@ -18,6 +18,7 @@ _lock = threading.Lock()
 _MAX_CACHE_ENTRIES = 6
 MAX_UPLOAD = 5 * 1024 * 1024
 
+
 def _decode_uploaded_image(file: UploadFile) -> Image.Image:
     contents = file.file.read(MAX_UPLOAD + 1)
     if len(contents) > MAX_UPLOAD:
@@ -104,5 +105,7 @@ def _predict_with_checkpoint(
     order = sorted(range(num_classes), key=lambda i: probs[i], reverse=True)
     preview = io.BytesIO()
     model_image.save(preview, format="PNG")
-    preview_data_url = "data:image/png;base64," + base64.b64encode(preview.getvalue()).decode("ascii")
+    preview_data_url = "data:image/png;base64," + base64.b64encode(preview.getvalue()).decode(
+        "ascii"
+    )
     return probs, latency, order, preview_data_url

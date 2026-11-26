@@ -163,13 +163,13 @@ export default function RunList({ runs, selectedId, onOpen, onCompare }) {
                   </td>
                   <td>
                     {run.best_val_accuracy == null
-                      ? "Not measured"
+                      ? "—"
                       : `${fmt(run.best_val_accuracy)}%`}
                   </td>
                   <td>
                     {run.metrics?.length
                       ? `${fmt(run.total_duration_sec, 1)} s`
-                      : "Not measured"}
+                      : "—"}
                   </td>
                   <td>
                     <button type="button" onClick={() => onOpen(run)}>

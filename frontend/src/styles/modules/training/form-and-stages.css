@@ -1,0 +1,318 @@
+.training-page > .panel {
+  padding: 1.5rem;
+  border-color: var(--tt-border);
+  border-radius: var(--tt-radius-surface);
+  box-shadow: none;
+}
+.run-config-disclosure {
+  margin-bottom: 16px;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-surface);
+  background: var(--tt-surface);
+}
+.run-config-disclosure > summary {
+  padding: 14px 18px;
+  color: var(--tt-text);
+  font-weight: 650;
+  cursor: pointer;
+}
+.run-config-disclosure[open] > summary {
+  border-bottom: 1px solid var(--tt-border);
+}
+.run-config-disclosure > .panel {
+  margin: 0;
+  border: 0;
+  box-shadow: none;
+}
+.training-page > .panel:first-child .panel-heading h2 {
+  color: var(--tt-text);
+  font-size: 1.05rem;
+}
+.training-form > .grid {
+  column-gap: 1rem;
+}
+.training-config-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.training-config-fields:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+.training-advanced-settings {
+  margin: 1rem 0;
+  padding: 0.8rem 0;
+  border-top: 1px solid var(--tt-border);
+  border-bottom: 1px solid var(--tt-border);
+}
+.training-advanced-settings > summary {
+  color: var(--tt-text);
+  font-weight: 650;
+  cursor: pointer;
+}
+.training-advanced-settings > summary span {
+  margin-left: 0.6rem;
+  color: var(--tt-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+.training-advanced-settings[open] > .grid {
+  margin-top: 1rem;
+}
+.training-advanced-settings[open] > .field,
+.training-advanced-settings[open] > .predecessor-context {
+  margin-top: 0.8rem;
+}
+.training-time-estimate {
+  margin: 1rem 0;
+  padding: 0.75rem 0;
+  border-block: 1px solid var(--border);
+}
+.execution-progress-label {
+  display: grid;
+  gap: 0.5rem;
+  margin-block: 0.75rem;
+  font-size: 0.8rem;
+}
+.execution-progress-label progress {
+  width: 100%;
+}
+.training-time-estimate p {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.advanced-run-id {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-control);
+  background: var(--tt-surface-2);
+}
+.advanced-run-id summary {
+  color: var(--tt-muted);
+  font-size: 0.74rem;
+}
+.advanced-run-id[open] {
+  padding-bottom: 0.25rem;
+}
+.initialization-note,
+.predecessor-context {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.4rem 0 1rem;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-control);
+  background: var(--tt-surface-2);
+  color: var(--tt-text);
+  font-size: 0.73rem;
+}
+.initialization-note span {
+  color: var(--tt-muted);
+  font-size: 0.68rem;
+}
+.pretrained-check {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: start;
+  margin: 0.75rem 0 1.1rem;
+  color: var(--tt-text);
+}
+.pretrained-check input {
+  margin-top: 0.1rem;
+}
+.pretrained-check small {
+  grid-column: 2;
+  margin: 0.1rem 0 0;
+  color: var(--tt-muted);
+  font-size: 0.68rem;
+}
+.predecessor-context {
+  margin-top: -0.2rem;
+  border-color: var(--tt-border);
+  background: var(--tt-surface-2);
+  color: var(--tt-text);
+}
+.predecessor-context p {
+  margin: 0;
+  color: var(--tt-muted);
+  font-size: 0.72rem;
+}
+.queue-disabled-reason {
+  display: inline-block;
+  margin: 0 0 0 0.8rem;
+  color: var(--tt-warning-fg);
+  font-size: 0.72rem;
+}
+.execution-stage {
+  margin: 1rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--tt-border);
+  border-radius: var(--tt-radius-surface);
+  background: var(--tt-surface-2);
+}
+.execution-stage-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+.execution-stage-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+.execution-stage-heading strong {
+  color: var(--tt-text);
+  font-size: 0.8rem;
+}
+.execution-stage-heading p {
+  margin: 0.2rem 0 0;
+  color: var(--tt-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.execution-stage-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  margin-top: 0.27rem;
+  border-radius: 50%;
+  background: #2272b4;
+}
+.execution-stage-dot.is-pulsing {
+  animation: stage-pulse 1.4s ease-in-out infinite;
+}
+.execution-stage-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+.execution-stage-timer {
+  color: #2272b4;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.execution-stage-count {
+  color: #60738a;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+.execution-pipeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--tt-border);
+}
+.execution-step {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  font-size: 0.72rem;
+  color: var(--tt-muted);
+}
+.execution-step-node {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--tt-border);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+.execution-step-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.execution-step.is-done {
+  color: #1a7f37;
+  font-weight: 600;
+}
+.execution-step.is-done .execution-step-node {
+  border-color: #1a7f37;
+  background: rgba(26, 127, 55, 0.12);
+  color: #1a7f37;
+}
+.execution-step.is-active {
+  color: var(--tt-text);
+  font-weight: 600;
+}
+.execution-step.is-active .execution-step-node {
+  border-color: #2272b4;
+  background: rgba(34, 114, 180, 0.16);
+  color: #2272b4;
+  animation: stage-pulse 1.5s ease-in-out infinite;
+}
+.execution-epoch-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0 1.1rem;
+}
+.execution-epoch-pill {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--tt-border);
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tt-muted);
+}
+.execution-epoch-pill.is-done {
+  border-color: rgba(26, 127, 55, 0.45);
+  background: rgba(26, 127, 55, 0.12);
+  color: #1a7f37;
+}
+.execution-epoch-pill.is-active {
+  border-color: #2272b4;
+  background: rgba(34, 114, 180, 0.14);
+  color: #2272b4;
+  animation: stage-pulse 1.4s ease-in-out infinite;
+}
+.app-shell.theme-dark .execution-stage-timer,
+.app-shell.theme-dark .execution-step.is-active .execution-step-node,
+.app-shell.theme-dark .execution-epoch-pill.is-active {
+  color: #6cb6ff;
+}
+.app-shell.theme-dark .execution-step.is-done,
+.app-shell.theme-dark .execution-step.is-done .execution-step-node,
+.app-shell.theme-dark .execution-epoch-pill.is-done {
+  color: #56d364;
+  border-color: rgba(86, 211, 100, 0.4);
+}
+.execution-stage-track {
+  position: relative;
+  height: 5px;
+  margin: 0.8rem 0 0 1.1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dce6ef;
+}
+.execution-stage-track span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 34%;
+  border-radius: inherit;
+  background: #2272b4;
+}
+.execution-stage-track.is-indeterminate span {
+  animation: stage-sweep 1.6s ease-in-out infinite;
+}
+.execution-stage > progress {
+  display: block;
+  width: calc(100% - 1.1rem);
+  height: 5px;
+  margin: 0.8rem 0 0 1.1rem;
+}

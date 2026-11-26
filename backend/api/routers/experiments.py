@@ -150,12 +150,26 @@ def decision_report(exp_id: str):
         return decode_config(run["config_json"]) if run.get("config_json") else {}
 
     def evaluation_for(run):
-        evaluation = decode_snapshot(run["final_evaluation_json"], "final_evaluation") if run.get("final_evaluation_json") else {}
+        evaluation = (
+            decode_snapshot(run["final_evaluation_json"], "final_evaluation")
+            if run.get("final_evaluation_json")
+            else {}
+        )
         latest_decision = run["decisions"][-1]["status"] if run.get("decisions") else None
-        return evaluation if run.get("final_evaluation_status") == "COMPLETED" and latest_decision == "SELECTED" and not evaluation.get("legacy_preselection_test_exposure") else {}
+        return (
+            evaluation
+            if run.get("final_evaluation_status") == "COMPLETED"
+            and latest_decision == "SELECTED"
+            and not evaluation.get("legacy_preselection_test_exposure")
+            else {}
+        )
 
     def validation_for(run):
-        return decode_snapshot(run["validation_json"], "validation") if run.get("validation_json") else {}
+        return (
+            decode_snapshot(run["validation_json"], "validation")
+            if run.get("validation_json")
+            else {}
+        )
 
     lines = [
         f"# Model selection decision report: {exp['name']}",
@@ -224,12 +238,18 @@ def decision_report(exp_id: str):
                 + " |"
             )
         evaluation = evaluation_for(r)
-        historical_evaluation = decode_snapshot(r["final_evaluation_json"], "final_evaluation") if r.get("final_evaluation_json") else {}
+        historical_evaluation = (
+            decode_snapshot(r["final_evaluation_json"], "final_evaluation")
+            if r.get("final_evaluation_json")
+            else {}
+        )
         lines += [
             "### Final test evaluation",
             "Historical test exposure from the previous workflow; not a valid post-selection result."
             if historical_evaluation.get("legacy_preselection_test_exposure")
-            else "Post-selection evaluation." if evaluation else "Sealed, incomplete, or no longer eligible for display.",
+            else "Post-selection evaluation."
+            if evaluation
+            else "Sealed, incomplete, or no longer eligible for display.",
             "```json",
         ]
         lines.append(
@@ -304,10 +324,23 @@ def metrics_report_csv(exp_id: str):
         ]
         for run in runs:
             config = decode_config(run["config_json"]) if run.get("config_json") else {}
-            dataset = decode_snapshot(run["dataset_json"], "dataset") if run.get("dataset_json") else {}
-            raw_evaluation = decode_snapshot(run["final_evaluation_json"], "final_evaluation") if run.get("final_evaluation_json") else {}
-            latest_decision = c.execute("SELECT status FROM decisions WHERE run_id=? ORDER BY id DESC LIMIT 1", (run["id"],)).fetchone()
-            eligible = run.get("final_evaluation_status") == "COMPLETED" and latest_decision and latest_decision["status"] == "SELECTED" and not raw_evaluation.get("legacy_preselection_test_exposure")
+            dataset = (
+                decode_snapshot(run["dataset_json"], "dataset") if run.get("dataset_json") else {}
+            )
+            raw_evaluation = (
+                decode_snapshot(run["final_evaluation_json"], "final_evaluation")
+                if run.get("final_evaluation_json")
+                else {}
+            )
+            latest_decision = c.execute(
+                "SELECT status FROM decisions WHERE run_id=? ORDER BY id DESC LIMIT 1", (run["id"],)
+            ).fetchone()
+            eligible = (
+                run.get("final_evaluation_status") == "COMPLETED"
+                and latest_decision
+                and latest_decision["status"] == "SELECTED"
+                and not raw_evaluation.get("legacy_preselection_test_exposure")
+            )
             evaluation = raw_evaluation if eligible else {}
             metrics = [
                 dict(row)

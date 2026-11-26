@@ -1,11 +1,21 @@
 """Validated product contracts and storage identities."""
 
 from typing import Annotated, Literal
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 Identifier = Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$")]
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=10000)]
-TagMap = dict[Annotated[str, StringConstraints(pattern=r"^[A-Za-z][A-Za-z0-9_.-]{0,63}")], Annotated[str, StringConstraints(max_length=256)]]
+TagMap = dict[
+    Annotated[str, StringConstraints(pattern=r"^[A-Za-z][A-Za-z0-9_.-]{0,63}")],
+    Annotated[str, StringConstraints(max_length=256)],
+]
 Architecture = Literal["custom_cnn", "resnet18", "mobilenet_v2", "efficientnet_b0"]
 DatasetName = Literal["cifar10", "cifar100", "mnist", "fashion_mnist", "svhn"]
 
@@ -21,6 +31,13 @@ class CustomCNNConfig(Contract):
     )
     classifier_width: int = Field(default=256, ge=16, le=2048)
     dropout: float = Field(default=0.3, ge=0, lt=1)
+
+    @field_validator("classifier_width")
+    @classmethod
+    def validate_classifier_width_step(cls, value: int) -> int:
+        if value % 16 != 0:
+            raise ValueError("classifier_width must be a multiple of 16")
+        return value
 
 
 class ExperimentCreate(Contract):

@@ -1,0 +1,175 @@
+/* ── Aligned Custom CNN Architecture Section (Zero horizontal drift) ── */
+.app-shell .architecture-controls-flat {
+  margin: 14px 0 10px;
+  padding: 6px 0 2px;
+  border: 0;
+  background: transparent;
+}
+
+.app-shell.theme-dark .architecture-controls-flat {
+  border: 0;
+}
+
+.app-shell .architecture-controls-flat > legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 0 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #54717f;
+}
+
+.app-shell.theme-dark .architecture-controls-flat > legend {
+  color: #8ea1ab;
+}
+
+/* ── Segmented Pill Execution Target (Zero Nested Cards) ── */
+.app-shell .execution-target-selector,
+.app-shell.theme-dark .execution-target-selector {
+  margin: 12px 0;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell .execution-target-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.app-shell .execution-target-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: #26343a;
+}
+
+.app-shell.theme-dark .execution-target-heading {
+  color: #edf2f4;
+}
+
+.app-shell .execution-segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 4px;
+  border-radius: 8px;
+  border: 1px solid #cfd9de;
+  background: #edf2f5;
+}
+
+.app-shell.theme-dark .execution-segmented {
+  border-color: #344147;
+  background: #131b1f;
+}
+
+.app-shell .execution-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px !important;
+  padding: 6px 14px !important;
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: #52636b !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: all 140ms ease;
+}
+
+.app-shell .execution-seg-btn:focus,
+.app-shell .execution-seg-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.app-shell.theme-dark .execution-seg-btn {
+  color: #93a3ac !important;
+}
+
+.app-shell .execution-seg-btn small {
+  font-size: 0.71rem;
+  font-weight: 500;
+  opacity: 0.78;
+}
+
+.app-shell .execution-seg-btn.is-active {
+  border-color: #b8c9d4 !important;
+  background: #ffffff !important;
+  color: #17263d !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.app-shell.theme-dark .execution-seg-btn.is-active {
+  border-color: #2c6d99 !important;
+  background: #1b2d38 !important;
+  color: #f0f6fc !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.app-shell .execution-seg-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.app-shell .execution-seg-btn.is-active .execution-seg-dot {
+  background: #1686d2;
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(22, 134, 210, 0.7);
+}
+
+.app-shell .cloud-status-inline {
+  margin-top: 10px;
+}
+
+.app-shell .cloud-inline-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.76rem;
+  color: #52636b;
+}
+
+.app-shell.theme-dark .cloud-inline-summary {
+  color: #9eb0b9;
+}
+
+.app-shell .cloud-inline-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-shell .cloud-inline-ok code {
+  color: #1686d2;
+  font-weight: 600;
+}
+
+.app-shell.theme-dark .cloud-inline-ok code {
+  color: #58b4f3;
+}
+
+.app-shell .byok-inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+}

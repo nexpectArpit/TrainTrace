@@ -5,6 +5,7 @@ import csv
 from db.database import database
 from storage import record_artifact, run_artifact_path
 
+
 def initialize_metrics_csv(run_id):
     """Create the notebook-friendly metrics stream once before the first epoch."""
     columns = [row["name"] for row in database_connection_columns()]
@@ -42,4 +43,3 @@ def publish_metrics_csv(run_id):
     path = run_artifact_path(run_id, f"{run_id}_metrics.csv", "metrics")
     if path.is_file() and path.stat().st_size:
         record_artifact(run_id, "metrics_csv", path)
-

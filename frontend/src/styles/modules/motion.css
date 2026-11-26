@@ -1,0 +1,69 @@
+/* Smooth Motion & Progressive Disclosure Transitions */
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-shell details::details-content {
+    interpolate-size: allow-keywords;
+    transition:
+      block-size 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      content-visibility 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.22s ease;
+    transition-behavior: allow-discrete;
+  }
+
+  .app-shell details:not([open])::details-content {
+    block-size: 0;
+    opacity: 0;
+    overflow: clip;
+  }
+
+  .app-shell details[open]::details-content {
+    opacity: 1;
+    overflow: visible;
+  }
+
+  .app-shell details > summary {
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+  }
+
+  .app-shell button,
+  .app-shell .run-preset-chip,
+  .app-shell .execution-seg-btn,
+  .app-shell .artifact-list li,
+  .app-shell .workspace-nav-item {
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .app-shell .live-chart-modal {
+    animation: modal-fade-in 180ms ease-out;
+  }
+
+  .app-shell .live-chart-modal-content {
+    animation: modal-pop-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

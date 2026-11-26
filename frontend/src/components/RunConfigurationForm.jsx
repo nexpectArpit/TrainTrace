@@ -61,7 +61,7 @@ export default function RunConfigurationForm({ workspace }) {
       key={run ? "inspect" : "create"}
       defaultOpen={!run}
     >
-      <summary>＋ Configure a new approach</summary>
+      <summary>Configure a new approach</summary>
       <Panel
         title={
           <span>
@@ -93,7 +93,6 @@ export default function RunConfigurationForm({ workspace }) {
             className="training-config-fields"
             disabled={configurationLocked}
           >
-            <RequiredFieldLegend />
             <RunSetupFields
               setup={setup}
               setSetup={setSetup}

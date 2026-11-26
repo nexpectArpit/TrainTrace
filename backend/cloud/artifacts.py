@@ -14,6 +14,7 @@ from db.database import database
 from snapshot_contracts import encode_snapshot
 from storage import sha256, record_artifact, run_artifact_path, write_json
 
+
 def download_and_ingest_kaggle_run(kernel_id: str, run_id: str) -> dict[str, Any]:
     """Download remote outputs to a temporary managed staging folder."""
     api, _ = get_authenticated_api()
@@ -53,8 +54,13 @@ def ingest_completed_run(kernel_id: str, run_id: str, set_run_state, log_event) 
     with database() as c:
         for epoch in history:
             values = (
-                run_id, epoch["epoch"], epoch["train_loss"], epoch["train_acc"],
-                epoch["val_loss"], epoch["val_acc"], epoch["epoch_time_sec"],
+                run_id,
+                epoch["epoch"],
+                epoch["train_loss"],
+                epoch["train_acc"],
+                epoch["val_loss"],
+                epoch["val_acc"],
+                epoch["epoch_time_sec"],
                 epoch["learning_rate"],
             )
             existing = c.execute(
@@ -87,7 +93,11 @@ def ingest_completed_run(kernel_id: str, run_id: str, set_run_state, log_event) 
     for filename, (category, kind) in category_map.items():
         source = output_dir / filename
         if not source.is_file():
-            if filename in {f"{run_id}_best_checkpoint.pt", f"{run_id}_split.json", f"{run_id}_metrics.csv"}:
+            if filename in {
+                f"{run_id}_best_checkpoint.pt",
+                f"{run_id}_split.json",
+                f"{run_id}_metrics.csv",
+            }:
                 raise RuntimeError(f"Required Kaggle output is missing: {filename}")
             continue
         target = run_artifact_path(run_id, filename, category)
@@ -114,11 +124,16 @@ def ingest_completed_run(kernel_id: str, run_id: str, set_run_state, log_event) 
     write_json(run_id, "environment", environment_snapshot)
 
     import torch
+
     checkpoint_data = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
-    if checkpoint_data.get("run_id") != run_id or checkpoint_data.get("epoch") != summary.get("best_epoch"):
+    if checkpoint_data.get("run_id") != run_id or checkpoint_data.get("epoch") != summary.get(
+        "best_epoch"
+    ):
         raise RuntimeError("Kaggle best checkpoint identity does not match its run summary")
     model_state = checkpoint_data.get("model_state_dict", {})
-    parameter_count = sum(value.numel() for value in model_state.values() if hasattr(value, "numel"))
+    parameter_count = sum(
+        value.numel() for value in model_state.values() if hasattr(value, "numel")
+    )
     state_digest = hashlib.sha256()
     for name, tensor in sorted(model_state.items()):
         value = tensor.detach().cpu().contiguous()
@@ -146,6 +161,7 @@ def ingest_completed_run(kernel_id: str, run_id: str, set_run_state, log_event) 
         dataset_json=encode_snapshot("dataset", dataset_snapshot),
         environment_json=encode_snapshot("environment", environment_snapshot),
     )
-    log_event(f"Completed on Kaggle Cloud GPU: best validation accuracy {summary.get('best_val_acc'):.2f}%")
+    log_event(
+        f"Completed on Kaggle Cloud GPU: best validation accuracy {summary.get('best_val_acc'):.2f}%"
+    )
     return validation
-

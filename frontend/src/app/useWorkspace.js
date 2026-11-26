@@ -6,15 +6,20 @@ import useLiveRun from "./useLiveRun";
 import useTagSearch from "./useTagSearch";
 import { filterRuns } from "./runFilters";
 
+function tabFromLocation() {
+  const pathPart = location.pathname.startsWith("/dashboard")
+    ? location.pathname.replace(/^\/dashboard\/?/, "")
+    : location.hash.startsWith("#/dashboard")
+      ? location.hash.replace(/^#\/dashboard\/?/, "")
+      : "";
+  const segment = pathPart.split("/")[0];
+  return tabs.find((t) => t.toLowerCase() === segment.toLowerCase()) || null;
+}
+
 export default function useWorkspace() {
   const [tab, setTabState] = useState(() => {
-    const rawHash = location.hash
-      .replace("#/dashboard", "")
-      .replace(/^\/+/, "");
-    const matchingTab = tabs.find(
-      (t) => t.toLowerCase() === rawHash.toLowerCase(),
-    );
-    if (matchingTab) return matchingTab;
+    const matched = tabFromLocation();
+    if (matched) return matched;
     return tabs.includes(localStorage.getItem("traintrace-tab"))
       ? localStorage.getItem("traintrace-tab")
       : "Investigations";
@@ -22,25 +27,26 @@ export default function useWorkspace() {
   const setTab = useCallback((nextTab) => {
     setTabState(nextTab);
     localStorage.setItem("traintrace-tab", nextTab);
-    if (location.hash.startsWith("#/dashboard")) {
-      location.hash = `#/dashboard/${nextTab.toLowerCase()}`;
+    const nextPath = `/dashboard/${nextTab.toLowerCase()}`;
+    if (location.pathname !== nextPath) {
+      window.history.pushState(null, "", nextPath);
     }
   }, []);
 
   useEffect(() => {
-    const handleHash = () => {
-      if (location.hash.startsWith("#/dashboard")) {
-        const rawHash = location.hash
-          .replace("#/dashboard", "")
-          .replace(/^\/+/, "");
-        const matchingTab = tabs.find(
-          (t) => t.toLowerCase() === rawHash.toLowerCase(),
-        );
-        if (matchingTab) setTabState(matchingTab);
+    const handleNav = () => {
+      const matched = tabFromLocation();
+      if (matched) {
+        setTabState(matched);
+        localStorage.setItem("traintrace-tab", matched);
       }
     };
-    window.addEventListener("hashchange", handleHash);
-    return () => window.removeEventListener("hashchange", handleHash);
+    window.addEventListener("popstate", handleNav);
+    window.addEventListener("hashchange", handleNav);
+    return () => {
+      window.removeEventListener("popstate", handleNav);
+      window.removeEventListener("hashchange", handleNav);
+    };
   }, []);
   const [expId, setExpId] = useState(
     () => localStorage.getItem("traintrace-investigation") || "",

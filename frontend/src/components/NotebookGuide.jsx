@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "./NotebookGuide.module.css";
+import InfoTooltip from "./InfoTooltip";
 
 export default function NotebookGuide({ runId }) {
   const [busy, setBusy] = useState("");
@@ -84,48 +85,51 @@ export default function NotebookGuide({ runId }) {
   };
 
   return (
-    <details className={styles.guide}>
-      <summary>Take this run to Colab or Jupyter</summary>
-      <div className={styles.content}>
-        <p>
-          Copy the runnable code into Colab/Jupyter, or download the complete
-          notebook. Both include this run’s settings, model, preprocessing,
-          training loop, charts, and metric/checkpoint saving code.
-        </p>
+    <section className={styles.bar} aria-label="Export to Colab or Jupyter">
+      <div className={styles.row}>
+        <div className={styles.info}>
+          <div className={styles.titleRow}>
+            <strong>Export to Colab / Jupyter</strong>
+            <InfoTooltip label="About notebook export">
+              Includes this run’s settings, model, preprocessing, training loop,
+              charts, and checkpoint saving code. Running it in Colab or Jupyter
+              starts a fresh standalone run and does not sync back into
+              TrainTrace. Final test evaluation is opt-in.
+            </InfoTooltip>
+          </div>
+          <p className={styles.subtitle}>
+            Standalone reproducible script &amp; .ipynb (runs independently of
+            TrainTrace).
+          </p>
+        </div>
         <div className={styles.actions}>
           <button
             type="button"
-            className={`${styles.action} ${styles.primary}`}
+            className={`${styles.action} ${styles.secondary}`}
             onClick={copyCode}
             disabled={Boolean(busy)}
           >
-            {busy === "copy" ? "Copying code…" : "Copy notebook code"}
+            {busy === "copy"
+              ? "Copying…"
+              : copied
+                ? "✓ Copied code"
+                : "Copy notebook code"}
           </button>
           <button
             type="button"
-            className={`${styles.action} ${styles.secondary}`}
+            className={`${styles.action} ${styles.primary}`}
             onClick={downloadNotebook}
             disabled={Boolean(busy)}
           >
-            {busy === "download" ? "Preparing file…" : "Download .ipynb"}
+            {busy === "download" ? "Preparing…" : "Download .ipynb"}
           </button>
         </div>
-        {copied && (
-          <p className={styles.success} role="status">
-            Code copied. Paste it into a Colab or Jupyter code cell.
-          </p>
-        )}
-        {error && (
-          <p className={styles.error} role="alert">
-            {error}
-          </p>
-        )}
-        <p className={styles.note}>
-          Copy the code into a notebook cell, or upload the .ipynb file to
-          Colab/Jupyter. Either starts a fresh training run; its results do not
-          sync back into TrainTrace. Final test evaluation is opt-in.
-        </p>
       </div>
-    </details>
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+    </section>
   );
 }

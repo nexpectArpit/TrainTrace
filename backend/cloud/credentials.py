@@ -189,7 +189,11 @@ def configure_kaggle_credentials(
     persistence_error = None
     if save_to_env:
         try:
-            env_path = BASE_DIR.parent / ".env" if (BASE_DIR.parent / ".env").is_file() else BASE_DIR / ".env"
+            env_path = (
+                BASE_DIR.parent / ".env"
+                if (BASE_DIR.parent / ".env").is_file()
+                else BASE_DIR / ".env"
+            )
             if not env_path.is_file():
                 env_path = BASE_DIR / ".env"
 
@@ -224,7 +228,9 @@ def configure_kaggle_credentials(
             env_path.write_text("\n".join(new_lines) + "\n")
             persisted = True
         except OSError as exc:
-            persistence_error = f"Credentials work for this session but could not be saved to .env: {exc}"
+            persistence_error = (
+                f"Credentials work for this session but could not be saved to .env: {exc}"
+            )
 
     return {
         "configured": True,
@@ -279,5 +285,3 @@ def get_authenticated_api(force: bool = False):
     _cached_api = api
     _cached_auth_fingerprint = fingerprint
     return api, resolved_username
-
-
