@@ -4,10 +4,29 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
 from config import BASE_DIR
+
+
+def _import_kaggle_api():
+    """Import KaggleApi safely, clearing half-initialized kaggle modules on retry."""
+    mod = sys.modules.get("kaggle.api.kaggle_api_extended")
+    if mod is not None and not hasattr(mod, "KaggleApi"):
+        for name in list(sys.modules):
+            if name == "kaggle" or name.startswith("kaggle."):
+                sys.modules.pop(name, None)
+    try:
+        from kaggle.api.kaggle_api_extended import KaggleApi
+    except Exception:
+        for name in list(sys.modules):
+            if name == "kaggle" or name.startswith("kaggle."):
+                sys.modules.pop(name, None)
+        from kaggle.api.kaggle_api_extended import KaggleApi
+    return KaggleApi
+
 
 _cached_kaggle_username: str | None = None
 _cached_api: Any = None
@@ -160,7 +179,7 @@ def configure_kaggle_credentials(
         os.environ.pop("KAGGLE_KEY", None)
 
     try:
-        from kaggle.api.kaggle_api_extended import KaggleApi
+        KaggleApi = _import_kaggle_api()
 
         api = KaggleApi()
         api.authenticate()
@@ -274,7 +293,7 @@ def get_authenticated_api(force: bool = False):
     elif creds["auth_type"] == "token":
         os.environ["KAGGLE_API_TOKEN"] = creds["token"]
 
-    from kaggle.api.kaggle_api_extended import KaggleApi
+    KaggleApi = _import_kaggle_api()
 
     api = KaggleApi()
     api.authenticate()
