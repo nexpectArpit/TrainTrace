@@ -1,0 +1,209 @@
+/* Modular Condensed Layout: Unified Metric Strips & Consistent Spacing */
+
+.app-shell .panel {
+  padding: 14px 16px;
+}
+
+.app-shell .panel-heading {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dce2e5;
+}
+
+.app-shell.theme-dark .panel-heading {
+  border-bottom-color: #2f3b41;
+}
+
+.app-shell .run-config-disclosure > summary,
+.app-shell .investigation-create-disclosure > summary,
+.app-shell .model-registration-disclosure > summary,
+.app-shell .compare-filter-panel > summary,
+.app-shell .decision-reasoning-details > summary {
+  padding: 12px 16px;
+  outline: none;
+}
+
+.app-shell .run-config-disclosure > .panel,
+.app-shell .investigation-create-disclosure > .panel,
+.app-shell .model-registration-disclosure[open] > .panel {
+  padding: 14px 16px;
+}
+
+.app-shell .field > span,
+.app-shell .metric-strip small,
+.app-shell .live-training-kpis small,
+.app-shell .execution-target-heading,
+.app-shell .run-preset-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.app-shell .metric-strip,
+.app-shell .live-training-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0;
+  margin: 0 0 8px;
+  padding: 2px 0 6px;
+  border-bottom: 0;
+}
+
+.app-shell .metric-strip > div,
+.app-shell .live-training-kpis > div {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 4px 14px;
+  box-shadow: none;
+}
+
+.app-shell .metric-strip > div:first-child,
+.app-shell .live-training-kpis > div:first-child {
+  padding-left: 0;
+}
+
+.app-shell .metric-strip > div + div,
+.app-shell .live-training-kpis > div + div {
+  border-left: 1px solid #dce2e5;
+}
+
+.app-shell.theme-dark .metric-strip,
+.app-shell.theme-dark .live-training-kpis {
+  border-bottom: 0;
+}
+
+.app-shell.theme-dark .metric-strip > div,
+.app-shell.theme-dark .live-training-kpis > div {
+  border: 0;
+  background: transparent;
+}
+
+.app-shell.theme-dark .metric-strip > div + div,
+.app-shell.theme-dark .live-training-kpis > div + div {
+  border-left: 1px solid #2f3b41;
+}
+
+.app-shell.theme-dark .metric-strip strong,
+.app-shell.theme-dark .live-training-kpis strong {
+  color: #e6edf3;
+}
+
+.app-shell .training-config-fields {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.app-shell .initialization-note {
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+}
+
+.app-shell .queue-disabled-reason {
+  display: block;
+  margin: 6px 0 0;
+}
+
+.app-shell .panel details:last-child,
+.app-shell.theme-dark .panel details:last-child {
+  border-bottom: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.app-shell .workflow-navigation {
+  margin-top: 10px;
+  padding: 8px 0 4px;
+  border-top: 0;
+}
+
+.app-shell .workflow-navigation p {
+  margin: 0 0 8px;
+}
+
+.app-shell .workspace-footer {
+  margin-top: 10px;
+  padding: 10px 0 0;
+}
+
+.app-shell .training-form .grid,
+.app-shell .training-form .grid-identity {
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.app-shell .run-disclosure {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #dce2e5;
+}
+
+.app-shell.theme-dark .run-disclosure {
+  border-top-color: #2f3b41;
+}
+
+.app-shell .run-disclosure > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tt-text);
+  padding: 2px 0;
+  outline: none;
+}
+
+.app-shell .run-disclosure[open] > summary {
+  margin-bottom: 10px;
+}
+
+.app-shell .artifact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 6px 16px;
+}
+
+.app-shell .artifact-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: 1px solid #dce2e5;
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+
+.app-shell.theme-dark .artifact-list li {
+  border-color: #2f3b41;
+}
+
+.app-shell .artifact-list li span {
+  color: var(--tt-muted);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .app-shell .metric-strip,
+  .app-shell .live-training-kpis {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .app-shell .metric-strip > div,
+  .app-shell .live-training-kpis > div {
+    padding: 4px 0;
+  }
+
+  .app-shell .metric-strip > div + div,
+  .app-shell .live-training-kpis > div + div {
+    border-left: 0;
+    border-top: 1px solid #2f3b41;
+    padding-top: 8px;
+  }
+}

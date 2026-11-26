@@ -264,7 +264,7 @@ export function Field({
           aria-invalid={rest["aria-invalid"] || rangeInvalid || undefined}
         />
       )}
-      {type === "number" && range && (
+      {type === "number" && range && (rest["aria-invalid"] || rangeInvalid) && (
         <small className="field-range-hint">
           {range}
           {stepHint}
@@ -292,6 +292,9 @@ export function Select({
         onChange={(e) => onChange(e.target.value)}
         {...rest}
       >
+        <button type="button">
+          <selectedcontent />
+        </button>
         {children}
       </select>
     </label>

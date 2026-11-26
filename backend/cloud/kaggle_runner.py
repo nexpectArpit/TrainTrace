@@ -28,7 +28,7 @@ exec(compile(__TT_MODEL_SOURCE__, "traintrace/core/models.py", "exec"), globals(
 exec(compile(__TT_DATASET_CONTRACT_SOURCE__, "traintrace/core/dataset_contract.py", "exec"), globals())
 
 RUN_ID = CONFIG["run_id"]
-CALLBACK_URL = os.environ.get("TRAINTRACE_CALLBACK_URL", "").rstrip("/")
+CALLBACK_URL = (__TT_CALLBACK_URL__ or os.environ.get("TRAINTRACE_CALLBACK_URL", "")).rstrip("/")
 OUTPUT_DIR = Path("/kaggle/working")
 DATA_DIR = OUTPUT_DIR / "data"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -135,7 +135,7 @@ def hash_file(path):
     return digest.hexdigest()
 
 
-def gpu_metrics():
+def gpu_metrics(query_smi=True):
     values = {
         "gpu_utilization_pct": None,
         "gpu_memory_used_mb": None,
@@ -144,20 +144,21 @@ def gpu_metrics():
         "gpu_temperature_c": None,
         "gpu_power_watts": None,
     }
-    try:
-        output = subprocess.check_output(
-            ["nvidia-smi", "--query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw", "--format=csv,noheader,nounits"],
-            text=True, stderr=subprocess.DEVNULL, timeout=2,
-        ).splitlines()[0]
-        fields = [field.strip() for field in output.split(",")]
-        for name, value in zip(
-            ("gpu_utilization_pct", "gpu_memory_used_mb", "gpu_memory_total_mb", "gpu_temperature_c", "gpu_power_watts"),
-            fields,
-        ):
-            if value not in {"", "N/A", "[N/A]"}:
-                values[name] = float(value)
-    except (OSError, subprocess.SubprocessError, ValueError, IndexError):
-        pass
+    if query_smi:
+        try:
+            output = subprocess.check_output(
+                ["nvidia-smi", "--query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw", "--format=csv,noheader,nounits"],
+                text=True, stderr=subprocess.DEVNULL, timeout=2,
+            ).splitlines()[0]
+            fields = [field.strip() for field in output.split(",")]
+            for name, value in zip(
+                ("gpu_utilization_pct", "gpu_memory_used_mb", "gpu_memory_total_mb", "gpu_temperature_c", "gpu_power_watts"),
+                fields,
+            ):
+                if value not in {"", "N/A", "[N/A]"}:
+                    values[name] = float(value)
+        except (OSError, subprocess.SubprocessError, ValueError, IndexError):
+            pass
     if values["gpu_memory_used_mb"] is not None and values["gpu_memory_total_mb"]:
         values["gpu_memory_utilization_pct"] = (
             100.0 * values["gpu_memory_used_mb"] / values["gpu_memory_total_mb"]
@@ -193,10 +194,12 @@ def post_telemetry(path, payload):
 
 def evaluate(model, loader, criterion, device):
     model.eval()
+    non_blocking = device.type == "cuda"
     loss_sum = correct = count = 0
     with torch.inference_mode():
         for images, labels in loader:
-            images, labels = images.to(device), labels.to(device)
+            images = images.to(device, non_blocking=non_blocking)
+            labels = labels.to(device, non_blocking=non_blocking)
             logits = model(images)
             loss = criterion(logits, labels)
             count += labels.size(0)
@@ -232,14 +235,15 @@ def main():
     validation_data = Subset(eval_full, validation_subset.indices)
     print(f"[TRAINTRACE_STAGE] {{\"phase\":\"dataset_preparation\",\"dataset\":{json.dumps(dataset_key)},\"message\":\"Dataset downloaded; building deterministic train and validation loaders.\"}}", flush=True)
     train_generator = torch.Generator().manual_seed(int(CONFIG["seed"]))
+    use_cuda = torch.cuda.is_available()
     train_loader = DataLoader(
         train_subset, batch_size=int(CONFIG["batch_size"]), shuffle=True,
         generator=train_generator, worker_init_fn=seed_worker,
-        num_workers=2, pin_memory=torch.cuda.is_available(),
+        num_workers=2, pin_memory=use_cuda, persistent_workers=True,
     )
     validation_loader = DataLoader(
         validation_data, batch_size=int(CONFIG["batch_size"]), shuffle=False,
-        num_workers=2, pin_memory=torch.cuda.is_available(),
+        num_workers=2, pin_memory=use_cuda, persistent_workers=True,
     )
 
     class_names = spec.get("classes") or getattr(train_full, "classes", None)
@@ -307,7 +311,8 @@ def main():
         interval_count = 0
         interval_started = time.perf_counter()
         for batch_idx, (images, labels) in enumerate(train_loader, 1):
-            images, labels = images.to(device), labels.to(device)
+            images = images.to(device, non_blocking=use_cuda)
+            labels = labels.to(device, non_blocking=use_cuda)
             optimizer.zero_grad(set_to_none=True)
             logits = model(images)
             loss = criterion(logits, labels)
@@ -328,7 +333,7 @@ def main():
                     "running_acc": 100.0 * correct / max(count, 1),
                     "samples_per_sec": interval_count / elapsed,
                     "learning_rate": optimizer.param_groups[0]["lr"],
-                    **gpu_metrics(),
+                    **gpu_metrics(query_smi=(batch_idx % 100 == 0 or batch_idx == len(train_loader))),
                 }
                 interval_count = 0
                 interval_started = time.perf_counter()

@@ -1,13 +1,16 @@
 import React from "react";
 import { Select } from "./Common";
 
-export default function WorkspaceContext({ workspace }) {
+export default function WorkspaceContext({ workspace, inline = false }) {
   const { tab, expId, runId, setRunId, experiments, runs, switchExperiment } =
     workspace;
   if (["Investigations", "Inference", "Search"].includes(tab)) return null;
 
   return (
-    <div className="context-bar" aria-label="Current research context">
+    <div
+      className={inline ? "context-strip-inline" : "context-bar"}
+      aria-label="Current research context"
+    >
       <Select label="Investigation" value={expId} onChange={switchExperiment}>
         <option value="">Choose investigation</option>
         {experiments.map((item) => (

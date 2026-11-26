@@ -99,7 +99,7 @@ def execute_remote_kaggle_run(payload: dict[str, Any], job_id: str, check_cancel
             log_event(f"TrainTrace stopped monitoring after {timeout_seconds} seconds; stop Kaggle kernel {kernel_id} on Kaggle if it is still running.")
             raise TimeoutError(f"Kaggle run exceeded its {timeout_seconds}-second monitoring limit; remote kernel {kernel_id} may still be running")
 
-        time.sleep(4)
+        time.sleep(2)
         status_info = get_kaggle_run_status(kernel_id)
         current_status = status_info.get("status", "UNKNOWN")
 

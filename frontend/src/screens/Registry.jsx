@@ -282,35 +282,45 @@ export default function Registry({ workspace }) {
                 configuration. The predecessor field records the research link,
                 not inherited weights.
               </p>
-              {lineage.investigation_history.map((r) => (
-                <article className="record" key={r.id}>
-                  <h3>{r.approach_name}</h3>
-                  <p>
-                    Predecessor:{" "}
-                    {lineageRuns.find(
-                      (candidate) => candidate.id === r.predecessor_run_id,
-                    )?.approach_name ||
-                      (r.predecessor_run_id
-                        ? "Outside this snapshot"
-                        : "Initial approach")}{" "}
-                    · {r.motivating_reason || "No motivation recorded"}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRunId(r.id);
-                      workspace.setTab("Training");
-                    }}
-                  >
-                    Open source run
-                  </button>
-                  {r.decisions.map((d) => (
-                    <p key={d.id}>
-                      {d.status}: {d.rationale}
-                    </p>
-                  ))}
-                </article>
-              ))}
+              <ol className="lineage-timeline">
+                {lineage.investigation_history.map((r) => (
+                  <li className="lineage-step" key={r.id}>
+                    <div className="lineage-step-main">
+                      <div className="lineage-step-header">
+                        <strong>{r.approach_name}</strong>
+                        <button
+                          type="button"
+                          className="link"
+                          onClick={() => {
+                            setRunId(r.id);
+                            workspace.setTab("Training");
+                          }}
+                        >
+                          Open source run
+                        </button>
+                      </div>
+                      <p className="lineage-step-meta">
+                        Predecessor:{" "}
+                        {lineageRuns.find(
+                          (candidate) => candidate.id === r.predecessor_run_id,
+                        )?.approach_name ||
+                          (r.predecessor_run_id
+                            ? "Outside this snapshot"
+                            : "Initial approach")}{" "}
+                        · {r.motivating_reason || "No motivation recorded"}
+                      </p>
+                      {r.decisions.map((d) => (
+                        <p className="lineage-step-decision" key={d.id}>
+                          <span className="lineage-decision-badge">
+                            {d.status}
+                          </span>{" "}
+                          {d.rationale}
+                        </p>
+                      ))}
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </>
           )}
           <Json data={lineage} label="Full immutable registry manifest" />

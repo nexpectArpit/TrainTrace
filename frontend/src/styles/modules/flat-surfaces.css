@@ -1,0 +1,108 @@
+/* ── Single-surface flat hierarchy: eliminate nested card-inside-card boxes ── */
+.app-shell .context-bar,
+.app-shell.theme-dark .context-bar {
+  padding: 0 0 16px 0;
+  margin-bottom: 20px;
+  border: 0;
+  border-bottom: 1px solid #d4dce0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell.theme-dark .context-bar {
+  border-bottom-color: #303d42;
+}
+
+.app-shell details > .panel,
+.app-shell.theme-dark details > .panel,
+.app-shell .run-config-disclosure > .panel,
+.app-shell.theme-dark .run-config-disclosure > .panel,
+.app-shell .investigation-create-disclosure > .panel,
+.app-shell.theme-dark .investigation-create-disclosure > .panel,
+.app-shell .model-registration-disclosure[open] > .panel,
+.app-shell.theme-dark .model-registration-disclosure[open] > .panel {
+  margin: 0;
+  padding: 14px 16px 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell.theme-dark details > .panel,
+.app-shell.theme-dark .run-config-disclosure > .panel,
+.app-shell.theme-dark .investigation-create-disclosure > .panel,
+.app-shell.theme-dark .model-registration-disclosure[open] > .panel {
+  border-top: 0;
+}
+
+.app-shell .panel .table-wrap,
+.app-shell.theme-dark .panel .table-wrap {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.app-shell .panel details,
+.app-shell.theme-dark .panel details {
+  border: 0;
+  border-bottom: 1px solid #dce2e5;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 0 10px 0;
+  margin-bottom: 14px;
+}
+
+.app-shell.theme-dark .panel details {
+  border-bottom-color: #344147;
+}
+
+.app-shell .panel .note-block,
+.app-shell .panel .compare-filter-toolbar,
+.app-shell .panel .architecture-controls,
+.app-shell .panel .initialization-note,
+.app-shell .panel .predecessor-context,
+.app-shell .panel .cloud-connected-banner,
+.app-shell .panel .byok-form-card,
+.app-shell .panel .empty,
+.app-shell.theme-dark .panel .note-block,
+.app-shell.theme-dark .panel .compare-filter-toolbar,
+.app-shell.theme-dark .panel .architecture-controls,
+.app-shell.theme-dark .panel .initialization-note,
+.app-shell.theme-dark .panel .predecessor-context,
+.app-shell.theme-dark .panel .cloud-connected-banner,
+.app-shell.theme-dark .panel .byok-form-card,
+.app-shell.theme-dark .panel .empty {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.app-shell .panel .architecture-controls,
+.app-shell .panel .initialization-note,
+.app-shell .panel .predecessor-context,
+.app-shell .panel .cloud-connected-banner,
+.app-shell .panel .byok-form-card {
+  padding: 12px 0 12px 14px;
+  border-left: 2px solid #1686d2;
+}
+
+.app-shell .panel .empty,
+.app-shell.theme-dark .panel .empty {
+  padding: 20px 0;
+}
+
+.app-shell input[type="file"],
+.app-shell.theme-dark input[type="file"] {
+  width: auto;
+  max-width: 100%;
+  padding: 6px 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}

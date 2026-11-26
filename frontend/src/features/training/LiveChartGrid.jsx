@@ -57,38 +57,6 @@ export default function LiveChartGrid({ settings, metrics, runInProgress }) {
                 smoothing={smoothing}
                 logScale={logScale}
                 chartType={chartType}
-                headerActions={
-                  <div className="live-chart-card-actions">
-                    <button
-                      type="button"
-                      onClick={() => moveChart(chart.field, -1)}
-                      aria-label={`Move ${chart.title} earlier`}
-                      title={`Move ${chart.title} earlier`}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveChart(chart.field, 1)}
-                      aria-label={`Move ${chart.title} later`}
-                      title={`Move ${chart.title} later`}
-                    >
-                      ↓
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setChartOrder((current) =>
-                          current.filter((field) => field !== chart.field),
-                        )
-                      }
-                      aria-label={`Remove ${chart.title} chart`}
-                      title={`Remove ${chart.title} chart`}
-                    >
-                      ×
-                    </button>
-                  </div>
-                }
                 onExpand={() => setExpandedChart(chart)}
                 {...chart}
               />
@@ -108,7 +76,7 @@ export default function LiveChartGrid({ settings, metrics, runInProgress }) {
               onClick={() => setExpandedChart(null)}
               aria-label="Close expanded chart"
             >
-              Close ×
+              ×
             </button>
             <LiveTrainingChart
               samples={

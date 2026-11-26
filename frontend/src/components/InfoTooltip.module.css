@@ -9,10 +9,10 @@
 
 :global(.app-shell) button.trigger:not(.link) {
   display: inline-grid;
-  width: 20px;
-  min-width: 20px;
-  height: 20px;
-  min-height: 20px;
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  min-height: 16px;
   padding: 0;
   place-items: center;
   border: 1px solid var(--tt-border, #8c9bad);
@@ -20,9 +20,9 @@
   background: transparent;
   color: var(--tt-muted, #63748a);
   font:
-    600 11px/1 system-ui,
+    600 10px/1 system-ui,
     sans-serif;
-  cursor: help;
+  cursor: pointer;
   transition:
     border-color 120ms ease,
     color 120ms ease;

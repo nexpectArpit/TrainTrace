@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,7 @@ def generate_kernel_code(config: dict[str, Any]) -> str:
         ).strip())
     except (OSError, subprocess.CalledProcessError):
         git_commit, git_dirty = None, None
+    callback_url = os.getenv("TRAINTRACE_CALLBACK_URL", "").strip().rstrip("/")
     return (
         template.replace("__TT_CONFIG_JSON__", json.dumps(config_json))
         .replace("__TT_MODEL_SOURCE__", repr(model_source))
@@ -40,6 +42,7 @@ def generate_kernel_code(config: dict[str, Any]) -> str:
         .replace("__TT_SOURCE_HASHES__", repr(source_hashes))
         .replace("__TT_GIT_COMMIT__", repr(git_commit))
         .replace("__TT_GIT_DIRTY__", repr(git_dirty))
+        .replace("__TT_CALLBACK_URL__", repr(callback_url))
     )
 
 def dispatch_kaggle_run(config: dict[str, Any]) -> dict[str, Any]:

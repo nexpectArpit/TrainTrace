@@ -50,7 +50,6 @@
 }
 .table {
   width: 100%;
-  min-width: 820px;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
 }
@@ -63,11 +62,11 @@
 }
 .table th,
 .table td {
-  padding: 10px 12px;
+  padding: 8px 8px;
   border-bottom: 1px solid var(--tt-border);
   text-align: left;
   vertical-align: middle;
-  font-size: 0.82rem;
+  font-size: 0.79rem;
 }
 .table thead th {
   position: sticky;
@@ -91,8 +90,8 @@
   color: var(--tt-blue);
 }
 .table tbody th {
-  min-width: 180px;
-  max-width: 290px;
+  min-width: 140px;
+  max-width: 215px;
 }
 :global(.app-shell) .table tbody th {
   position: static;

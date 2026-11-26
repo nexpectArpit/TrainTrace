@@ -111,33 +111,37 @@ export default function Investigations({ workspace }) {
               }}
             >
               <RequiredFieldLegend />
-              <Field
-                label="Investigation name"
-                value={newExp.name}
-                onChange={(v) => setNewExp({ ...newExp, name: v })}
-                placeholder="e.g. Improve CIFAR-100 validation accuracy"
-                required
-              />
-              <Field
-                label="Objective"
-                type="textarea"
-                value={newExp.objective}
-                onChange={(v) => setNewExp({ ...newExp, objective: v })}
-                placeholder="What problem are you trying to solve?"
-                required
-              />
-              <Field
-                label="Hypothesis"
-                type="textarea"
-                value={newExp.hypothesis}
-                onChange={(v) => setNewExp({ ...newExp, hypothesis: v })}
-                placeholder="What do you expect to happen, and why?"
-                required
-              />
-              <TagsField
-                value={newExp.tags}
-                onChange={(tags) => setNewExp({ ...newExp, tags })}
-              />
+              <div className="grid two">
+                <Field
+                  label="Investigation name"
+                  value={newExp.name}
+                  onChange={(v) => setNewExp({ ...newExp, name: v })}
+                  placeholder="e.g. Improve CIFAR-100 validation accuracy"
+                  required
+                />
+                <TagsField
+                  value={newExp.tags}
+                  onChange={(tags) => setNewExp({ ...newExp, tags })}
+                />
+              </div>
+              <div className="grid two">
+                <Field
+                  label="Objective"
+                  type="textarea"
+                  value={newExp.objective}
+                  onChange={(v) => setNewExp({ ...newExp, objective: v })}
+                  placeholder="What problem are you trying to solve?"
+                  required
+                />
+                <Field
+                  label="Hypothesis"
+                  type="textarea"
+                  value={newExp.hypothesis}
+                  onChange={(v) => setNewExp({ ...newExp, hypothesis: v })}
+                  placeholder="What do you expect to happen, and why?"
+                  required
+                />
+              </div>
               <div className="form-footer">
                 {hasStartedCreate && createMissingFields.length > 0 && (
                   <span role="status" aria-live="polite">

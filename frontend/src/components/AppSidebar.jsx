@@ -3,8 +3,53 @@ import { Badge } from "./Common";
 import { navGroups, tabLabels, tabIconPaths } from "../app/config";
 import SidebarNavItem from "./design-system/SidebarNavItem";
 
-export default function AppSidebar({ workspace, collapsed, setCollapsed }) {
-  const { tab, setTab, online, info, jobs } = workspace;
+export default function AppSidebar({
+  workspace,
+  collapsed,
+  setCollapsed,
+  sidebarWidth = 244,
+  setSidebarWidth,
+  setSidebarResizing,
+  minWidth = 190,
+  maxWidth = 360,
+  defaultWidth = 244,
+}) {
+  const { tab, setTab, online, info } = workspace;
+
+  const startResize = (event) => {
+    if (event.button !== 0 || !setSidebarWidth) return;
+    event.preventDefault();
+    setSidebarResizing?.(true);
+    const prevCursor = document.body.style.cursor;
+    const prevSelect = document.body.style.userSelect;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const onMove = (moveEvent) => {
+      const nextX = moveEvent.clientX;
+      if (nextX < 125) {
+        setCollapsed(true);
+      } else {
+        setCollapsed(false);
+        const clamped = Math.min(
+          maxWidth,
+          Math.max(minWidth, Math.round(nextX)),
+        );
+        setSidebarWidth(clamped);
+      }
+    };
+
+    const onUp = () => {
+      setSidebarResizing?.(false);
+      document.body.style.cursor = prevCursor;
+      document.body.style.userSelect = prevSelect;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
 
   return (
     <aside className="app-sidebar">
@@ -18,13 +63,8 @@ export default function AppSidebar({ workspace, collapsed, setCollapsed }) {
           aria-label="TrainTrace home"
           onClick={(event) => {
             event.preventDefault();
-            setTab("Investigations");
-            window.history.replaceState(
-              null,
-              "",
-              window.location.pathname + window.location.search,
-            );
-            document.getElementById("main")?.focus();
+            window.history.pushState(null, "", "/");
+            window.dispatchEvent(new PopStateEvent("popstate"));
           }}
         >
           <img
@@ -70,7 +110,11 @@ export default function AppSidebar({ workspace, collapsed, setCollapsed }) {
       </div>
       <nav className="workspace-nav" aria-label="Workspace">
         {navGroups.map((group) => (
-          <div className="nav-group" key={group.label}>
+          <div
+            className="nav-group"
+            data-group={group.label.toLowerCase()}
+            key={group.label}
+          >
             <span className="nav-group-label">{group.label}</span>
             {group.items.map((item) => (
               <SidebarNavItem
@@ -88,7 +132,17 @@ export default function AppSidebar({ workspace, collapsed, setCollapsed }) {
         className="sidebar-status"
         title={`${online ? "API online" : "API offline"} · Worker ${online ? (info?.worker_online ? "online" : "offline") : "unknown"}`}
       >
-        <Badge value={online ? "API ONLINE" : "API OFFLINE"} />
+        <Badge
+          value={
+            collapsed
+              ? online
+                ? "ONLINE"
+                : "OFFLINE"
+              : online
+                ? "API ONLINE"
+                : "API OFFLINE"
+          }
+        />
         <p>
           {online
             ? info?.hardware?.name
@@ -97,9 +151,43 @@ export default function AppSidebar({ workspace, collapsed, setCollapsed }) {
         <small>
           Worker:{" "}
           {online ? (info?.worker_online ? "online" : "offline") : "unknown"} ·{" "}
-          {online ? (info?.queued_jobs ?? "—") : "—"} queued
+          {online ? (info?.queued_jobs ?? "--") : "--"} queued
         </small>
       </div>
+      <div
+        className="sidebar-resizer"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize sidebar"
+        aria-valuemin={68}
+        aria-valuemax={maxWidth}
+        aria-valuenow={collapsed ? 68 : sidebarWidth}
+        tabIndex={0}
+        title="Drag to resize sidebar (double-click to reset)"
+        onMouseDown={startResize}
+        onDoubleClick={() => {
+          setCollapsed(false);
+          setSidebarWidth?.(defaultWidth);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            if (collapsed) {
+              setCollapsed(false);
+              setSidebarWidth?.(minWidth);
+            } else {
+              setSidebarWidth?.(Math.min(maxWidth, sidebarWidth + 16));
+            }
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            if (!collapsed && sidebarWidth - 16 < minWidth) {
+              setCollapsed(true);
+            } else if (!collapsed) {
+              setSidebarWidth?.(Math.max(minWidth, sidebarWidth - 16));
+            }
+          }
+        }}
+      />
     </aside>
   );
 }

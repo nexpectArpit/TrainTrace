@@ -1,7 +1,7 @@
 import { DEFAULT_ARCHITECTURE_CONFIG } from "../../components/Common";
 
 export const architectureLabels = {
-  custom_cnn: "Custom CNN — configurable",
+  custom_cnn: "Custom CNN (configurable)",
   resnet18: "ResNet-18 — residual CNN",
   mobilenet_v2: "MobileNetV2 — mobile-optimized",
   efficientnet_b0: "EfficientNet-B0 — compound-scaled CNN",
@@ -29,8 +29,8 @@ export const architectureFields = [
     "Classifier units",
     16,
     2048,
-    1,
-    "Hidden units in the classifier head before the output classes.",
+    16,
+    "Hidden units in the classifier head before the output classes (multiples of 16).",
   ],
   [
     "dropout",

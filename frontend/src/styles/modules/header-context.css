@@ -1,0 +1,68 @@
+/* ── Unified Top Header & Inline Context Strip ── */
+.app-shell .page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  padding: 0 0 16px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #d4dce0;
+}
+
+.app-shell.theme-dark .page-header {
+  border-bottom-color: #2c383e;
+}
+
+.app-shell .page-header-title h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.025em;
+}
+
+.app-shell .page-header-title .page-description {
+  margin: 3px 0 0;
+  font-size: 0.8rem;
+}
+
+.app-shell .page-header .header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.app-shell .context-strip-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.app-shell .context-strip-inline .field {
+  margin: 0;
+  min-width: 185px;
+  max-width: 260px;
+}
+
+.app-shell .context-strip-inline .field > span {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+
+.app-shell .context-strip-inline select {
+  min-height: 34px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.app-shell .header-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px !important;
+  padding: 6px 12px !important;
+  font-size: 0.78rem;
+}
