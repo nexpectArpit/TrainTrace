@@ -234,13 +234,20 @@ export default function RunExecutionPanel({ workspace }) {
             <div className="training-time-estimate" role="status">
               <strong>
                 Estimated training time remaining:{" "}
-                {executionStatus === "QUEUED"
-                  ? "Waiting in queue"
+                {executionStatus === "QUEUED" ||
+                (isCloudRun &&
+                  metrics.length === 0 &&
+                  stageProgress?.remote_status !== "RUNNING")
+                  ? isCloudRun
+                    ? "Waiting in Kaggle GPU queue (typically 1–5 min)"
+                    : "Waiting in queue"
                   : timeEstimate && timeEstimate.remainingEpochs > 0
                     ? `about ${formatDuration(timeEstimate.remainingSeconds)}`
                     : timeEstimate
                       ? "Finishing run"
-                      : "Estimating…"}
+                      : isCloudRun
+                        ? "Running on T4 GPU (first epoch ~30–60 s)"
+                        : "Estimating…"}
               </strong>
               <p>
                 {timeEstimate && timeEstimate.remainingEpochs > 0
@@ -304,7 +311,9 @@ export default function RunExecutionPanel({ workspace }) {
                         : stageProgress?.phase === "validation"
                           ? "Measuring validation loss and accuracy before saving this epoch."
                           : isCloudRun
-                            ? "Kaggle buffers stdout during batch execution; live epochs and artifacts sync automatically when the kernel finishes."
+                            ? stageProgress?.remote_status === "RUNNING"
+                              ? "T4 GPU is running; first epoch typically completes in ~30–60 s (Kaggle buffers stdout if live callback is unavailable)."
+                              : "Waiting for Kaggle to assign a free T4 GPU (typically 1–5 min depending on queue)."
                             : metrics.length
                               ? `${metrics.length} of ${run.epochs} epochs saved.`
                               : "The run is starting; the first epoch metric appears after training and validation complete."}
